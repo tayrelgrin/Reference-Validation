@@ -1,0 +1,194 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일\Data">
+      <UniqueIdentifier>{5148c3bc-1344-4741-8ccb-657bfd4950e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\GUI">
+      <UniqueIdentifier>{7cbeaaff-ee41-407e-a49f-53e00586e44c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\GUI">
+      <UniqueIdentifier>{cdedb24d-af29-44db-89d5-d8146d0a1868}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Data">
+      <UniqueIdentifier>{67f8d89f-e82b-46dd-9519-ef589c80836f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="res\Data_Manager.rc2">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Data_Manager.ico">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Delete.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Setting.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\EXIT.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\LoadSetting.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\New.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Reload.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Save.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Delete_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\bitmap1.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\EXIT_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\LoadSetting_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\New_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Reload_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Save_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Setting_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Left.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Right.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Left_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+    <None Include="res\Right_push.bmp">
+      <Filter>리소스 파일</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="AddNewRef.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicData.h">
+      <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="CheckingFileList.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigDMData.h">
+      <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_Manager.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Data_ManagerDlg.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="FileType.h">
+      <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Register.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingBaseInfo.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="TestType.h">
+      <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="InformationManager.h">
+      <Filter>헤더 파일\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="tinyxml2.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="BaseItem.h">
+      <Filter>헤더 파일\GUI</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicData.cpp">
+      <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigDMData.cpp">
+      <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="FileType.cpp">
+      <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="TestType.cpp">
+      <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="AddNewRef.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="CheckingFileList.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Data_Manager.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Data_ManagerDlg.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Register.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="SettingBaseInfo.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="InformationManager.cpp">
+      <Filter>소스 파일\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="tinyxml2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseItem.cpp">
+      <Filter>소스 파일\GUI</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Data_Manager.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>
