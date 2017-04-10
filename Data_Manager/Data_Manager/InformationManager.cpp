@@ -143,7 +143,7 @@ void InformationManager::LoadBasicFileList()
 	}
 }
 
-void InformationManager::LoadRefFromXMLFile()
+void InformationManager::LoadXMLFileList()
 {
 	ConfigDMData cTempConfig;
 
@@ -168,7 +168,7 @@ void InformationManager::LoadRefFromXMLFile()
 	{
 		ConfigDMData* pAddConfig = new ConfigDMData;
 
-		pAddConfig->LoadDataFiles(vStrFilePath[i]);
+		//pAddConfig->LoadDataFiles(vStrFilePath[i]);
 
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
@@ -177,7 +177,13 @@ void InformationManager::LoadRefFromXMLFile()
 		pAddConfig->SetConfigNum(strConfig);
 		pAddConfig->SetDOE(strDOE);
 
-		m_listConfigs.AddTail(pAddConfig);
+		m_vPrj.push_back(strPrj);
+		m_vBuild.push_back(strBuild);
+		m_vConfig.push_back(strConfig);
+		m_vDOE.push_back(strDOE);
+
+		delete pAddConfig;
+		//m_listConfigs.AddTail(pAddConfig);
 	}
 }
 
@@ -190,7 +196,25 @@ void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString&
 	AfxExtractSubString(outStrBuild,	strFileName,0,'-');
 	AfxExtractSubString(outStrConfig,	strFileName,1,'-');
 	AfxExtractSubString(outStrDOE,		strFileName,2,'-');
+	AfxExtractSubString(outStrDOE,		outStrDOE,0,'.');
 
 	nIndex = strTemp.ReverseFind('\\');
 	outStrPrj = strTemp.Mid(nIndex+1);
+}
+
+void InformationManager::GetPrjVList(std::vector<CString>& outvData)
+{
+	outvData = m_vPrj;
+}
+void InformationManager::GetBuildVList(std::vector<CString>& outvData)
+{
+	outvData = m_vBuild;
+}
+void InformationManager::GetConfigVList(std::vector<CString>& outvData)
+{
+	outvData = m_vConfig;
+}
+void InformationManager::GetDOEVList(std::vector<CString>& outvData)
+{
+	outvData = m_vDOE;
 }

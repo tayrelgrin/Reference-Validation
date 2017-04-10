@@ -127,7 +127,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-	m_cValueData.LoadRefFromXMLFile();
+	m_cValueData.LoadXMLFileList();
 	m_cValueData.LoadBasicFileList();
 
 	Button_Imaging();
@@ -346,6 +346,8 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cValueData.SaveRefToFile(_T("temp"));
+
+
 
 	MessageBox (NULL,NULL,MB_OK);
 }
