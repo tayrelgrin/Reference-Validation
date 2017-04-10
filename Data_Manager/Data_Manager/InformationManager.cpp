@@ -142,3 +142,55 @@ void InformationManager::LoadBasicFileList()
 		m_vBasicFile.push_back("OSLeakage.spc");
 	}
 }
+
+void InformationManager::LoadRefFromXMLFile()
+{
+	ConfigDMData cTempConfig;
+
+	CString strEXEDirectory;
+
+	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
+
+	strEXEDirectory += "\\Data";
+
+	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정.
+
+	CFileFind finder;
+
+	std::vector<CString> vStrFilePath;
+	std::vector<CString> vDummy;
+
+	cTempConfig.GetDirList(strEXEDirectory,vDummy, vStrFilePath);
+
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	for (int i = 0; i < vStrFilePath.size(); i++)
+	{
+		ConfigDMData* pAddConfig = new ConfigDMData;
+
+		pAddConfig->LoadDataFiles(vStrFilePath[i]);
+
+		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
+
+		pAddConfig->SetProject(strPrj);
+		pAddConfig->SetBuildNum(strBuild);
+		pAddConfig->SetConfigNum(strConfig);
+		pAddConfig->SetDOE(strDOE);
+
+		m_listConfigs.AddTail(pAddConfig);
+	}
+}
+
+void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
+{
+	int nIndex = inStr.ReverseFind('\\');
+	CString strFileName = inStr.Mid((nIndex+1));
+	CString strTemp = inStr.Left(nIndex);
+	
+	AfxExtractSubString(outStrBuild,	strFileName,0,'-');
+	AfxExtractSubString(outStrConfig,	strFileName,1,'-');
+	AfxExtractSubString(outStrDOE,		strFileName,2,'-');
+
+	nIndex = strTemp.ReverseFind('\\');
+	outStrPrj = strTemp.Mid(nIndex+1);
+}

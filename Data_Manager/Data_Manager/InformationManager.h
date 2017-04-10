@@ -12,10 +12,11 @@ public:
 	void DeleteConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
 	void SaveRefToFile(CString inFilePath);
-	void LoadRefFromFile();
+	void LoadRefFromXMLFile();
 	void SaveSettingToFile();
 	void LoadSettingFromFile();
 	void LoadBasicFileList();
+	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;

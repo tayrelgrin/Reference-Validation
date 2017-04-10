@@ -127,6 +127,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+	m_cValueData.LoadRefFromXMLFile();
 	m_cValueData.LoadBasicFileList();
 
 	Button_Imaging();
@@ -327,6 +328,28 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 	(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
 }
 
+void CData_ManagerDlg::OnBnClickedButtonDelete()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	//m_cData.DeleteConfigData();
+}
+
+
+void CData_ManagerDlg::OnBnClickedButtonReload()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void CData_ManagerDlg::OnBnClickedButtonSave()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_cValueData.SaveRefToFile(_T("temp"));
+
+	MessageBox (NULL,NULL,MB_OK);
+}
+
 
 void CData_ManagerDlg::AddToTree(std::vector<CString> invData)
 {
@@ -379,25 +402,7 @@ void CData_ManagerDlg::InitMainList()
 
 }
 
-void CData_ManagerDlg::OnBnClickedButtonDelete()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//m_cData.DeleteConfigData();
-}
-
-
-void CData_ManagerDlg::OnBnClickedButtonReload()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
-void CData_ManagerDlg::OnBnClickedButtonSave()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_cValueData.SaveRefToFile(_T("temp"));
-}
 
 void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData)
 {

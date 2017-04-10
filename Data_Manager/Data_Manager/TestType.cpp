@@ -121,6 +121,9 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 	tinyxml2::XMLElement* Element;
 	if(m_strTestName != "")
 	{
+		if(m_strTestName.Find('\\') != -1)
+			m_strTestName.Replace('\\','_');
+
 		Element = cXMLDoc.NewElement(LPSTR(LPCTSTR(m_strTestName)));
 
 		cElement->LinkEndChild(Element);
@@ -144,4 +147,26 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 
 		}
 	}	
+}
+
+void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent)
+{
+	tinyxml2::XMLNode* pNode;
+	tinyxml2::XMLElement* pElent;
+	tinyxml2::XMLAttribute* pAttr;
+
+	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
+	{
+		if(pElent = pNode->ToElement())
+		{
+			if(pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute())
+			{
+				FileType* cNewTest = new FileType;
+				cNewTest->LoadDataFromXML((tinyxml2::XMLAttribute*)pAttr);
+				m_pListFile.AddTail(cNewTest);
+			}
+			else
+				LoadDataFromXML(pElent);
+		}
+	}
 }

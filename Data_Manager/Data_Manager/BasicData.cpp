@@ -147,7 +147,7 @@ bool BasicData::operator==(const BasicData& inData)
 void BasicData::writeDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement)
 {
 	tinyxml2::XMLElement* Element;
-	Element = cXMLDoc.NewElement("");
+	Element = cXMLDoc.NewElement("Element");
 
 	cElement->LinkEndChild(Element);
 	Element->SetAttribute("Section",	m_strSection);

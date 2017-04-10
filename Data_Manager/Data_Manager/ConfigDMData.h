@@ -9,10 +9,11 @@
 class ConfigDMData
 {
 public:
+	//void operator=(const ConfigDMData& inData);
 	ConfigDMData(void);
 	~ConfigDMData(void);
 	void RefNameParsing(CString instrData);
-	void GetDirList(CString instrPath, std::vector<CString>& inVDirList);
+	void GetDirList(CString instrPath, std::vector<CString>& inVDirList,std::vector<CString>& inVFileList);
 	void GetTestDirFromVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath);
 	void GetConfigInfoFromVector(std::vector<CString> invData, CString inRootPath, CString& outPrj, CString& outBuild, CString& outConfig, CString& outDOE);
 	void SetProject(CString inData);
@@ -20,7 +21,6 @@ public:
 	void SetConfigNum(CString inData);
 	void SetDOE(CString inData);
 	bool operator==(const ConfigDMData& inData);
-	//void operator=(const ConfigDMData& inData);
 	CString GetBuildNum();
 	void GetDirPathList(std::vector<CString>& outvData);
 	void GetTestNameFromDirVector(std::vector<CString> invData, std::vector<CString>& outvData);
@@ -37,6 +37,10 @@ public:
 	void AddCommonBaseFile(std::vector<CString> invFileName);
 	void SetBaseFiles(std::vector<CString> invFileName);
 	CString GetEXEDirectoryPath();
+	void LoadDataFiles(CString inStrPath);
+	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
+	void SearchXMLData(tinyxml2::XMLAttribute* pParent, BasicData* outData);
+
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

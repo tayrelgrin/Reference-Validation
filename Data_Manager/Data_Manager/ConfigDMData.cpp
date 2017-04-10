@@ -52,7 +52,7 @@ void ConfigDMData::RefNameParsing(CString instrData)
 	AfxExtractSubString(strDOE,		instrData, 6, '_');
 }
 
-void ConfigDMData::GetDirList(CString instrPath, std::vector<CString>& inVDirList)
+void ConfigDMData::GetDirList(CString instrPath, std::vector<CString>& inVDirList,  std::vector<CString>& inVFileList)
 {
 	SetCurrentDirectory(instrPath); //현재 검색할 디렉터리 설정.
 
@@ -71,11 +71,16 @@ void ConfigDMData::GetDirList(CString instrPath, std::vector<CString>& inVDirLis
 		if (finder.IsDirectory() && !finder.IsDots())
 		{
 			DirName = finder.GetFilePath();
-			GetDirList(DirName, inVDirList);
+			GetDirList(DirName, inVDirList, inVFileList);
 		}
 		if (finder.IsDirectory() && finder.IsDots() == false )
 		{
 			inVDirList.push_back(DirName);
+		}
+		if (finder.IsArchived())
+		{
+			fileName = finder.GetFilePath();
+			inVFileList.push_back(fileName);
 		}
 	}
 }
@@ -348,7 +353,7 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 
 	CreateDirectory(strFilePath,NULL);
 
-	strFilePath += "\\"+ m_strConfigNum + "-" + m_strDOE +".xml";
+	strFilePath += "\\"+ m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE +".xml";
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 
@@ -422,3 +427,40 @@ CString ConfigDMData::GetEXEDirectoryPath()
 
 	return strDirecPath;
 }
+
+void ConfigDMData::LoadDataFiles(CString inStrPath)
+{
+	tinyxml2::XMLDocument xmlDoc;
+	tinyxml2::XMLError eResult = xmlDoc.LoadFile(inStrPath);
+
+	SearchXMLData(&xmlDoc);
+}
+
+void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
+{
+	tinyxml2::XMLNode* pNode;
+	tinyxml2::XMLDeclaration* pDeclar;
+	tinyxml2::XMLElement* pElent;
+	tinyxml2::XMLAttribute* pAttr;
+
+	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
+	{
+		if(pElent = pNode->ToElement())
+		{
+			if(inIndex==1)
+			{
+				TestType* cNewTest = new TestType;
+
+				cNewTest->SetTestName(pElent->Value());
+
+				cNewTest->LoadDataFromXML(pNode);
+				m_pListTestType.AddTail(cNewTest);
+			}
+			else
+			{
+				SearchXMLData(pNode, ++inIndex);
+			}
+		}
+	}
+}
+

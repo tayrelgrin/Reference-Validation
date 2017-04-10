@@ -123,3 +123,28 @@ CString FileType::GetFileName()
 {
 	return m_strFileName;
 }
+
+void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
+{
+	tinyxml2::XMLAttribute* pAttr;
+	BasicData* outData = new BasicData;
+	bool bFlag = false;
+
+	for (pAttr = pParent; pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
+	{
+		CString strTemp = pAttr->Name();
+
+		if("Section" == strTemp)
+			outData->setSection(pAttr->Value());
+		else if("Item" == strTemp)
+			outData->setItem(pAttr->Value());
+		else if("Value" == strTemp)
+		{
+			outData->setValue(pAttr->Value());
+			bFlag = true;
+		}
+	}
+
+	if(bFlag)
+		m_pListData.AddTail(outData);
+}

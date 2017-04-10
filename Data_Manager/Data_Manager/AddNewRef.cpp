@@ -89,11 +89,11 @@ void AddNewRef::OnEnChangeMfceditbrowse1()
 	{
 		m_vStrDir.erase(m_vStrDir.begin()+i);
 	}
-
+	std::vector<CString> vDummy;
 	m_vStrDir.clear();
 	//m_editCtrl.GetWindowTextW(m_strDirRootPath);
 	m_editCtrl.GetWindowText(m_strDirRootPath);
-	m_cNewConfig.GetDirList(m_strDirRootPath, m_vStrDir);
+	m_cNewConfig.GetDirList(m_strDirRootPath, m_vStrDir,vDummy);
 	m_cNewConfig.GetConfigInfoFromVector(m_vStrDir, m_strDirRootPath, m_strPrj, m_strBuild, m_strConfig, m_strDOE);
 	EditBoxSetting();
 }
