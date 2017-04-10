@@ -86,6 +86,7 @@ private:
 	CString m_strBuildNum;
 	CString m_strConfigNum;
 	CString m_strDOE;
+	
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;

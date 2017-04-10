@@ -439,9 +439,7 @@ void ConfigDMData::LoadDataFiles(CString inStrPath)
 void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 {
 	tinyxml2::XMLNode* pNode;
-	tinyxml2::XMLDeclaration* pDeclar;
 	tinyxml2::XMLElement* pElent;
-	tinyxml2::XMLAttribute* pAttr;
 
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{

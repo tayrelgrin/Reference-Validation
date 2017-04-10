@@ -17,17 +17,17 @@ public:
 	void LoadSettingFromFile();
 	void LoadBasicFileList();
 	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
-	void GetPrjVList(std::vector<CString>& outvData);
-	void GetBuildVList(std::vector<CString>& outvData);
-	void GetConfigVList(std::vector<CString>& outvData);
-	void GetDOEVList(std::vector<CString>& outvData);
+	void GetConfigNameList(std::vector<CString>& outvData);
+	void AddToPrj(CString inData);
+	void AddToBuild(CString inData);
+	void AddToConfig(CString inData);
+	void AddToDOE(CString inData);
+
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;
 	std::vector<CString> m_vBasicFile;
-	std::vector<CString> m_vPrj;
-	std::vector<CString> m_vBuild;
-	std::vector<CString> m_vConfig;
-	std::vector<CString> m_vDOE;
+	std::vector<CString> m_vConfigName;
+
 };
 

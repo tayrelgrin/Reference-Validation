@@ -177,10 +177,9 @@ void InformationManager::LoadXMLFileList()
 		pAddConfig->SetConfigNum(strConfig);
 		pAddConfig->SetDOE(strDOE);
 
-		m_vPrj.push_back(strPrj);
-		m_vBuild.push_back(strBuild);
-		m_vConfig.push_back(strConfig);
-		m_vDOE.push_back(strDOE);
+		CString strComb = strPrj+'_'+strBuild+'_'+strConfig+'_'+strDOE;
+
+		m_vConfigName.push_back(strComb);
 
 		delete pAddConfig;
 		//m_listConfigs.AddTail(pAddConfig);
@@ -202,19 +201,7 @@ void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString&
 	outStrPrj = strTemp.Mid(nIndex+1);
 }
 
-void InformationManager::GetPrjVList(std::vector<CString>& outvData)
+void InformationManager::GetConfigNameList(std::vector<CString>& outvData)
 {
-	outvData = m_vPrj;
-}
-void InformationManager::GetBuildVList(std::vector<CString>& outvData)
-{
-	outvData = m_vBuild;
-}
-void InformationManager::GetConfigVList(std::vector<CString>& outvData)
-{
-	outvData = m_vConfig;
-}
-void InformationManager::GetDOEVList(std::vector<CString>& outvData)
-{
-	outvData = m_vDOE;
+	outvData = m_vConfigName;
 }

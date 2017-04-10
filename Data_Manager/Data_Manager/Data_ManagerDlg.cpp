@@ -128,7 +128,12 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 	m_cValueData.LoadXMLFileList();
+
+ 	m_cValueData.GetConfigNameList(m_vConfigName);
+	AddRefinfoToListBox();
+
 	m_cValueData.LoadBasicFileList();
+
 
 	Button_Imaging();
 	
@@ -271,7 +276,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		if (vTemp.size()==0)
 		{
-			m_vConfigName.push_back(strComb);
+			m_vConfigName.push_back(strComb);	
 		}
 
 		if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
@@ -425,10 +430,18 @@ void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData)
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddRefinfoToListBox()
 {
-	AddProjectToListBox(m_strPrj);
-	AddBuildToListBox(m_strBuildNum);
-	AddConfigToListBox(m_strConfigNum);
-	AddDOEToListBox(m_strDOE);
+	for (int i= 0; i<m_vConfigName.size(); i++)
+	{
+		AfxExtractSubString(m_strPrj,		m_vConfigName[i], 0, '_');
+		AfxExtractSubString(m_strBuildNum,	m_vConfigName[i], 1, '_');
+		AfxExtractSubString(m_strConfigNum, m_vConfigName[i], 2, '_');
+		AfxExtractSubString(m_strDOE,		m_vConfigName[i], 3, '_');
+
+		AddProjectToListBox(m_strPrj);
+		AddBuildToListBox(m_strBuildNum);
+		AddConfigToListBox(m_strConfigNum);
+		AddDOEToListBox(m_strDOE);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -439,7 +452,7 @@ void CData_ManagerDlg::AddRefinfoToListBox()
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 {
-	m_lbProject.AddString(m_strPrj);
+	m_lbProject.AddString(inPrj);
 }
 
 //////////////////////////////////////////////////////////////////////////
