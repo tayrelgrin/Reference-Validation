@@ -9,7 +9,6 @@
 class ConfigDMData
 {
 public:
-	//void operator=(const ConfigDMData& inData);
 	ConfigDMData(void);
 	~ConfigDMData(void);
 	void RefNameParsing(CString instrData);

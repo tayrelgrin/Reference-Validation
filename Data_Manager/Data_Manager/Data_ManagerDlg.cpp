@@ -505,10 +505,21 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 	std::vector<CString> vFileList;
 	FindStringInVector(m_vConfigName, m_strPrj, vFileList);
 	CString strTemp;
+	bool bCompareResult = true;
+
 	for (int i=0; i<vFileList.size(); i++)
 	{
 		AfxExtractSubString(strTemp, vFileList[i], 1, '_');
-		m_lbBuild.AddString(strTemp);
+		
+		for (int i = 0; i< m_lbBuild.GetCount(); i++)
+		{
+			CString strTarget;
+			m_lbBuild.GetText(i, strTarget);
+			if(strTarget == strTemp)
+				bCompareResult = false;
+		}
+		if(bCompareResult)	// 중복 확인 
+			m_lbBuild.AddString(strTemp);
 	}
 }
 
@@ -535,13 +546,24 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	CString strTarget = m_strPrj + '_' + m_strBuildNum;
 	CString strTemp;
 	std::vector<CString> vFileList;
+	bool bCompareResult = true;
 
 	FindStringInVector(m_vConfigName, strTarget, vFileList);
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
 		AfxExtractSubString(strTemp, vFileList[i], 2, '_');
-		m_lbConfig.AddString(strTemp);
+
+		for (int i = 0; i< m_lbConfig.GetCount(); i++)
+		{
+			CString strTarget;
+			m_lbConfig.GetText(i, strTarget);
+			if(strTarget == strTemp)
+				bCompareResult = false;
+		}
+		if(bCompareResult)	// 중복 확인 
+			m_lbConfig.AddString(strTemp);
+
 	}
 }
 

@@ -158,16 +158,6 @@ CString ConfigDMData::GetBuildNum()
 	return m_strBuildNum;
 }
 
-// void ConfigDMData::operator =(const ConfigDMData& inData)
-// {
-// 	m_strBuildNum	= inData.m_strBuildNum;
-// 	m_strPrj		= inData.m_strPrj;
-// 	m_strConfigNum	= inData.m_strConfigNum;
-// 	m_strDOE		= inData.m_strDOE;
-// 	
-// 	m_vTestDirPath.clear();
-// 	m_vTestDirPath.assign(inData.m_vTestDirPath.begin(), inData.m_vTestDirPath.end());
-// }
 
 void ConfigDMData::GetTestDirFromVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
 {
