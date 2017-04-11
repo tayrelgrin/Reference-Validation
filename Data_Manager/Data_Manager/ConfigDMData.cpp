@@ -10,6 +10,11 @@ ConfigDMData::ConfigDMData(void)
 
 ConfigDMData::~ConfigDMData(void)
 {
+	InitListAndVectors();
+}
+
+void ConfigDMData::InitListAndVectors()
+{
 	for(int i = 0; i<m_vTestDirPath.size(); i++)
 	{
 		m_vTestDirPath.erase(m_vTestDirPath.begin()+i);
@@ -18,15 +23,15 @@ ConfigDMData::~ConfigDMData(void)
 	{
 		m_vTestName.erase(m_vTestName.begin()+i);
 	}
-// 	for(int i = 0; i<m_vFilePath.size(); i++)
-// 	{
-// 		m_vFilePath.erase(m_vFilePath.begin()+i);
-// 	}
+	// 	for(int i = 0; i<m_vFilePath.size(); i++)
+	// 	{
+	// 		m_vFilePath.erase(m_vFilePath.begin()+i);
+	// 	}
 	m_vTestDirPath.clear();
 	m_vTestName.clear();
 	//m_vFilePath.clear();
-	
-	
+
+
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
 
@@ -36,9 +41,9 @@ ConfigDMData::~ConfigDMData(void)
 		TestType* temp = m_pListTestType.GetNext(pPos);
 		delete temp;
 		m_pListTestType.RemoveAt(pTemp);
-		
+
 	}
-	
+
 	m_pListTestType.RemoveAll();
 }
 
@@ -244,6 +249,7 @@ void ConfigDMData::SetTestDirList(std::vector<CString> invData)
 void ConfigDMData::AddNewTest()
 {
 	CString strTestName;
+	CString strIndex8th;
 
 	for (int i = 0; i<m_vTestDirPath.size(); i++)
 	{
@@ -254,7 +260,13 @@ void ConfigDMData::AddNewTest()
 		CString strIndex9th="";
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
+		AfxExtractSubString(strIndex8th,strDir,7,'_');
 		AfxExtractSubString(strIndex9th,strDir,8,'_');
+
+		if (strIndex9th=="" && strIndex8th != "")
+		{
+			strIndex9th = strIndex8th;
+		}
 
 		if(strIndex9th != "" && strTestName != "")
 		{
@@ -324,7 +336,22 @@ void ConfigDMData::SetFilePath(std::vector<CString> invPath)
 void ConfigDMData::GetTestList(std::vector<CString>& outvPath)
 {
 	outvPath.clear();
-	outvPath.assign(m_vTestName.begin(), m_vTestName.end());
+	if (m_vTestName.size() > 0)
+	{
+		outvPath.assign(m_vTestName.begin(), m_vTestName.end());
+	}
+	else
+	{
+		POSITION pPos = m_pListTestType.GetHeadPosition();
+
+		while(pPos)
+		{
+			TestType* temp = m_pListTestType.GetNext(pPos);
+			CString strTemp = temp->GetTestName();
+			m_vTestName.push_back(strTemp);
+			outvPath.push_back(strTemp);
+		}
+	}
 }
 
 void ConfigDMData::GetDirPathList(std::vector<CString>& outvPath)
@@ -423,6 +450,8 @@ void ConfigDMData::LoadDataFiles(CString inStrPath)
 	tinyxml2::XMLDocument xmlDoc;
 	tinyxml2::XMLError eResult = xmlDoc.LoadFile(inStrPath);
 
+	InitListAndVectors();
+
 	SearchXMLData(&xmlDoc);
 }
 
@@ -440,6 +469,7 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 				TestType* cNewTest = new TestType;
 
 				cNewTest->SetTestName(pElent->Value());
+				m_vTestName.push_back(pElent->Value());
 
 				cNewTest->LoadDataFromXML(pNode);
 				m_pListTestType.AddTail(cNewTest);

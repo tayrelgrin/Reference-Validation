@@ -19,7 +19,6 @@ TestType::~TestType(void)
 		FileType* temp = m_pListFile.GetNext(pPos);
 		delete temp;
 		m_pListFile.RemoveAt(pTemp);
-		
 	}
 
 	m_pListFile.RemoveAll();
@@ -40,18 +39,12 @@ void TestType::AddNewFile(CString inStrFileName)
 	FileType* newFile = new FileType;
 	
 	newFile->SetFileName(inStrFileName);
-	if (m_pListFile.IsEmpty())
-		m_pListFile.AddHead(newFile);
-	else
-		m_pListFile.AddTail(newFile);
+	m_pListFile.AddTail(newFile);
 }
 
 void TestType::AddNewFile(FileType* inData)
 {
-	if (m_pListFile.IsEmpty())
-		m_pListFile.AddHead(inData);
-	else
-		m_pListFile.AddTail(inData);
+	m_pListFile.AddTail(inData);
 }
 
 void TestType::AddNewTest(CString inPath)
@@ -149,7 +142,7 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 	}	
 }
 
-void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent)
+void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName)
 {
 	tinyxml2::XMLNode* pNode;
 	tinyxml2::XMLElement* pElent;
@@ -161,12 +154,17 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent)
 		{
 			if(pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute())
 			{
-				FileType* cNewTest = new FileType;
-				cNewTest->LoadDataFromXML((tinyxml2::XMLAttribute*)pAttr);
-				m_pListFile.AddTail(cNewTest);
+				
+				FileType* pNewTest = new FileType;
+				pNewTest->SetFileName(inStrFileName);
+
+				pNewTest->LoadDataFromXML((tinyxml2::XMLAttribute*)pAttr);
+				m_pListFile.AddTail(pNewTest);
+				
 			}
-			else
-				LoadDataFromXML(pElent);
+			else{
+				LoadDataFromXML(pElent,pNode->Value() );
+			}
 		}
 	}
 }

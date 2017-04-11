@@ -267,7 +267,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		}
 		temp.clear();
 
-		AddToTree(m_vTestList);
+		AddToTree(cNewConfig);
 
 		CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
 		std::vector<CString> vTemp;
@@ -352,35 +352,49 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cValueData.SaveRefToFile(_T("temp"));
 
-
-
 	MessageBox (NULL,NULL,MB_OK);
 }
 
 
-void CData_ManagerDlg::AddToTree(std::vector<CString> invData)
+void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 {
 	m_treeMainTest.DeleteAllItems();
+
+	std::vector<CString> vData, vTestName;
+
+	m_strRootPath = m_cAddNewRefDlg.GetDirRootPath();
+	m_cAddNewRefDlg.GetDirList(m_vDirList);
+
+	if(m_vDirList.size() == 0)
+	{
+		inpData->GetTestList(vTestName);
+	}
+	else
+	{
+		inpData->GetTestDirFromVector(m_vDirList, vData, m_strRootPath);
+		inpData->GetTestNameFromDirVector(vData, vTestName);
+	}
 
 	HTREEITEM BASEINFO = m_treeMainTest.InsertItem(_T("Base Info"), TVI_ROOT, TVI_LAST);
 	HTREEITEM Test;
 
-	for(int i= 0 ; i < invData.size(); i++)
+	for(int i= 0 ; i < vTestName.size(); i++)
 	{
-		if(invData[i].Find('\\') == -1)
+		vTestName[i].Replace('_','\\');
+		if(vTestName[i].Find('\\') == -1)
 		{
-			Test = m_treeMainTest.InsertItem(invData[i], TVI_ROOT, TVI_LAST);
+			Test = m_treeMainTest.InsertItem(vTestName[i], TVI_ROOT, TVI_LAST);
 		}
 		else
 		{
 			CString temp;
 			CString compare = m_treeMainTest.GetItemText(Test);
 
-			AfxExtractSubString(temp, invData[i], 0, '\\');
+			AfxExtractSubString(temp, vTestName[i], 0, '\\');
 			if(temp != compare)
 				Test = m_treeMainTest.InsertItem(temp);
 
-			AfxExtractSubString(temp, invData[i], 1, '\\');
+			AfxExtractSubString(temp, vTestName[i], 1, '\\');
 
 			m_treeMainTest.InsertItem(temp, Test, NULL);
 		}
@@ -410,7 +424,6 @@ void CData_ManagerDlg::InitMainList()
 }
 
 
-
 void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData)
 {
 	inData->SetProject(m_strPrj);
@@ -432,15 +445,9 @@ void CData_ManagerDlg::AddRefinfoToListBox()
 {
 	for (int i= 0; i<m_vConfigName.size(); i++)
 	{
-		AfxExtractSubString(m_strPrj,		m_vConfigName[i], 0, '_');
-		AfxExtractSubString(m_strBuildNum,	m_vConfigName[i], 1, '_');
-		AfxExtractSubString(m_strConfigNum, m_vConfigName[i], 2, '_');
-		AfxExtractSubString(m_strDOE,		m_vConfigName[i], 3, '_');
+		AfxExtractSubString(m_strPrj, m_vConfigName[i], 0, '_');
 
 		AddProjectToListBox(m_strPrj);
-		AddBuildToListBox(m_strBuildNum);
-		AddConfigToListBox(m_strConfigNum);
-		AddDOEToListBox(m_strDOE);
 	}
 }
 
@@ -452,7 +459,19 @@ void CData_ManagerDlg::AddRefinfoToListBox()
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 {
-	m_lbProject.AddString(inPrj);
+	m_lbProject.ResetContent();
+
+	bool bCompareResult = true;
+	CString strTemp;
+	for(int i = 0; i<m_lbProject.GetCount(); i++)
+	{
+		m_lbProject.GetText(i, strTemp);
+		if(inPrj == strTemp)
+			bCompareResult = false;
+	}
+	
+	if(bCompareResult)
+		m_lbProject.AddString(inPrj);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -463,6 +482,7 @@ void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddBuildToListBox(CString inBuild)
 {
+	m_lbBuild.ResetContent();
 	m_lbBuild.AddString(inBuild);
 }
 
@@ -474,6 +494,7 @@ void CData_ManagerDlg::AddBuildToListBox(CString inBuild)
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddConfigToListBox(CString inConfig)
 {
+	m_lbConfig.ResetContent();
 	m_lbConfig.AddString(inConfig);
 }
 
@@ -485,6 +506,7 @@ void CData_ManagerDlg::AddConfigToListBox(CString inConfig)
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddDOEToListBox(CString inDOE)
 {
+	m_lbDOE.ResetContent();
 	m_lbDOE.AddString(inDOE);
 }
 
@@ -492,15 +514,14 @@ void CData_ManagerDlg::AddDOEToListBox(CString inDOE)
 void CData_ManagerDlg::OnLbnSelchangeListPrj()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	CString strPrj;
-	GetDlgItemText(IDC_EDIT_PrjName, strPrj);
 	
 	m_lbConfig.ResetContent();
 	m_lbBuild.ResetContent();
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
 
-	m_lbProject.SelectString(-1, m_strPrj);
+	int nIndex = m_lbProject.GetCurSel();
+	m_lbProject.GetText(nIndex, m_strPrj);
 
 	std::vector<CString> vFileList;
 	FindStringInVector(m_vConfigName, m_strPrj, vFileList);
@@ -509,6 +530,7 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
+		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 1, '_');
 		
 		for (int i = 0; i< m_lbBuild.GetCount(); i++)
@@ -541,7 +563,8 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
 
-	m_lbBuild.SelectString(-1, m_strBuildNum);
+	int nIndex = m_lbBuild.GetCurSel();
+	m_lbBuild.GetText(nIndex, m_strBuildNum);
 
 	CString strTarget = m_strPrj + '_' + m_strBuildNum;
 	CString strTemp;
@@ -552,6 +575,7 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
+		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 2, '_');
 
 		for (int i = 0; i< m_lbConfig.GetCount(); i++)
@@ -563,7 +587,6 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 		}
 		if(bCompareResult)	// 중복 확인 
 			m_lbConfig.AddString(strTemp);
-
 	}
 }
 
@@ -573,25 +596,41 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
 
-	m_lbConfig.SelectString(-1, m_strConfigNum);
+	int nIndex = m_lbConfig.GetCurSel();
+	m_lbConfig.GetText(nIndex, m_strConfigNum);
 
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
 	CString strTemp;
 	std::vector<CString> vFileList;
+	bool bCompareResult = true;
 
 	FindStringInVector(m_vConfigName, strTarget, vFileList);
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
+		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 3, '_');
-		m_lbDOE.AddString(strTemp);
+
+		for (int i = 0; i< m_lbDOE.GetCount(); i++)
+		{
+			CString strTarget;
+			m_lbDOE.GetText(i, strTarget);
+			if(strTarget == strTemp)
+				bCompareResult = false;
+		}
+		if(bCompareResult)	// 중복 확인 
+			m_lbDOE.AddString(strTemp);		
 	}
 }
 
 void CData_ManagerDlg::OnLbnSelchangeListDoe()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_lbDOE.SelectString(-1, m_strDOE);
+
+	ConfigDMData* pConfig = &m_cNewConfigData;
+
+	int nIndex = m_lbDOE.GetCurSel();
+	m_lbDOE.GetText(nIndex, m_strDOE);
 
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
 	CString strTemp;
@@ -600,6 +639,14 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	FindStringInVector(m_vConfigName, strTarget, vFileList);
 
 	// File Read 후 treeview에 뿌려주기
+	CString strEXEDirectory;
+
+	strEXEDirectory = pConfig->GetEXEDirectoryPath();
+
+	strEXEDirectory = strEXEDirectory + "\\Data\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
+
+	pConfig->LoadDataFiles(strEXEDirectory);
+	AddToTree(pConfig);
 }
 
 void CData_ManagerDlg::MakeDataDirectory()
@@ -618,4 +665,3 @@ void CData_ManagerDlg::MakeDataDirectory()
 
 	CreateDirectory(strEXEPath,NULL);
 }
-

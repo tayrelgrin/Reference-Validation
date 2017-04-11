@@ -38,8 +38,7 @@ public:
 	CString GetEXEDirectoryPath();
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
-	void SearchXMLData(tinyxml2::XMLAttribute* pParent, BasicData* outData);
-
+	void InitListAndVectors();
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

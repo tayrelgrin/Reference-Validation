@@ -168,8 +168,6 @@ void InformationManager::LoadXMLFileList()
 	{
 		ConfigDMData* pAddConfig = new ConfigDMData;
 
-		//pAddConfig->LoadDataFiles(vStrFilePath[i]);
-
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
 		pAddConfig->SetProject(strPrj);
@@ -182,8 +180,30 @@ void InformationManager::LoadXMLFileList()
 		m_vConfigName.push_back(strComb);
 
 		delete pAddConfig;
-		//m_listConfigs.AddTail(pAddConfig);
 	}
+}
+
+void InformationManager::LoadXMLFileList(CString inData)
+{
+	ConfigDMData* pAddConfig = new ConfigDMData;
+
+	pAddConfig->LoadDataFiles(inData);
+
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
+
+	pAddConfig->SetProject(strPrj);
+	pAddConfig->SetBuildNum(strBuild);
+	pAddConfig->SetConfigNum(strConfig);
+	pAddConfig->SetDOE(strDOE);
+
+	CString strComb = strPrj+'_'+strBuild+'_'+strConfig+'_'+strDOE;
+
+	m_vConfigName.push_back(strComb);
+
+	delete pAddConfig;
+	m_listConfigs.AddTail(pAddConfig);
 }
 
 void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)

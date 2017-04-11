@@ -13,6 +13,7 @@ public:
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
 	void SaveRefToFile(CString inFilePath);
 	void LoadXMLFileList();
+	void LoadXMLFileList(CString inData);
 	void SaveSettingToFile();
 	void LoadSettingFromFile();
 	void LoadBasicFileList();

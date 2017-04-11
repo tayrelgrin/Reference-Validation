@@ -16,7 +16,7 @@ public:
 	void GetFilePathInDir(CString inPath, std::vector<CString>& outvData);
 	void AddNewTest(CString inPath);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement, std::vector<CString> invBasicFile);
-	void LoadDataFromXML(tinyxml2::XMLNode* pParent);
+	void LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName="");
 private:
 	CList<FileType*> m_pListFile;
 	CString m_strTestName;

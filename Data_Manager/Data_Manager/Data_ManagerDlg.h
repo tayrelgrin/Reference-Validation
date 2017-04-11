@@ -63,7 +63,7 @@ public:
 	afx_msg void OnBnClickedButtonSave();
 
 public:
-	void AddToTree(std::vector<CString> invData);
+	void AddToTree(ConfigDMData* inpData);
 	void AddNewConfig(ConfigDMData* inData);
 	void AddProjectToListBox(CString inPrj);
 	void AddBuildToListBox(CString inBuild);
