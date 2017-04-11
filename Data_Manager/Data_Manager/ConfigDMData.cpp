@@ -265,7 +265,8 @@ void ConfigDMData::AddNewTest()
 
 		if (strIndex9th=="" && strIndex8th != "")
 		{
-			strIndex9th = strIndex8th;
+			if(strIndex8th.Find('-') != -1)
+				strIndex9th = strIndex8th;
 		}
 
 		if(strIndex9th != "" && strTestName != "")

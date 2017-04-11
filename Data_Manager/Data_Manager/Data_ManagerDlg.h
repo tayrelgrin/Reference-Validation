@@ -49,8 +49,7 @@ public:
 	afx_msg void OnBnClickedButtonNew();
 	afx_msg void OnBnClickedButtonSetting();
 	afx_msg void OnBnClickedButtonExit();
-
-
+	
 	void Button_Imaging();	
 	void InitMainList();
 	afx_msg void OnBnClickedButtonLoadsetting();
@@ -76,7 +75,6 @@ private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;
 	std::vector<CString> m_vConfigName;
-	
 	AddNewRef m_cAddNewRefDlg;
 	SettingBaseInfo m_cSettingDlg;
 	ConfigDMData m_cNewConfigData;
@@ -96,4 +94,5 @@ public:
 	afx_msg void OnLbnSelchangeListBuildnum();
 	afx_msg void OnLbnSelchangeListConfignum();
 	afx_msg void OnLbnSelchangeListDoe();
+	afx_msg void OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 };

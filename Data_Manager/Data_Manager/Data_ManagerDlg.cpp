@@ -91,6 +91,7 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_LBN_SELCHANGE(IDC_LIST_BUILDNUM, &CData_ManagerDlg::OnLbnSelchangeListBuildnum)
 	ON_LBN_SELCHANGE(IDC_LIST_CONFIGNUM, &CData_ManagerDlg::OnLbnSelchangeListConfignum)
 	ON_LBN_SELCHANGE(IDC_LIST_DOE, &CData_ManagerDlg::OnLbnSelchangeListDoe)
+	ON_NOTIFY(NM_CLICK, IDC_TREE_MAIN, &CData_ManagerDlg::OnNMClickTreeMain)
 END_MESSAGE_MAP()
 
 
@@ -459,7 +460,7 @@ void CData_ManagerDlg::AddRefinfoToListBox()
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 {
-	m_lbProject.ResetContent();
+	//m_lbProject.ResetContent();
 
 	bool bCompareResult = true;
 	CString strTemp;
@@ -618,7 +619,7 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 			if(strTarget == strTemp)
 				bCompareResult = false;
 		}
-		if(bCompareResult)	// 중복 확인 
+		if(bCompareResult)	// 중복 확인
 			m_lbDOE.AddString(strTemp);		
 	}
 }
@@ -628,9 +629,11 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	ConfigDMData* pConfig = &m_cNewConfigData;
+	m_treeMainTest.DeleteAllItems();
 
 	int nIndex = m_lbDOE.GetCurSel();
 	m_lbDOE.GetText(nIndex, m_strDOE);
+	BeginWaitCursor(); 
 
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
 	CString strTemp;
@@ -647,6 +650,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	pConfig->LoadDataFiles(strEXEDirectory);
 	AddToTree(pConfig);
+	EndWaitCursor();
 }
 
 void CData_ManagerDlg::MakeDataDirectory()
@@ -664,4 +668,10 @@ void CData_ManagerDlg::MakeDataDirectory()
 	strEXEPath = strEXEPath + "\\Data";
 
 	CreateDirectory(strEXEPath,NULL);
+}
+
+void CData_ManagerDlg::OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 }

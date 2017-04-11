@@ -129,8 +129,6 @@ void InformationManager::LoadBasicFileList()
 
 			tinyxml2::XMLDeclaration* decl;
 
-
-
 		}
 	}
 	else
@@ -214,7 +212,9 @@ void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString&
 	
 	AfxExtractSubString(outStrBuild,	strFileName,0,'-');
 	AfxExtractSubString(outStrConfig,	strFileName,1,'-');
-	AfxExtractSubString(outStrDOE,		strFileName,2,'-');
+	nIndex = strFileName.Find('-',0);
+	nIndex = strFileName.Find('-',nIndex+1);
+	outStrDOE = strFileName.Mid(nIndex+1);
 	AfxExtractSubString(outStrDOE,		outStrDOE,0,'.');
 
 	nIndex = strTemp.ReverseFind('\\');
