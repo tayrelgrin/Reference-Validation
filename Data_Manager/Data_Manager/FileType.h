@@ -12,7 +12,7 @@ public:
 	~FileType(void);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
 	void SetFileName(CString inData);
-	void AddNewData(CString inData);
+	void AddNewData(CString inData, int inNInput = 2);
 	void AddNewData(BasicData* inData);
 	void INIFileReadByLine(CString inPath, std::vector<CString>& outData);
 	CString GetFileName();

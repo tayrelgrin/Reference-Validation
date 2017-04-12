@@ -47,7 +47,7 @@ void TestType::AddNewFile(FileType* inData)
 	m_pListFile.AddTail(inData);
 }
 
-void TestType::AddNewTest(CString inPath)
+void TestType::AddNewTest(CString inPath, int inNInput)
 {
 	std::vector<CString> vFilePath;
 
@@ -60,7 +60,7 @@ void TestType::AddNewTest(CString inPath)
 		int nIndex = strFilePath.ReverseFind('\\');			// 파일 이름 인덱스
 		
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
-		cNewFile->AddNewData(vFilePath[i]);					// 파일 이름 적용
+		cNewFile->AddNewData(vFilePath[i], inNInput);		// 파일 이름 적용
 
 		m_pListFile.AddTail(cNewFile);
 	}

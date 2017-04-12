@@ -131,7 +131,11 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-	m_cValueData.LoadXMLFileList();
+	InitMainList();
+	MakeDataDirectory();
+
+	m_cValueData.LoadXMLFileListInValue();
+	//m_cValueData.LoadXMLSettingFileList();
 
  	m_cValueData.GetConfigNameList(m_vConfigName);
 	AddRefinfoToListBox();
@@ -141,8 +145,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	Button_Imaging();
 	
-	InitMainList();
-	MakeDataDirectory();
+	
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -231,6 +234,8 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
+	AfxSetAllocStop(1920);
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
@@ -239,8 +244,18 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 	if(IDOK == m_cAddNewRefDlg.DoModal())
 	{
+		for(int i = 0; i<m_vTestList.size(); i++)
+		{
+			m_vTestList.erase(m_vTestList.begin()+i);
+		}
 		m_vTestList.clear();
+
+		for(int i = 0; i<m_vDirList.size(); i++)
+		{
+			m_vDirList.erase(m_vDirList.begin()+i);
+		}
 		m_vDirList.clear();
+
 		std::vector<CString> temp;
 		for(int i = 0; i<temp.size(); i++)
 		{
@@ -266,6 +281,10 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		cNewConfig->GetFilePathInDir(temp, m_vDirList);
 		
 
+		cNewSetting->SetTestList(m_vTestList);
+		cNewSetting->SetTestDirList(m_vDirList);
+		cNewSetting->SetBaseFiles(temp);
+
 		AddNewConfig(cNewConfig, cNewSetting);
 
 		for(int i = 0; i<temp.size(); i++)
@@ -283,8 +302,14 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		if (vTemp.size()==0)
 		{
-			m_vConfigName.push_back(strComb);	
+			m_vConfigName.push_back(strComb);
 		}
+
+		for(int i = 0; i<vTemp.size(); i++)
+		{
+			vTemp.erase(vTemp.begin()+i);
+		}
+		vTemp.clear();
 
 		if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
 			AddProjectToListBox(m_strPrj);
@@ -328,6 +353,10 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 		m_vDirList.erase(m_vDirList.begin()+i);
 	}
 	m_vDirList.clear();
+	
+	m_cValueData.InitAllData();
+	m_cNewConfigData.InitListAndVectors();
+	m_cNewSettingData.InitListAndVectors();
 
 	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 }
@@ -649,6 +678,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	ConfigDMData* pConfig = &m_cNewConfigData;
+	ConfigDMData* pSetting = &m_cNewSettingData;
 	m_treeMainTest.DeleteAllItems();
 
 	int nIndex = m_lbDOE.GetCurSel();
@@ -661,14 +691,18 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	FindStringInVector(m_vConfigName, strTarget, vFileList);
 
-	// File Read 후 treeview에 뿌려주기
-	CString strEXEDirectory;
+	// File Read 
+	CString strEXEDirectory, strValuePath, strSettingPath;
 
 	strEXEDirectory = pConfig->GetEXEDirectoryPath();
 
-	strEXEDirectory = strEXEDirectory + "\\Data\\Value\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
+	strValuePath = strEXEDirectory + "\\Data\\Value\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
+	strSettingPath = strEXEDirectory + "\\Data\\Setting\\Setting-" + m_strPrj + '-' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
 
-	pConfig->LoadDataFiles(strEXEDirectory);
+	pConfig->LoadDataFiles(strValuePath);
+	pSetting->LoadDataFiles(strSettingPath);
+
+	// treeview에 뿌려주기
 	AddToTree(pConfig);
 	EndWaitCursor();
 }
@@ -687,7 +721,7 @@ void CData_ManagerDlg::MakeDataDirectory()
 	strEXEPath = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
 
 	strEXEPath = strEXEPath + "\\Data";
-
+	CreateDirectory(strEXEPath,NULL);
 	CreateDirectory(strEXEPath+"\\Value",NULL);
 	CreateDirectory(strEXEPath+"\\Setting",NULL);
 }

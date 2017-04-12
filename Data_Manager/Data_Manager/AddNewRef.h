@@ -32,6 +32,7 @@ public:
 	void GetDirList( std::vector<CString>& inVDirList);
 	void CopyConfigData(ConfigDMData inData);
 	void EditBoxSetting();
+	void InitAllData();
 private:
 	CString m_strBuild;
 	CString m_strDOE;

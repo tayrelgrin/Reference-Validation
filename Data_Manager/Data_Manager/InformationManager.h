@@ -13,8 +13,10 @@ public:
 	void DeleteConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
 	void SaveRefToFile(CString inFilePath);
-	void LoadXMLFileList();
-	void LoadXMLFileList(CString inData);
+	void LoadXMLFileListInValue();
+	void LoadXMLFileListInSetting();
+	void LoadXMLValueFileList(CString inData);
+	void LoadXMLSettingFileList(CString inData);
 	void SaveSettingToFile();
 	void LoadSettingFromFile();
 	void LoadBasicFileList();
@@ -24,6 +26,7 @@ public:
 	void AddToBuild(CString inData);
 	void AddToConfig(CString inData);
 	void AddToDOE(CString inData);
+	void InitAllData();
 
 private:
 	CList<ConfigDMData*> m_listConfigs;

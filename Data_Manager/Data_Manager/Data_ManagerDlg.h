@@ -78,6 +78,7 @@ private:
 	AddNewRef m_cAddNewRefDlg;
 	SettingBaseInfo m_cSettingDlg;
 	ConfigDMData m_cNewConfigData;
+	ConfigDMData m_cNewSettingData;
 	InformationManager m_cValueData;
 	CString m_strRootPath;
 	CString m_strPrj;

@@ -47,9 +47,8 @@ void FileType::SetFileName(CString inData)
 	m_strFileName = inData;
 }
 
-void FileType::AddNewData(CString inData)
+void FileType::AddNewData(CString inData, int inNInput)
 {
-
 	std::vector<CString> vtemp;
 	CString strSection, strItem, strValue;
 	bool bFlag = false;
@@ -72,10 +71,18 @@ void FileType::AddNewData(CString inData)
 			if (cNewData==NULL)
 				cNewData = new BasicData();
 			AfxExtractSubString(strItem,		strTemp, 0, '=');
-			AfxExtractSubString(strValue,		strTemp, 1, '=');
+
+			if(inNInput!=2)
+			{
+				strValue.Format("%d", inNInput);
+			}
+			else
+				AfxExtractSubString(strValue,		strTemp, 1, '=');
+
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
 			cNewData->setValue(strValue);
+			
 			bFlag = false;
 		}
 		if(bFlag == false)
@@ -116,7 +123,7 @@ void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
 		if(!bIsNotEOL) break;
 	}
 
-	sourceFile.Close(); 
+	sourceFile.Close();
 }
 
 CString FileType::GetFileName()

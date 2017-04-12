@@ -19,6 +19,17 @@ AddNewRef::AddNewRef(CWnd* pParent /*=NULL*/)
 
 AddNewRef::~AddNewRef()
 {
+	InitAllData();
+}
+
+void AddNewRef::InitAllData()
+{
+	for(int i = 0; i<m_vStrDir.size(); i++)
+	{
+		m_vStrDir.erase(m_vStrDir.begin()+i);
+	}
+
+	m_vStrDir.clear();
 }
 
 void AddNewRef::DoDataExchange(CDataExchange* pDX)

@@ -11,6 +11,11 @@ InformationManager::InformationManager(void)
 
 InformationManager::~InformationManager(void)
 {
+	InitAllData();
+}
+
+void InformationManager::InitAllData()
+{
 	POSITION pPos = m_listConfigs.GetHeadPosition();
 	POSITION ptemp = NULL;
 
@@ -62,7 +67,8 @@ void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
 {
 	std::vector<CString> vTest;
 	inNewData->GetTestList(vTest);
-	inNewData->AddNewTest();
+	int nInput = 0;
+	inNewData->AddNewTest(nInput);
 
 	m_listSetting.AddTail(inNewData);
 
@@ -170,7 +176,7 @@ void InformationManager::LoadBasicFileList()
 	}
 }
 
-void InformationManager::LoadXMLFileList()
+void InformationManager::LoadXMLFileListInValue()
 {
 	ConfigDMData cTempConfig;
 
@@ -202,7 +208,7 @@ void InformationManager::LoadXMLFileList()
 		pAddConfig->SetConfigNum(strConfig);
 		pAddConfig->SetDOE(strDOE);
 
-		CString strComb = strPrj+'_'+strBuild+'_'+strConfig+'_'+strDOE;
+		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		m_vConfigName.push_back(strComb);
 
@@ -210,7 +216,47 @@ void InformationManager::LoadXMLFileList()
 	}
 }
 
-void InformationManager::LoadXMLFileList(CString inData)
+void InformationManager::LoadXMLFileListInSetting()
+{
+	ConfigDMData cTempConfig;
+
+	CString strEXEDirectory;
+
+	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
+
+	strEXEDirectory += "\\Data\\Setting";
+
+	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정.
+
+	CFileFind finder;
+
+	std::vector<CString> vStrFilePath;
+	std::vector<CString> vDummy;
+
+	cTempConfig.GetDirList(strEXEDirectory,vDummy, vStrFilePath);
+
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	for (int i = 0; i < vStrFilePath.size(); i++)
+	{
+		ConfigDMData* pAddConfig = new ConfigDMData;
+
+		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
+
+		pAddConfig->SetProject(strPrj);
+		pAddConfig->SetBuildNum(strBuild);
+		pAddConfig->SetConfigNum(strConfig);
+		pAddConfig->SetDOE(strDOE);
+
+		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
+
+		//m_vConfigName.push_back(strComb);
+
+		delete pAddConfig;
+	}
+}
+
+void InformationManager::LoadXMLValueFileList(CString inData)
 {
 	ConfigDMData* pAddConfig = new ConfigDMData;
 
@@ -229,8 +275,33 @@ void InformationManager::LoadXMLFileList(CString inData)
 
 	m_vConfigName.push_back(strComb);
 
-	delete pAddConfig;
 	m_listConfigs.AddTail(pAddConfig);
+
+	delete pAddConfig;
+}
+
+void InformationManager::LoadXMLSettingFileList(CString inData)
+{
+	ConfigDMData* pAddConfig = new ConfigDMData;
+
+	pAddConfig->LoadDataFiles(inData);
+
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
+
+	pAddConfig->SetProject(strPrj);
+	pAddConfig->SetBuildNum(strBuild);
+	pAddConfig->SetConfigNum(strConfig);
+	pAddConfig->SetDOE(strDOE);
+
+	CString strComb = strPrj+'_'+strBuild+'_'+strConfig+'_'+strDOE;
+
+	//m_vConfigName.push_back(strComb);
+
+	m_listSetting.AddTail(pAddConfig);
+
+	delete pAddConfig;
 }
 
 void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)

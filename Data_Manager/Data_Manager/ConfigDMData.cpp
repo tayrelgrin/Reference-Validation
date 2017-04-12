@@ -23,12 +23,19 @@ void ConfigDMData::InitListAndVectors()
 	{
 		m_vTestName.erase(m_vTestName.begin()+i);
 	}
+
+	for(int i = 0; i<m_vBaseFiles.size(); i++)
+	{
+		m_vBaseFiles.erase(m_vBaseFiles.begin()+i);
+	}
+	
 	// 	for(int i = 0; i<m_vFilePath.size(); i++)
 	// 	{
 	// 		m_vFilePath.erase(m_vFilePath.begin()+i);
 	// 	}
 	m_vTestDirPath.clear();
 	m_vTestName.clear();
+	m_vBaseFiles.clear();
 	//m_vFilePath.clear();
 
 
@@ -246,7 +253,7 @@ void ConfigDMData::SetTestDirList(std::vector<CString> invData)
 	invData.clear();
 }
 
-void ConfigDMData::AddNewTest()
+void ConfigDMData::AddNewTest(int inNInput)
 {
 	CString strTestName;
 	CString strIndex8th;
@@ -275,7 +282,7 @@ void ConfigDMData::AddNewTest()
 		}
 
 		cAddData->SetTestName(strTestName);
-		cAddData->AddNewTest(m_vTestDirPath[i]);
+		cAddData->AddNewTest(m_vTestDirPath[i], inNInput);
 		
 		m_pListTestType.AddTail(cAddData);
 	}
@@ -409,7 +416,7 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 
 	CreateDirectory(strFilePath,NULL);
 
-	strFilePath += "\\" + m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE + ".xml";
+	strFilePath += "\\Setting-" + m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE + ".xml";
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 

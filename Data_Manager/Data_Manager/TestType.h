@@ -14,7 +14,7 @@ public:
 	void AddNewFile(CString inStrFileName);
 	void AddNewFile(FileType* inData);
 	void GetFilePathInDir(CString inPath, std::vector<CString>& outvData);
-	void AddNewTest(CString inPath);
+	void AddNewTest(CString inPath, int inNInput = 2);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement, std::vector<CString> invBasicFile);
 	void LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName="");
 private:
