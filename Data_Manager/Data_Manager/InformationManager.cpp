@@ -58,6 +58,21 @@ void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 	vTest.clear();
 }
 
+void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
+{
+	std::vector<CString> vTest;
+	inNewData->GetTestList(vTest);
+	inNewData->AddNewTest();
+
+	m_listSetting.AddTail(inNewData);
+
+	for(int i = 0; i<vTest.size(); i++)
+	{
+		vTest.erase(vTest.begin()+i);
+	}
+	vTest.clear();
+}
+
 void InformationManager::DeleteConfigData(ConfigDMData* inTargetData)
 {
 	POSITION pDelete;
@@ -102,6 +117,20 @@ void InformationManager::SaveRefToFile(CString inFilePath)
 			pTemp->SaveDataToFile(m_vBasicFile);
 		}
 	}
+
+	pTemp = m_listSetting.GetHead();
+
+	pos = m_listSetting.GetHeadPosition();
+
+	while(pos)
+	{
+		pTemp = m_listSetting.GetNext(pos);
+		if(pTemp->GetNewDataFlag())
+		{
+			pTemp->SaveSettingToFile(m_vBasicFile);
+		}
+	}
+	pTemp->SetNewDataFlag(false);
 }
 
 void InformationManager::LoadBasicFileList()
@@ -128,7 +157,7 @@ void InformationManager::LoadBasicFileList()
 			tinyxml2::XMLNode* cNode;
 
 			tinyxml2::XMLDeclaration* decl;
-
+			// 로드 추가
 		}
 	}
 	else
@@ -149,7 +178,7 @@ void InformationManager::LoadXMLFileList()
 
 	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
 
-	strEXEDirectory += "\\Data";
+	strEXEDirectory += "\\Data\\Value";
 
 	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정.
 
@@ -223,5 +252,6 @@ void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString&
 
 void InformationManager::GetConfigNameList(std::vector<CString>& outvData)
 {
+	outvData.clear();
 	outvData = m_vConfigName;
 }

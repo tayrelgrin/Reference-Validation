@@ -107,19 +107,15 @@ void AddNewRef::CopyConfigData(ConfigDMData inData)
 void AddNewRef::EditBoxSetting()
 {
 	CEdit *p=(CEdit *)GetDlgItem(IDC_EDIT_PrjName);
-	//p->SetWindowTextW(m_strPrj);
 	p->SetWindowText(m_strPrj);
 
 	p=(CEdit *)GetDlgItem(IDC_EDIT_BUILDNUM);
-	//p->SetWindowTextW(m_strBuild);
 	p->SetWindowText(m_strBuild);
 
 	p=(CEdit *)GetDlgItem(IDC_EDIT_CONFIGNUM);
-	//p->SetWindowTextW(m_strConfig);
 	p->SetWindowText(m_strConfig);
 
 	p=(CEdit *)GetDlgItem(IDC_EDIT_DOE);
-	//p->SetWindowTextW(m_strDOE);
 	p->SetWindowText(m_strDOE);
 }
 
@@ -132,8 +128,6 @@ void AddNewRef::OnBnClickedButtonAddok()
 	cNewConfig.SetBuildNum(m_strBuild);
 	cNewConfig.SetConfigNum(m_strConfig);
 	cNewConfig.SetDOE(m_strDOE);
-
-	//cNewConfig.GetTestNameFromVector();
 
 	CDialogEx::OnOK();
 }

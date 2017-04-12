@@ -31,6 +31,7 @@ public:
 	void INIFileReadLine(std::vector<CString> invPath);
 	void SetFilePath(std::vector<CString> invPath);
 	void SaveDataToFile(std::vector<CString> invBasicFile);
+	void SaveSettingToFile(std::vector<CString> invBasicFile);
 	bool GetNewDataFlag();
 	void SetNewDataFlag(bool inData);
 	void AddCommonBaseFile(std::vector<CString> invFileName);

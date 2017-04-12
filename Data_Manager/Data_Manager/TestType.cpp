@@ -62,10 +62,7 @@ void TestType::AddNewTest(CString inPath)
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
 		cNewFile->AddNewData(vFilePath[i]);					// 파일 이름 적용
 
-		if(m_pListFile.IsEmpty())
-			m_pListFile.AddHead(cNewFile);
-		else
-			m_pListFile.AddTail(cNewFile);
+		m_pListFile.AddTail(cNewFile);
 	}
 	for(int i = 0; i<vFilePath.size(); i++)
 	{

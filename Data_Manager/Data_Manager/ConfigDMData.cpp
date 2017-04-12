@@ -367,7 +367,7 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 
 	strEXEPath = GetEXEDirectoryPath();
 
- 	CString strFilePath = strEXEPath + "\\Data\\" + m_strPrj;
+ 	CString strFilePath = strEXEPath + "\\Data\\Value\\" + m_strPrj;
 
 	CreateDirectory(strFilePath,NULL);
 
@@ -396,8 +396,47 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 	
 	cXMLDocument.SaveFile(strTemp);
 	
-	SetNewDataFlag(false);
+	//SetNewDataFlag(false);
 }
+
+void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
+{
+	CString strEXEPath;
+
+	strEXEPath = GetEXEDirectoryPath();
+
+	CString strFilePath = strEXEPath + "\\Data\\Setting";
+
+	CreateDirectory(strFilePath,NULL);
+
+	strFilePath += "\\" + m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE + ".xml";
+
+	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
+
+	tinyxml2::XMLDocument cXMLDocument;
+	tinyxml2::XMLDeclaration* dexl = cXMLDocument.NewDeclaration();
+
+	cXMLDocument.LinkEndChild(dexl);
+
+	tinyxml2::XMLElement* pElemenet = cXMLDocument.NewElement("Setting");
+
+	cXMLDocument.LinkEndChild(pElemenet);
+
+	POSITION pos = m_pListTestType.GetHeadPosition();
+
+	//	AddCommonBaseFile(invBasicFile);		// Ref 파일에 기본 파일들 추가
+
+	while(pos)
+	{
+		TestType* pData = m_pListTestType.GetNext(pos);
+		pData->SaveDataToFile(cXMLDocument, pElemenet, m_vBaseFiles);
+	}
+
+	cXMLDocument.SaveFile(strTemp);
+
+	//SetNewDataFlag(false);
+}
+
 
 void ConfigDMData::SetNewDataFlag(bool inData)
 {

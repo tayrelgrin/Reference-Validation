@@ -32,9 +32,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
+
 CAboutDlg::CAboutDlg() : CDialogEx(CAboutDlg::IDD)
 {
 }
+
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -55,6 +57,7 @@ CData_ManagerDlg::CData_ManagerDlg(CWnd* pParent /*=NULL*/)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);	
 }
+
 
 void CData_ManagerDlg::DoDataExchange(CDataExchange* pDX)
 {
@@ -143,6 +146,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
+
 void CData_ManagerDlg::Button_Imaging()
 {
 	// New Button image calling
@@ -173,6 +177,7 @@ void CData_ManagerDlg::Button_Imaging()
 	m_cButton_EXIT.LoadBitmaps(IDB_BITMAP_EXIT,IDB_BITMAP_EXITPUSH,NULL,NULL);
 	m_cButton_EXIT.SizeToContent();
 }
+
 
 void CData_ManagerDlg::OnSysCommand(UINT nID, LPARAM lParam)
 {
@@ -251,6 +256,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_cAddNewRefDlg.GetDirList(m_vDirList);
 
 		ConfigDMData* cNewConfig = new ConfigDMData();
+		ConfigDMData* cNewSetting = new ConfigDMData();
 
 		cNewConfig->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
 		cNewConfig->GetTestNameFromDirVector(temp, m_vTestList);
@@ -260,7 +266,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		cNewConfig->GetFilePathInDir(temp, m_vDirList);
 		
 
-		AddNewConfig(cNewConfig);
+		AddNewConfig(cNewConfig, cNewSetting);
 
 		for(int i = 0; i<temp.size(); i++)
 		{
@@ -334,6 +340,7 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 	(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
 }
 
+
 void CData_ManagerDlg::OnBnClickedButtonDelete()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -402,10 +409,12 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	}
 }
 
+
 void CData_ManagerDlg::OnLbnSetfocusListPrj()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }
+
 
 void CData_ManagerDlg::InitMainList()
 {
@@ -425,7 +434,7 @@ void CData_ManagerDlg::InitMainList()
 }
 
 
-void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData)
+void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData, ConfigDMData* inSetting)
 {
 	inData->SetProject(m_strPrj);
 	inData->SetBuildNum(m_strBuildNum);
@@ -433,7 +442,14 @@ void CData_ManagerDlg::AddNewConfig(ConfigDMData* inData)
 	inData->SetDOE(m_strDOE);
 	inData->SetNewDataFlag(TRUE);
 
+	inSetting->SetProject(m_strPrj);
+	inSetting->SetBuildNum(m_strBuildNum);
+	inSetting->SetConfigNum(m_strConfigNum);
+	inSetting->SetDOE(m_strDOE);
+	inSetting->SetNewDataFlag(TRUE);
+
 	m_cValueData.AddNewConfigData(inData);
+	m_cValueData.AddNewSettingData(inSetting);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -546,6 +562,7 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 	}
 }
 
+
 void CData_ManagerDlg::FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData)
 {
 	for(int i= 0; i<invData.size(); i++)
@@ -556,6 +573,7 @@ void CData_ManagerDlg::FindStringInVector(std::vector<CString> invData, CString 
 		}
 	}
 }
+
 
 void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 {
@@ -591,6 +609,7 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	}
 }
 
+
 void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -624,6 +643,7 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	}
 }
 
+
 void CData_ManagerDlg::OnLbnSelchangeListDoe()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -646,12 +666,13 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	strEXEDirectory = pConfig->GetEXEDirectoryPath();
 
-	strEXEDirectory = strEXEDirectory + "\\Data\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
+	strEXEDirectory = strEXEDirectory + "\\Data\\Value\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
 
 	pConfig->LoadDataFiles(strEXEDirectory);
 	AddToTree(pConfig);
 	EndWaitCursor();
 }
+
 
 void CData_ManagerDlg::MakeDataDirectory()
 {
@@ -667,8 +688,10 @@ void CData_ManagerDlg::MakeDataDirectory()
 
 	strEXEPath = strEXEPath + "\\Data";
 
-	CreateDirectory(strEXEPath,NULL);
+	CreateDirectory(strEXEPath+"\\Value",NULL);
+	CreateDirectory(strEXEPath+"\\Setting",NULL);
 }
+
 
 void CData_ManagerDlg::OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 {

@@ -63,7 +63,7 @@ public:
 
 public:
 	void AddToTree(ConfigDMData* inpData);
-	void AddNewConfig(ConfigDMData* inData);
+	void AddNewConfig(ConfigDMData* inData, ConfigDMData* inSetting);
 	void AddProjectToListBox(CString inPrj);
 	void AddBuildToListBox(CString inBuild);
 	void AddConfigToListBox(CString inConfig);

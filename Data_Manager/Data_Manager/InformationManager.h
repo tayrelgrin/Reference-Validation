@@ -8,6 +8,7 @@ public:
 	InformationManager(void);
 	~InformationManager(void);
 	void AddNewConfigData(ConfigDMData* inNewData);
+	void AddNewSettingData(ConfigDMData* inNewData);
 	void ModifyConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
