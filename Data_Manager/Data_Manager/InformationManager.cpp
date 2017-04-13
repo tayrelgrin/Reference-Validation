@@ -147,9 +147,9 @@ void InformationManager::LoadBaseFileList()
 	CString strEXEPath = path;
 	CString strFilepath;
 
-	int i = strEXEPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
+	int nIndex = strEXEPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
 
-	strEXEPath = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
+	strEXEPath = strEXEPath.Left(nIndex);//뒤에 있는 현재 실행 파일 이름을 지운다.
 
 	strFilepath = strEXEPath + "\\Data\\BaseFile.xml";
 
@@ -195,7 +195,6 @@ void InformationManager::LoadBaseFileList()
 		CString strTemp;
 		for (int i = 0; i<m_vBasicFile.size(); i++)
 		{
-			CString strTemp;
 			pElem2 = cDoc.NewElement("File");
 			text = cDoc.NewText(m_vBasicFile[i]);
 

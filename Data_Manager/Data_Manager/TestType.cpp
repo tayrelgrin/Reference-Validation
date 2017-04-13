@@ -64,9 +64,9 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 
 		if (invBasicFile.size() > 0)
 		{
-			for(int i = 0; i<invBasicFile.size(); i++)
+			for(int j = 0; j<invBasicFile.size(); j++)
 			{
-				if(invBasicFile[i].Find(cNewFile->GetFileName()) != -1)
+				if(invBasicFile[j].Find(cNewFile->GetFileName()) != -1)
 				{
 					m_pListFile.AddTail(cNewFile);
 					break;
@@ -123,8 +123,8 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 	tinyxml2::XMLElement* Element;
 	if(m_strTestName != "")
 	{
-		if(m_strTestName.Find('\\') != -1)
-			m_strTestName.Replace('\\','*');
+ 		if(m_strTestName.Find('\\') != -1)
+ 			m_strTestName.Replace('\\',':');
 
 		Element = cXMLDoc.NewElement(LPSTR(LPCTSTR(m_strTestName)));
 
@@ -191,7 +191,7 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 	{
 		FileType* temp = m_pListFile.GetNext(pPos);
 		strFileName = temp->GetFileName();
-		strFileName = inTestName + "*" + strFileName;
+		strFileName = inTestName + ":" + strFileName;
 
 		outvFileNames.push_back(strFileName);
 	}

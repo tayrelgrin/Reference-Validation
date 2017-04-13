@@ -409,12 +409,14 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	HTREEITEM h_2Child;
 	for(int i= 0 ; i < vTestName.size(); i++)
 	{
-		if(vTestName[i].Find('\\') == -1)
+		AfxExtractSubString(strTemp, vTestName[i], 2, ':');
+
+		if(vTestName[i].Find('\\') == -1 && strTemp=="")
 		{
 			strTemp = vTestName[i];
 
-			AfxExtractSubString(strTest, strTemp, 0, '*');
-			AfxExtractSubString(strFile, strTemp, 1, '*');
+			AfxExtractSubString(strTest, strTemp, 0, ':');
+			AfxExtractSubString(strFile, strTemp, 1, ':');
 
  			if(m_treeMainTest.GetCount() >= 1 && i != 0)
  				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
@@ -428,16 +430,25 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 		else
 		{
 			AfxExtractSubString(strTemp, vTestName[i], 0, '\\');
+			AfxExtractSubString(strTemp,strTemp, 0, ':');
 
-			if(m_treeMainTest.GetCount() > 0 && i != 0)	
+			if(m_treeMainTest.GetCount() > 0 && i != 0)
 				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
 
 			if(strTemp != compare)
 				h_Root = m_treeMainTest.InsertItem(strTemp, TVI_ROOT, TVI_LAST);
 
 			AfxExtractSubString(strTemp, vTestName[i], 1, '\\');
-			AfxExtractSubString(strTest, strTemp, 0, '*');
-			AfxExtractSubString(strFile, strTemp, 1, '*');
+			AfxExtractSubString(strTest, strTemp, 0, ':');
+			AfxExtractSubString(strFile, strTemp, 1, ':');
+
+			if(strTemp.Find(':') != -1 || strTemp == "")
+			{
+				AfxExtractSubString(strTest, vTestName[i], 1, ':');
+				AfxExtractSubString(strFile, vTestName[i], 2, ':');
+			}
+
+			
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)	
 				compare = m_treeMainTest.GetItemText(h_Child);	// Serach in h_Child level in tree
@@ -638,10 +649,10 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 2, '_');
 
-		for (int i = 0; i< m_lbConfig.GetCount(); i++)
+		for (int j = 0; j< m_lbConfig.GetCount(); j++)
 		{
 			CString strTarget;
-			m_lbConfig.GetText(i, strTarget);
+			m_lbConfig.GetText(j, strTarget);
 			if(strTarget == strTemp)
 				bCompareResult = false;
 		}
@@ -660,22 +671,22 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	int nIndex = m_lbConfig.GetCurSel();
 	m_lbConfig.GetText(nIndex, m_strConfigNum);
 
-	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
+	CString strTargetName = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
 	CString strTemp;
 	std::vector<CString> vFileList;
 	bool bCompareResult = true;
 
-	FindStringInVector(m_vConfigName, strTarget, vFileList);
+	FindStringInVector(m_vConfigName, strTargetName, vFileList);
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
 		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 3, '_');
 
-		for (int i = 0; i< m_lbDOE.GetCount(); i++)
+		for (int j = 0; j< m_lbDOE.GetCount(); j++)
 		{
 			CString strTarget;
-			m_lbDOE.GetText(i, strTarget);
+			m_lbDOE.GetText(j, strTarget);
 			if(strTarget == strTemp)
 				bCompareResult = false;
 		}
@@ -743,4 +754,8 @@ void CData_ManagerDlg::OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
+
+	HTREEITEM hNode = NULL;
+
+	m_treeMainTest.GetItemText(hNode);
 }

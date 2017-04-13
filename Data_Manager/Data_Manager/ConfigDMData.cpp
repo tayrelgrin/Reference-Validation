@@ -203,7 +203,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 			AfxExtractSubString(temp2,		invData[i], 8, '_');
 			if (temp2 != "")
 			{
-				temp = temp2 +'*'+ temp;
+				temp = temp2 +":"+ temp;
 			}
 		}
 		else
@@ -211,7 +211,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 			AfxExtractSubString(temp2,		invData[i], 0, '\\');
 			AfxExtractSubString(temp,		invData[i], 1, '\\');
 			AfxExtractSubString(temp,		temp, 5, '_');
-			temp = temp2 +'*'+ temp;
+			temp = temp2 +"\\"+ temp;
 		}
 		if(temp!="")
 			outvData.push_back(temp);
@@ -440,7 +440,6 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	
 	for (int i = 0; i<m_vBaseFiles.size(); i++)
 	{
-		CString strTemp;
 		pElem2 = cXMLDocument.NewElement("File");
 		text = cXMLDocument.NewText(m_vBaseFiles[i]);
 
@@ -584,7 +583,6 @@ void ConfigDMData::SaveBaseFileListToFile(CString inFilePath, std::vector<CStrin
 void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 {
 	CString strTemp;
-	std::vector<CString> vFileName;
 
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
