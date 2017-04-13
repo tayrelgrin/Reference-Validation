@@ -47,7 +47,7 @@ void TestType::AddNewFile(FileType* inData)
 	m_pListFile.AddTail(inData);
 }
 
-void TestType::AddNewTest(CString inPath, int inNInput)
+void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int inNInput)
 {
 	std::vector<CString> vFilePath;
 
@@ -56,13 +56,25 @@ void TestType::AddNewTest(CString inPath, int inNInput)
 	for (int i = 0; i< vFilePath.size(); i++)
 	{
 		FileType* cNewFile = new FileType();				// 객체 생성
-		CString strFilePath = vFilePath[i];		
+		CString strFilePath = vFilePath[i];
 		int nIndex = strFilePath.ReverseFind('\\');			// 파일 이름 인덱스
 		
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
 		cNewFile->AddNewData(vFilePath[i], inNInput);		// 파일 이름 적용
 
-		m_pListFile.AddTail(cNewFile);
+		if (invBasicFile.size() > 0)
+		{
+			for(int i = 0; i<invBasicFile.size(); i++)
+			{
+				if(invBasicFile[i].Find(cNewFile->GetFileName()) != -1)
+				{
+					m_pListFile.AddTail(cNewFile);
+					break;
+				}
+			}
+		}
+		else
+			m_pListFile.AddTail(cNewFile);		
 	}
 	for(int i = 0; i<vFilePath.size(); i++)
 	{
@@ -112,7 +124,7 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 	if(m_strTestName != "")
 	{
 		if(m_strTestName.Find('\\') != -1)
-			m_strTestName.Replace('\\','_');
+			m_strTestName.Replace('\\','*');
 
 		Element = cXMLDoc.NewElement(LPSTR(LPCTSTR(m_strTestName)));
 
@@ -123,23 +135,24 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 		while(pos)
 		{
 			FileType* pData = m_pListFile.GetNext(pos);
-
-			pData->SaveDataToFile(cXMLDoc, Element);
-
-			// 		for(int i = 0; i<invBasicFile.size(); i++)
-			// 		{
-			// 			if(invBasicFile[i].Find(pData->GetFileName()) != -1)
-			// 			{
-			// 				pData->SaveDataToFile(cXMLDoc, Element);
-			// 				break;
-			// 			}
-			// 		}
-
+			if (invBasicFile.size() > 0)
+			{
+				for(int i = 0; i<invBasicFile.size(); i++)
+				{
+					if(invBasicFile[i].Find(pData->GetFileName()) != -1)
+					{
+						pData->SaveDataToFile(cXMLDoc, Element);
+						break;
+					}
+				}
+			}
+			else
+				pData->SaveDataToFile(cXMLDoc, Element);
 		}
 	}	
 }
 
-void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName)
+void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName, FileType* pNewTest)
 {
 	tinyxml2::XMLNode* pNode;
 	tinyxml2::XMLElement* pElent;
@@ -151,17 +164,35 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 		{
 			if(pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute())
 			{
-				
-				FileType* pNewTest = new FileType;
+				if(pNewTest==nullptr)
+					pNewTest = new FileType;
+
 				pNewTest->SetFileName(inStrFileName);
 
 				pNewTest->LoadDataFromXML((tinyxml2::XMLAttribute*)pAttr);
-				m_pListFile.AddTail(pNewTest);
 				
 			}
-			else{
-				LoadDataFromXML(pElent,pNode->Value() );
+			else
+			{
+				pNewTest = new FileType;
+				LoadDataFromXML(pElent,pNode->Value(), pNewTest);
+				m_pListFile.AddTail(pNewTest);
 			}
 		}
+	}
+}
+
+
+void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNames)
+{
+	POSITION pPos = m_pListFile.GetHeadPosition();
+	CString strFileName;
+	while(pPos)
+	{
+		FileType* temp = m_pListFile.GetNext(pPos);
+		strFileName = temp->GetFileName();
+		strFileName = inTestName + "*" + strFileName;
+
+		outvFileNames.push_back(strFileName);
 	}
 }

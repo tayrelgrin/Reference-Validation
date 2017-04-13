@@ -203,7 +203,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 			AfxExtractSubString(temp2,		invData[i], 8, '_');
 			if (temp2 != "")
 			{
-				temp = temp2 +'\\'+ temp;
+				temp = temp2 +'*'+ temp;
 			}
 		}
 		else
@@ -211,7 +211,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 			AfxExtractSubString(temp2,		invData[i], 0, '\\');
 			AfxExtractSubString(temp,		invData[i], 1, '\\');
 			AfxExtractSubString(temp,		temp, 5, '_');
-			temp = temp2 +'\\'+ temp;
+			temp = temp2 +'*'+ temp;
 		}
 		if(temp!="")
 			outvData.push_back(temp);
@@ -253,7 +253,7 @@ void ConfigDMData::SetTestDirList(std::vector<CString> invData)
 	invData.clear();
 }
 
-void ConfigDMData::AddNewTest(int inNInput)
+void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 {
 	CString strTestName;
 	CString strIndex8th;
@@ -281,8 +281,10 @@ void ConfigDMData::AddNewTest(int inNInput)
 			strTestName = strIndex9th + "\\" + strTestName;
 		}
 
+		AddCommonBaseFile(inBaseFile);
+
 		cAddData->SetTestName(strTestName);
-		cAddData->AddNewTest(m_vTestDirPath[i], inNInput);
+		cAddData->AddNewTest(m_vTestDirPath[i],m_vBaseFiles, inNInput);
 		
 		m_pListTestType.AddTail(cAddData);
 	}
@@ -395,10 +397,12 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 
 //	AddCommonBaseFile(invBasicFile);		// Ref 파일에 기본 파일들 추가
 
+	std::vector<CString> vTemp;
+
 	while(pos)
 	{
 		TestType* pData = m_pListTestType.GetNext(pos);
-		pData->SaveDataToFile(cXMLDocument, pElemenet, m_vBaseFiles);
+		pData->SaveDataToFile(cXMLDocument, pElemenet, vTemp);
 	}
 	
 	cXMLDocument.SaveFile(strTemp);
@@ -425,13 +429,32 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 
 	cXMLDocument.LinkEndChild(dexl);
 
+	
+	AddCommonBaseFile(invBasicFile);		// Ref 파일에 기본 파일들 추가
+	
+	//////////////////////////////////////////////////////////////////////////
+	tinyxml2::XMLElement* pElem;
+	tinyxml2::XMLElement* pElem2;
+	tinyxml2::XMLText* text;
+	pElem = cXMLDocument.NewElement("BaseFile");
+	
+	for (int i = 0; i<m_vBaseFiles.size(); i++)
+	{
+		CString strTemp;
+		pElem2 = cXMLDocument.NewElement("File");
+		text = cXMLDocument.NewText(m_vBaseFiles[i]);
+
+		pElem2->LinkEndChild(text);
+		pElem->LinkEndChild(pElem2);
+	}
+	cXMLDocument.LinkEndChild(pElem);
+	//////////////////////////////////////////////////////////////////////////
+	
 	tinyxml2::XMLElement* pElemenet = cXMLDocument.NewElement("Setting");
 
 	cXMLDocument.LinkEndChild(pElemenet);
 
 	POSITION pos = m_pListTestType.GetHeadPosition();
-
-	//	AddCommonBaseFile(invBasicFile);		// Ref 파일에 기본 파일들 추가
 
 	while(pos)
 	{
@@ -441,7 +464,6 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 
 	cXMLDocument.SaveFile(strTemp);
 
-	//SetNewDataFlag(false);
 }
 
 
@@ -466,14 +488,29 @@ void ConfigDMData::AddCommonBaseFile(std::vector<CString> invFileName)
 void ConfigDMData::SetBaseFiles(std::vector<CString> invFileName)
 {
 	m_vBaseFiles.clear();
-	CString strTemp;
+	CString strTemp, strFileName;
 
 	for (int i=0; i<invFileName.size(); i++)
 	{
-		strTemp.Format("%s%s", invFileName[i], ".ini");
-		m_vBaseFiles.push_back(strTemp);
+		strFileName = invFileName[i];
+
+		if (strFileName.Find('\\') != -1)
+		{
+			AfxExtractSubString(strTemp, strFileName, 1, '\\');
+			strFileName = strTemp;
+		}
+
+		if(strFileName.GetLength() >7)
+		{
+			strTemp.Format("%s%s", strFileName, ".ini");
+
+			m_vBaseFiles.push_back(strTemp);
+
+			strTemp.Format("%s%s", strFileName, "_Register.ini");
+
+			m_vBaseFiles.push_back(strTemp);
+		}
 	}
-	
 }
 
 CString ConfigDMData::GetEXEDirectoryPath()
@@ -509,6 +546,11 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{
+		CString strTemp = pNode->Value();
+		if (strTemp == "BaseFile" || strTemp == "File")
+		{
+			continue;
+		}
 		if(pElent = pNode->ToElement())
 		{
 			if(inIndex==1)
@@ -529,3 +571,28 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	}
 }
 
+void ConfigDMData::SaveBaseFileListToFile(CString inFilePath, std::vector<CString> invData)
+{
+
+	tinyxml2::XMLDocument cDoc;
+	
+
+	
+	cDoc.SaveFile(inFilePath);
+}
+
+void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
+{
+	CString strTemp;
+	std::vector<CString> vFileName;
+
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+
+	while(pPos)
+	{
+		TestType* temp = m_pListTestType.GetNext(pPos);
+		strTemp = temp->GetTestName();
+		temp->GetFileNames(strTemp, outvData);
+	}
+}

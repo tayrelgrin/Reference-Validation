@@ -19,7 +19,7 @@ public:
 	void LoadXMLSettingFileList(CString inData);
 	void SaveSettingToFile();
 	void LoadSettingFromFile();
-	void LoadBasicFileList();
+	void LoadBaseFileList();
 	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
 	void GetConfigNameList(std::vector<CString>& outvData);
 	void AddToPrj(CString inData);
@@ -27,7 +27,6 @@ public:
 	void AddToConfig(CString inData);
 	void AddToDOE(CString inData);
 	void InitAllData();
-
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;

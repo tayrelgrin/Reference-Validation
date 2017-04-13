@@ -26,7 +26,7 @@ public:
 	void SetTestList(std::vector<CString> invData);
 	void GetTestList(std::vector<CString>& outvPath);
 	void SetTestDirList(std::vector<CString> invData);
-	void AddNewTest(int inNInput = 2);
+	void AddNewTest(std::vector<CString> inBaseFile, int inNInput = 2);
 	void GetFilePathInDir(std::vector<CString> invPath, std::vector<CString>& outvData);
 	void INIFileReadLine(std::vector<CString> invPath);
 	void SetFilePath(std::vector<CString> invPath);
@@ -40,6 +40,8 @@ public:
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
 	void InitListAndVectors();
+	void SaveBaseFileListToFile(CString inFilePath, std::vector<CString> invData);
+	void GetFileNames(std::vector<CString>& outvData);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

@@ -135,13 +135,11 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	MakeDataDirectory();
 
 	m_cValueData.LoadXMLFileListInValue();
-	//m_cValueData.LoadXMLSettingFileList();
+	
+	m_cValueData.LoadBaseFileList();
 
  	m_cValueData.GetConfigNameList(m_vConfigName);
 	AddRefinfoToListBox();
-
-	m_cValueData.LoadBasicFileList();
-
 
 	Button_Imaging();
 	
@@ -234,7 +232,7 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
-	AfxSetAllocStop(1920);
+	//AfxSetAllocStop(801);
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
@@ -280,7 +278,6 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		cNewConfig->SetBaseFiles(temp);
 		cNewConfig->GetFilePathInDir(temp, m_vDirList);
 		
-
 		cNewSetting->SetTestList(m_vTestList);
 		cNewSetting->SetTestDirList(m_vDirList);
 		cNewSetting->SetBaseFiles(temp);
@@ -293,7 +290,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		}
 		temp.clear();
 
-		AddToTree(cNewConfig);
+		AddToTree(cNewSetting);
 
 		CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
 		std::vector<CString> vTemp;
@@ -387,7 +384,10 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 void CData_ManagerDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	
+	BeginWaitCursor();
 	m_cValueData.SaveRefToFile(_T("temp"));
+	EndWaitCursor();
 
 	MessageBox (NULL,NULL,MB_OK);
 }
@@ -398,42 +398,54 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	m_treeMainTest.DeleteAllItems();
 
 	std::vector<CString> vData, vTestName;
+	CString strTemp, strTest, strFile;
+	CString compare;
 
-	m_strRootPath = m_cAddNewRefDlg.GetDirRootPath();
-	m_cAddNewRefDlg.GetDirList(m_vDirList);
+	inpData->GetFileNames(vTestName);
 
-	if(m_vDirList.size() == 0)
-	{
-		inpData->GetTestList(vTestName);
-	}
-	else
-	{
-		inpData->GetTestDirFromVector(m_vDirList, vData, m_strRootPath);
-		inpData->GetTestNameFromDirVector(vData, vTestName);
-	}
-
-	HTREEITEM BASEINFO = m_treeMainTest.InsertItem(_T("Base Info"), TVI_ROOT, TVI_LAST);
-	HTREEITEM Test;
-
+	HTREEITEM h_BASEINFO = m_treeMainTest.InsertItem(_T("Base Info"), TVI_ROOT, TVI_LAST);
+	HTREEITEM h_Root;
+	HTREEITEM h_Child;
+	HTREEITEM h_2Child;
 	for(int i= 0 ; i < vTestName.size(); i++)
 	{
-		vTestName[i].Replace('_','\\');
 		if(vTestName[i].Find('\\') == -1)
 		{
-			Test = m_treeMainTest.InsertItem(vTestName[i], TVI_ROOT, TVI_LAST);
+			strTemp = vTestName[i];
+
+			AfxExtractSubString(strTest, strTemp, 0, '*');
+			AfxExtractSubString(strFile, strTemp, 1, '*');
+
+ 			if(m_treeMainTest.GetCount() >= 1 && i != 0)
+ 				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
+
+			if(strTest != compare)
+				h_Root = m_treeMainTest.InsertItem(strTest, TVI_ROOT, TVI_LAST);
+
+			h_Child = m_treeMainTest.InsertItem(strFile, h_Root, NULL);
+
 		}
 		else
 		{
-			CString temp;
-			CString compare = m_treeMainTest.GetItemText(Test);
+			AfxExtractSubString(strTemp, vTestName[i], 0, '\\');
 
-			AfxExtractSubString(temp, vTestName[i], 0, '\\');
-			if(temp != compare)
-				Test = m_treeMainTest.InsertItem(temp);
+			if(m_treeMainTest.GetCount() > 0 && i != 0)	
+				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
 
-			AfxExtractSubString(temp, vTestName[i], 1, '\\');
+			if(strTemp != compare)
+				h_Root = m_treeMainTest.InsertItem(strTemp, TVI_ROOT, TVI_LAST);
 
-			m_treeMainTest.InsertItem(temp, Test, NULL);
+			AfxExtractSubString(strTemp, vTestName[i], 1, '\\');
+			AfxExtractSubString(strTest, strTemp, 0, '*');
+			AfxExtractSubString(strFile, strTemp, 1, '*');
+
+			if(m_treeMainTest.GetCount() > 0 && i != 0)	
+				compare = m_treeMainTest.GetItemText(h_Child);	// Serach in h_Child level in tree
+
+			if(strTest != compare)
+				h_Child = m_treeMainTest.InsertItem(strTest, h_Root, NULL);
+
+			h_2Child = m_treeMainTest.InsertItem(strFile, h_Child, NULL);
 		}
 	}
 }
@@ -703,7 +715,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	pSetting->LoadDataFiles(strSettingPath);
 
 	// treeview에 뿌려주기
-	AddToTree(pConfig);
+	AddToTree(pSetting);
 	EndWaitCursor();
 }
 

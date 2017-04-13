@@ -26,7 +26,6 @@ void InformationManager::InitAllData()
 		delete pData;
 		m_listConfigs.RemoveAt(ptemp);
 	}
-	ptemp = m_listConfigs.GetHeadPosition();
 
 	pPos = m_listSetting.GetHeadPosition();
 	while(pPos)
@@ -45,7 +44,7 @@ void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 {
 	std::vector<CString> vTest;
 	inNewData->GetTestList(vTest);
-	inNewData->AddNewTest();
+	inNewData->AddNewTest(m_vBasicFile);
 
 	if(m_listConfigs.IsEmpty())
 	{
@@ -68,7 +67,7 @@ void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
 	std::vector<CString> vTest;
 	inNewData->GetTestList(vTest);
 	int nInput = 0;
-	inNewData->AddNewTest(nInput);
+	inNewData->AddNewTest(m_vBasicFile, nInput);
 
 	m_listSetting.AddTail(inNewData);
 
@@ -139,7 +138,7 @@ void InformationManager::SaveRefToFile(CString inFilePath)
 	pTemp->SetNewDataFlag(false);
 }
 
-void InformationManager::LoadBasicFileList()
+void InformationManager::LoadBaseFileList()
 {
 	TCHAR path[_MAX_PATH];
 
@@ -152,27 +151,60 @@ void InformationManager::LoadBasicFileList()
 
 	strEXEPath = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
 
-	strFilepath = strEXEPath + "\\Data\\BasicFile.xml";
+	strFilepath = strEXEPath + "\\Data\\BaseFile.xml";
 
 	tinyxml2::XMLDocument cDoc;
 
-	if(tinyxml2::XML_SUCCESS == cDoc.LoadFile(strEXEPath))
+	
+	if(tinyxml2::XML_SUCCESS == cDoc.LoadFile(strFilepath))
 	{
-		if(tinyxml2::XML_SUCCESS == cDoc.LoadFile(strFilepath))
-		{
-			tinyxml2::XMLNode* cNode;
+		tinyxml2::XMLNode* pNode;
+		tinyxml2::XMLNode* pNode2;
 
-			tinyxml2::XMLDeclaration* decl;
-			// 로드 추가
+		tinyxml2::XMLElement* pElem;
+		tinyxml2::XMLElement* pElem2;
+	
+		for (pNode = (tinyxml2::XMLNode*)cDoc.FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
+		{
+			if(pElem = pNode->ToElement())
+			{
+ 				for (pNode2 = (tinyxml2::XMLNode*)pElem->FirstChild(); pNode2 != 0; pNode2 = (tinyxml2::XMLNode*)pNode2->NextSibling())
+ 				{
+					if(pElem2 = pNode2->ToElement())
+					{
+						m_vBasicFile.push_back(pElem2->GetText());
+					}
+				}
+			}
 		}
 	}
 	else
 	{
 		m_vBasicFile.push_back("Spec.ini");
 		m_vBasicFile.push_back("ItemVersion.ini");
-		m_vBasicFile.push_back("_Register.ini");
 		m_vBasicFile.push_back("OS2.spc");
 		m_vBasicFile.push_back("OSLeakage.spc");
+
+		tinyxml2::XMLElement* pElem;
+		tinyxml2::XMLElement* pElem2;
+		tinyxml2::XMLText* text;
+
+		pElem = cDoc.NewElement("BaseFile");
+	
+		
+		CString strTemp;
+		for (int i = 0; i<m_vBasicFile.size(); i++)
+		{
+			CString strTemp;
+			pElem2 = cDoc.NewElement("File");
+			text = cDoc.NewText(m_vBasicFile[i]);
+
+			pElem2->LinkEndChild(text);
+			pElem->LinkEndChild(pElem2);
+			
+		}
+		cDoc.LinkEndChild(pElem);		
+		cDoc.SaveFile(strFilepath);
 	}
 }
 

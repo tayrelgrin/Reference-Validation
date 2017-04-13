@@ -53,7 +53,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 	CString strSection, strItem, strValue;
 	bool bFlag = false;
 	INIFileReadByLine(inData, vtemp);
-	BasicData* cNewData=NULL;
+	BasicData* cNewData = NULL;
 
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
@@ -98,6 +98,11 @@ void FileType::AddNewData(CString inData, int inNInput)
 			}
 		}	
 	}
+	for(int i = 0; i<vtemp.size(); i++)
+	{
+		vtemp.erase(vtemp.begin()+i);
+	}
+	vtemp.clear();
 }
 
 void FileType::AddNewData(BasicData* inData)
