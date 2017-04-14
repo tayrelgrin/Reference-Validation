@@ -71,6 +71,7 @@ public:
 	void AddRefinfoToListBox();
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 	void MakeDataDirectory();
+	void AddToListControl(CString inStrFileName, FileType& inData);
 private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;
@@ -80,6 +81,7 @@ private:
 	ConfigDMData m_cNewConfigData;
 	ConfigDMData m_cNewSettingData;
 	InformationManager m_cValueData;
+	FileType m_cFileData;
 	CString m_strRootPath;
 	CString m_strPrj;
 	CString m_strBuildNum;
@@ -95,5 +97,5 @@ public:
 	afx_msg void OnLbnSelchangeListBuildnum();
 	afx_msg void OnLbnSelchangeListConfignum();
 	afx_msg void OnLbnSelchangeListDoe();
-	afx_msg void OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -9,6 +9,11 @@ FileType::FileType(void)
 
 FileType::~FileType(void)
 {
+	InitList();
+}
+
+void FileType::InitList()
+{
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListData.GetHeadPosition();
 
@@ -18,7 +23,6 @@ FileType::~FileType(void)
 		BasicData* temp = m_pListData.GetNext(pPos);
 		delete temp;
 		m_pListData.RemoveAt(pTemp);
-		
 	}
 
 	m_pListData.RemoveAll();
@@ -74,7 +78,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 
 			if(inNInput!=2)
 			{
-				strValue.Format("%d", inNInput);
+				strValue.Format(_T("%d"), inNInput);
 			}
 			else
 				AfxExtractSubString(strValue,		strTemp, 1, '=');
@@ -144,19 +148,52 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 
 	for (pAttr = pParent; pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
 	{
-		CString strTemp = pAttr->Name();
+		CString strTemp = (CString)pAttr->Name();
 
 		if("Section" == strTemp)
-			outData->setSection(pAttr->Value());
+			outData->setSection((CString)pAttr->Value());
 		else if("Item" == strTemp)
-			outData->setItem(pAttr->Value());
+			outData->setItem((CString)pAttr->Value());
 		else if("Value" == strTemp)
 		{
-			outData->setValue(pAttr->Value());
+			outData->setValue((CString)pAttr->Value());
 			bFlag = true;
 		}
 	}
 
 	if(bFlag)
 		m_pListData.AddTail(outData);
+}
+
+void FileType::CopyDataInList(FileType& outData)
+{
+	outData.InitList();
+
+	POSITION pPos = m_pListData.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* temp = m_pListData.GetNext(pPos);
+		BasicData* cNewData = new BasicData;
+
+		cNewData->setData(*temp);
+
+		outData.AddNewData(cNewData);
+	}
+}
+
+
+void FileType::CopyDataToList(CList<BasicData*>& outListData)
+{
+	POSITION pPos = m_pListData.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* temp = m_pListData.GetNext(pPos);
+		BasicData* cNewData = new BasicData;
+
+		cNewData->setData(*temp);
+
+		outListData.AddTail(cNewData);
+	}
 }

@@ -94,7 +94,7 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_LBN_SELCHANGE(IDC_LIST_BUILDNUM, &CData_ManagerDlg::OnLbnSelchangeListBuildnum)
 	ON_LBN_SELCHANGE(IDC_LIST_CONFIGNUM, &CData_ManagerDlg::OnLbnSelchangeListConfignum)
 	ON_LBN_SELCHANGE(IDC_LIST_DOE, &CData_ManagerDlg::OnLbnSelchangeListDoe)
-	ON_NOTIFY(NM_CLICK, IDC_TREE_MAIN, &CData_ManagerDlg::OnNMClickTreeMain)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ManagerDlg::OnTvnSelchangedTreeMain)
 END_MESSAGE_MAP()
 
 
@@ -339,6 +339,8 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 void CData_ManagerDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	m_ListCtrlMain.DeleteAllItems();
 	for(int i = 0; i<m_vTestList.size(); i++)
 	{
 		m_vTestList.erase(m_vTestList.begin()+i);
@@ -354,6 +356,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 	m_cValueData.InitAllData();
 	m_cNewConfigData.InitListAndVectors();
 	m_cNewSettingData.InitListAndVectors();
+	
 
 	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 }
@@ -442,7 +445,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 			AfxExtractSubString(strTest, strTemp, 0, ':');
 			AfxExtractSubString(strFile, strTemp, 1, ':');
 
-			if(strTemp.Find(':') != -1 || strTemp == "")
+			if(strTemp == "")	// 확인하자
 			{
 				AfxExtractSubString(strTest, vTestName[i], 1, ':');
 				AfxExtractSubString(strFile, vTestName[i], 2, ':');
@@ -602,10 +605,10 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 		bCompareResult = true;
 		AfxExtractSubString(strTemp, vFileList[i], 1, '_');
 		
-		for (int i = 0; i< m_lbBuild.GetCount(); i++)
+		for (int j = 0; j< m_lbBuild.GetCount(); j++)
 		{
 			CString strTarget;
-			m_lbBuild.GetText(i, strTarget);
+			m_lbBuild.GetText(j, strTarget);
 			if(strTarget == strTemp)
 				bCompareResult = false;
 		}
@@ -637,12 +640,12 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	int nIndex = m_lbBuild.GetCurSel();
 	m_lbBuild.GetText(nIndex, m_strBuildNum);
 
-	CString strTarget = m_strPrj + '_' + m_strBuildNum;
+	CString strTargetName = m_strPrj + '_' + m_strBuildNum;
 	CString strTemp;
 	std::vector<CString> vFileList;
 	bool bCompareResult = true;
 
-	FindStringInVector(m_vConfigName, strTarget, vFileList);
+	FindStringInVector(m_vConfigName, strTargetName, vFileList);
 
 	for (int i=0; i<vFileList.size(); i++)
 	{
@@ -719,8 +722,8 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	strEXEDirectory = pConfig->GetEXEDirectoryPath();
 
-	strValuePath = strEXEDirectory + "\\Data\\Value\\" + m_strPrj + '\\' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
-	strSettingPath = strEXEDirectory + "\\Data\\Setting\\Setting-" + m_strPrj + '-' +  + m_strBuildNum + '-' + m_strConfigNum + '-' + m_strDOE + ".xml";
+	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
 
 	pConfig->LoadDataFiles(strValuePath);
 	pSetting->LoadDataFiles(strSettingPath);
@@ -743,19 +746,66 @@ void CData_ManagerDlg::MakeDataDirectory()
 
 	strEXEPath = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
 
-	strEXEPath = strEXEPath + "\\Data";
+	strEXEPath.Format(_T("%s%s"),strEXEPath,"\\Data");
 	CreateDirectory(strEXEPath,NULL);
 	CreateDirectory(strEXEPath+"\\Value",NULL);
 	CreateDirectory(strEXEPath+"\\Setting",NULL);
 }
 
 
-void CData_ManagerDlg::OnNMClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
+void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 {
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
 
-	HTREEITEM hNode = NULL;
+	HTREEITEM hNode;
+	CString strFileName, strTestName, strDirName;
 
-	m_treeMainTest.GetItemText(hNode);
+	hNode = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
+	strFileName = m_treeMainTest.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+
+ 	hNode = m_treeMainTest.GetNextItem(hNode, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+ 	strTestName = m_treeMainTest.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+ 
+ 	hNode = m_treeMainTest.GetNextItem(hNode, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+ 	strDirName = m_treeMainTest.GetItemText(hNode);				// 그 아이템의 이름을 얻어온다.
+
+	if(strTestName!="")
+	{
+		m_cNewConfigData.SearchTestInList(strDirName+strTestName, strFileName, m_cFileData);
+
+		AddToListControl(strFileName, m_cFileData);
+	}
+}
+
+
+void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
+{
+	m_ListCtrlMain.DeleteAllItems(); 
+	CList<BasicData*> Items;
+	inData.CopyDataToList(Items);
+
+	POSITION pos = Items.GetHeadPosition();;
+	int nIndex = 0;
+	CString strSequence;
+	CString strOri, strValue, strDescrip;
+	while(pos)
+	{
+		strSequence.Format(_T("%d"), nIndex);
+
+		BasicData* temp = Items.GetNext(pos);
+		m_ListCtrlMain.InsertItem(nIndex, strSequence);
+		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
+		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
+		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
+
+		strOri = temp->getValue();
+		AfxExtractSubString(strValue, strOri, 0, '/');
+		AfxExtractSubString(strDescrip, strOri, 1, '/');
+		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue ,0,0,0,NULL);
+		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip ,0,0,0,NULL);
+
+		nIndex++;
+	}
 }

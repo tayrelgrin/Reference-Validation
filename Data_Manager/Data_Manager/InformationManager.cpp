@@ -83,7 +83,7 @@ void InformationManager::DeleteConfigData(ConfigDMData* inTargetData)
 	POSITION pDelete;
 	//pDelete = m_listConfigs.Find(inTargetData); index 로 삭제하게 해야할듯
 
-	m_listConfigs.RemoveAt(pDelete);
+//	m_listConfigs.RemoveAt(pDelete);
 	// add file delete
 }
 
@@ -98,7 +98,7 @@ void InformationManager::DeleteConfigData(CString instrPrj, CString instrBuild, 
 	cTargetData.SetDOE(instrDOE);
 
 	//pDelete = m_listConfigs.Find(cTargetData);
-	m_listConfigs.RemoveAt(pDelete);
+//	m_listConfigs.RemoveAt(pDelete);
 	// add file delete
 }
 
@@ -151,12 +151,12 @@ void InformationManager::LoadBaseFileList()
 
 	strEXEPath = strEXEPath.Left(nIndex);//뒤에 있는 현재 실행 파일 이름을 지운다.
 
-	strFilepath = strEXEPath + "\\Data\\BaseFile.xml";
+	strFilepath.Format(_T("%s%s"), strEXEPath,"\\Data\\BaseFile.xml" );
 
 	tinyxml2::XMLDocument cDoc;
 
 	
-	if(tinyxml2::XML_SUCCESS == cDoc.LoadFile(strFilepath))
+	if(tinyxml2::XML_SUCCESS == cDoc.LoadFile( LPSTR(LPCTSTR(strFilepath))))
 	{
 		tinyxml2::XMLNode* pNode;
 		tinyxml2::XMLNode* pNode2;
@@ -172,7 +172,7 @@ void InformationManager::LoadBaseFileList()
  				{
 					if(pElem2 = pNode2->ToElement())
 					{
-						m_vBasicFile.push_back(pElem2->GetText());
+						m_vBasicFile.push_back((CString)pElem2->GetText());
 					}
 				}
 			}
@@ -180,10 +180,10 @@ void InformationManager::LoadBaseFileList()
 	}
 	else
 	{
-		m_vBasicFile.push_back("Spec.ini");
-		m_vBasicFile.push_back("ItemVersion.ini");
-		m_vBasicFile.push_back("OS2.spc");
-		m_vBasicFile.push_back("OSLeakage.spc");
+		m_vBasicFile.push_back(_T("Spec.ini"));
+		m_vBasicFile.push_back(_T("ItemVersion.ini"));
+		m_vBasicFile.push_back(_T("OS2.spc"));
+		m_vBasicFile.push_back(_T("OSLeakage.spc"));
 
 		tinyxml2::XMLElement* pElem;
 		tinyxml2::XMLElement* pElem2;
@@ -196,14 +196,14 @@ void InformationManager::LoadBaseFileList()
 		for (int i = 0; i<m_vBasicFile.size(); i++)
 		{
 			pElem2 = cDoc.NewElement("File");
-			text = cDoc.NewText(m_vBasicFile[i]);
+			text = cDoc.NewText( LPSTR(LPCTSTR(m_vBasicFile[i])));
 
 			pElem2->LinkEndChild(text);
 			pElem->LinkEndChild(pElem2);
 			
 		}
 		cDoc.LinkEndChild(pElem);		
-		cDoc.SaveFile(strFilepath);
+		cDoc.SaveFile(LPSTR(LPCTSTR(strFilepath)));
 	}
 }
 

@@ -175,7 +175,8 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 			else
 			{
 				pNewTest = new FileType;
-				LoadDataFromXML(pElent,pNode->Value(), pNewTest);
+				
+				LoadDataFromXML(pElent,(CString)pNode->Value(), pNewTest);
 				m_pListFile.AddTail(pNewTest);
 			}
 		}
@@ -195,4 +196,24 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 
 		outvFileNames.push_back(strFileName);
 	}
+}
+
+bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
+{
+	POSITION pPos = m_pListFile.GetHeadPosition();
+	CString strFileName;
+	bool bResult=false;
+
+	while(pPos)
+	{
+		FileType* temp = m_pListFile.GetNext(pPos);
+		strFileName = temp->GetFileName();
+
+		if (strFileName == inStrTargetFile)
+		{
+			temp->CopyDataInList(outData);
+			bResult = true;
+		}
+	}
+	return bResult;
 }

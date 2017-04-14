@@ -195,7 +195,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 	for (INT i= 0 ; i<invData.size(); i++)
 	{
 		CString temp = invData[i];
-		CString temp2 = "";
+		CString temp2 = _T("");
 
 		if(temp.Find('\\') == -1)
 		{
@@ -264,7 +264,7 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 		int nIndex = m_vTestDirPath[i].ReverseFind('\\');
 		CString strDir = m_vTestDirPath[i];
 		strDir = strDir.Mid(nIndex+1);
-		CString strIndex9th="";
+		CString strIndex9th = _T("");
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
 		AfxExtractSubString(strIndex8th,strDir,7,'_');
@@ -376,11 +376,12 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 
 	strEXEPath = GetEXEDirectoryPath();
 
- 	CString strFilePath = strEXEPath + "\\Data\\Value\\" + m_strPrj;
+ 	CString strFilePath;
+	strFilePath.Format(_T("%s%s%s"),strEXEPath ,"\\Data\\Value\\" , m_strPrj);
 
 	CreateDirectory(strFilePath,NULL);
 
-	strFilePath += "\\"+ m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE +".xml";
+	strFilePath.Format(_T("%s%s%s%s%s%s%s%s"), strFilePath,"\\", m_strBuildNum ,"-" , m_strConfigNum , "-" , m_strDOE ,".xml");
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 
@@ -420,7 +421,7 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 
 	CreateDirectory(strFilePath,NULL);
 
-	strFilePath += "\\Setting-" + m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE + ".xml";
+	strFilePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strFilePath , "\\Setting-" , m_strPrj , "-" , m_strBuildNum , "-" , m_strConfigNum , "-" , m_strDOE , ".xml");
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 
@@ -441,7 +442,7 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	for (int i = 0; i<m_vBaseFiles.size(); i++)
 	{
 		pElem2 = cXMLDocument.NewElement("File");
-		text = cXMLDocument.NewText(m_vBaseFiles[i]);
+		text = cXMLDocument.NewText( LPSTR(LPCTSTR(m_vBaseFiles[i])));
 
 		pElem2->LinkEndChild(text);
 		pElem->LinkEndChild(pElem2);
@@ -501,11 +502,11 @@ void ConfigDMData::SetBaseFiles(std::vector<CString> invFileName)
 
 		if(strFileName.GetLength() >7)
 		{
-			strTemp.Format("%s%s", strFileName, ".ini");
+			strTemp.Format(_T("%s%s"), strFileName, ".ini");
 
 			m_vBaseFiles.push_back(strTemp);
 
-			strTemp.Format("%s%s", strFileName, "_Register.ini");
+			strTemp.Format(_T("%s%s"), strFileName, "_Register.ini");
 
 			m_vBaseFiles.push_back(strTemp);
 		}
@@ -531,7 +532,7 @@ CString ConfigDMData::GetEXEDirectoryPath()
 void ConfigDMData::LoadDataFiles(CString inStrPath)
 {
 	tinyxml2::XMLDocument xmlDoc;
-	tinyxml2::XMLError eResult = xmlDoc.LoadFile(inStrPath);
+	tinyxml2::XMLError eResult = xmlDoc.LoadFile( LPSTR(LPCTSTR(inStrPath)));
 
 	InitListAndVectors();
 
@@ -545,7 +546,7 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{
-		CString strTemp = pNode->Value();
+		CString strTemp = (CString)pNode->Value();
 		if (strTemp == "BaseFile" || strTemp == "File")
 		{
 			continue;
@@ -556,8 +557,8 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 			{
 				TestType* cNewTest = new TestType;
 
-				cNewTest->SetTestName(pElent->Value());
-				m_vTestName.push_back(pElent->Value());
+				cNewTest->SetTestName((CString)pElent->Value());
+				m_vTestName.push_back((CString)pElent->Value());
 
 				cNewTest->LoadDataFromXML(pNode);
 				m_pListTestType.AddTail(cNewTest);
@@ -577,7 +578,7 @@ void ConfigDMData::SaveBaseFileListToFile(CString inFilePath, std::vector<CStrin
 	
 
 	
-	cDoc.SaveFile(inFilePath);
+	cDoc.SaveFile(LPSTR(LPCTSTR(inFilePath)));
 }
 
 void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
@@ -593,4 +594,23 @@ void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 		strTemp = temp->GetTestName();
 		temp->GetFileNames(strTemp, outvData);
 	}
+}
+
+bool ConfigDMData::SearchTestInList(CString inTargetTest, CString inTargetFile , FileType& outData)
+{
+	bool bResult = false;
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+
+	while(pPos)
+	{
+		TestType* temp = m_pListTestType.GetNext(pPos);
+ 		CString strTemp = temp->GetTestName();
+
+		if(strTemp == inTargetTest)
+		{
+			bResult = temp->SearchFileInList(inTargetFile, outData);
+		}
+	}
+
+	return bResult;
 }
