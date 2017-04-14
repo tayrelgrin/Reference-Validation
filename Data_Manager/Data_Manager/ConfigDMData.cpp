@@ -257,7 +257,7 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 {
 	CString strTestName;
 	CString strIndex8th;
-
+	AddCommonBaseFile(inBaseFile);
 	for (int i = 0; i<m_vTestDirPath.size(); i++)
 	{
 		TestType* cAddData = new TestType;
@@ -281,13 +281,12 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 			strTestName = strIndex9th + "\\" + strTestName;
 		}
 
-		AddCommonBaseFile(inBaseFile);
-
 		cAddData->SetTestName(strTestName);
 		cAddData->AddNewTest(m_vTestDirPath[i],m_vBaseFiles, inNInput);
 		
 		m_pListTestType.AddTail(cAddData);
 	}
+	
 }
 
 void ConfigDMData::GetFilePathInDir(std::vector<CString> invPath, std::vector<CString>& outvData)
@@ -377,11 +376,13 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 	strEXEPath = GetEXEDirectoryPath();
 
  	CString strFilePath;
-	strFilePath.Format(_T("%s%s%s"),strEXEPath ,"\\Data\\Value\\" , m_strPrj);
+	CString strCTemp;
 
-	CreateDirectory(strFilePath,NULL);
+	strCTemp.Format(_T("%s%s%s"),strEXEPath ,"\\Data\\Value\\" , m_strPrj);
 
-	strFilePath.Format(_T("%s%s%s%s%s%s%s%s"), strFilePath,"\\", m_strBuildNum ,"-" , m_strConfigNum , "-" , m_strDOE ,".xml");
+	CreateDirectory(strCTemp,NULL);
+
+	strFilePath.Format(_T("%s%s%s%s%s%s%s%s"), strCTemp,"\\", m_strBuildNum ,"-" , m_strConfigNum , "-" , m_strDOE ,".xml");
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 
@@ -417,11 +418,11 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 
 	strEXEPath = GetEXEDirectoryPath();
 
-	CString strFilePath = strEXEPath + "\\Data\\Setting";
+	CString strTempFilePath = strEXEPath + "\\Data\\Setting";
+	CString strFilePath;
+	CreateDirectory(strTempFilePath,NULL);
 
-	CreateDirectory(strFilePath,NULL);
-
-	strFilePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strFilePath , "\\Setting-" , m_strPrj , "-" , m_strBuildNum , "-" , m_strConfigNum , "-" , m_strDOE , ".xml");
+	strFilePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strTempFilePath , "\\Setting-" , m_strPrj , "-" , m_strBuildNum , "-" , m_strConfigNum , "-" , m_strDOE , ".xml");
 
 	char* strTemp = (LPSTR)strFilePath.GetBuffer(0);
 
@@ -479,9 +480,19 @@ bool ConfigDMData::GetNewDataFlag()
 
 void ConfigDMData::AddCommonBaseFile(std::vector<CString> invFileName)
 {
+	bool bResult;
 	for(int i=0; i<invFileName.size(); i++)
 	{
-		m_vBaseFiles.push_back(invFileName[i]); 
+		bResult = false;
+		for (int j= 0 ; j< m_vBaseFiles.size(); j++)
+		{
+			if (m_vBaseFiles[j]== invFileName[i])
+			{
+				bResult = true;
+			}
+		}
+		if(bResult==false)
+			m_vBaseFiles.push_back(invFileName[i]); 
 	}
 }
 

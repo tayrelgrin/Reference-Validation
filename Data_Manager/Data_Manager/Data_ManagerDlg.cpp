@@ -143,7 +143,9 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	Button_Imaging();
 	
-	
+	m_cNewConfigData	= new ConfigDMData();
+	m_cNewSettingData	= new ConfigDMData();
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -235,6 +237,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 	//AfxSetAllocStop(801);
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
 		m_cAddNewRefDlg.DestroyWindow();
@@ -242,6 +245,10 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 	if(IDOK == m_cAddNewRefDlg.DoModal())
 	{
+		BeginWaitCursor();
+		m_cNewConfigData->InitListAndVectors();
+		m_cNewSettingData->InitListAndVectors();
+
 		for(int i = 0; i<m_vTestList.size(); i++)
 		{
 			m_vTestList.erase(m_vTestList.begin()+i);
@@ -268,21 +275,18 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_strRootPath = m_cAddNewRefDlg.GetDirRootPath();
 		m_cAddNewRefDlg.GetDirList(m_vDirList);
 
-		ConfigDMData* cNewConfig = new ConfigDMData();
-		ConfigDMData* cNewSetting = new ConfigDMData();
-
-		cNewConfig->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
-		cNewConfig->GetTestNameFromDirVector(temp, m_vTestList);
-		cNewConfig->SetTestList(m_vTestList);
-		cNewConfig->SetTestDirList(m_vDirList);
-		cNewConfig->SetBaseFiles(temp);
-		cNewConfig->GetFilePathInDir(temp, m_vDirList);
+		m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
+		m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
+		m_cNewConfigData->SetTestList(m_vTestList);
+		m_cNewConfigData->SetTestDirList(m_vDirList);
+		m_cNewConfigData->SetBaseFiles(temp);
+		m_cNewConfigData->GetFilePathInDir(temp, m_vDirList);
 		
-		cNewSetting->SetTestList(m_vTestList);
-		cNewSetting->SetTestDirList(m_vDirList);
-		cNewSetting->SetBaseFiles(temp);
+		m_cNewSettingData->SetTestList(m_vTestList);
+		m_cNewSettingData->SetTestDirList(m_vDirList);
+		m_cNewSettingData->SetBaseFiles(temp);
 
-		AddNewConfig(cNewConfig, cNewSetting);
+		AddNewConfig(m_cNewConfigData, m_cNewSettingData);
 
 		for(int i = 0; i<temp.size(); i++)
 		{
@@ -290,7 +294,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		}
 		temp.clear();
 
-		AddToTree(cNewSetting);
+		AddToTree(m_cNewSettingData);
 
 		CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
 		std::vector<CString> vTemp;
@@ -319,6 +323,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		if(m_lbDOE.FindStringExact(-1, m_strDOE) == -1)
 			AddDOEToListBox(m_strDOE);
+		EndWaitCursor();
 	}
 }
 
@@ -354,8 +359,8 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 	m_vDirList.clear();
 	
 	m_cValueData.InitAllData();
-	m_cNewConfigData.InitListAndVectors();
-	m_cNewSettingData.InitListAndVectors();
+	m_cNewConfigData->InitListAndVectors();
+	m_cNewSettingData->InitListAndVectors();
 	
 
 	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
@@ -477,7 +482,7 @@ void CData_ManagerDlg::InitMainList()
 	m_ListCtrlMain.DeleteAllItems();
 
 	// List style
-	m_ListCtrlMain.SetExtendedStyle(LVS_EX_GRIDLINES);
+	m_ListCtrlMain.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVCFMT_CENTER);
 
 	m_ListCtrlMain.InsertColumn(0, _T("Critical item"), LVCFMT_CENTER, 80,  -1);
 	m_ListCtrlMain.InsertColumn(1, _T("File"),			LVCFMT_CENTER, 100, -1);
@@ -703,8 +708,8 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	ConfigDMData* pConfig = &m_cNewConfigData;
-	ConfigDMData* pSetting = &m_cNewSettingData;
+	ConfigDMData* pConfig = m_cNewConfigData;
+	ConfigDMData* pSetting = m_cNewSettingData;
 	m_treeMainTest.DeleteAllItems();
 
 	int nIndex = m_lbDOE.GetCurSel();
@@ -760,7 +765,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 
 	HTREEITEM hNode;
-	CString strFileName, strTestName, strDirName;
+	CString strFileName, strTestName, strDirName, strCombe;
 
 	hNode = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
 	strFileName = m_treeMainTest.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
@@ -773,16 +778,23 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if(strTestName!="")
 	{
-		m_cNewConfigData.SearchTestInList(strDirName+strTestName, strFileName, m_cFileData);
+		if(strDirName!="")
+			strCombe = strDirName+":"+strTestName;
+		else
+			strCombe = strTestName;
+		m_cNewConfigData->SearchTestInList(strCombe, strFileName, m_cFileData);
 
 		AddToListControl(strFileName, m_cFileData);
 	}
+	else
+		m_ListCtrlMain.DeleteAllItems();
 }
 
 
 void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 {
 	m_ListCtrlMain.DeleteAllItems(); 
+
 	CList<BasicData*> Items;
 	inData.CopyDataToList(Items);
 
@@ -790,12 +802,14 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 	int nIndex = 0;
 	CString strSequence;
 	CString strOri, strValue, strDescrip;
+	BeginWaitCursor();
 	while(pos)
 	{
 		strSequence.Format(_T("%d"), nIndex);
 
 		BasicData* temp = Items.GetNext(pos);
 		m_ListCtrlMain.InsertItem(nIndex, strSequence);
+		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
 		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
 		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
@@ -808,4 +822,5 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 
 		nIndex++;
 	}
+	EndWaitCursor();
 }

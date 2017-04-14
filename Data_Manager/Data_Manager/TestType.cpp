@@ -66,7 +66,7 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 		{
 			for(int j = 0; j<invBasicFile.size(); j++)
 			{
-				if(invBasicFile[j].Find(cNewFile->GetFileName()) != -1)
+				if(cNewFile->GetFileName().Find(invBasicFile[j]) != -1)
 				{
 					m_pListFile.AddTail(cNewFile);
 					break;
@@ -139,7 +139,7 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 			{
 				for(int i = 0; i<invBasicFile.size(); i++)
 				{
-					if(invBasicFile[i].Find(pData->GetFileName()) != -1)
+					if(pData->GetFileName().Find(invBasicFile[i]) != -1)
 					{
 						pData->SaveDataToFile(cXMLDoc, Element);
 						break;

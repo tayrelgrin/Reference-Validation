@@ -78,8 +78,8 @@ private:
 	std::vector<CString> m_vConfigName;
 	AddNewRef m_cAddNewRefDlg;
 	SettingBaseInfo m_cSettingDlg;
-	ConfigDMData m_cNewConfigData;
-	ConfigDMData m_cNewSettingData;
+	ConfigDMData* m_cNewConfigData;
+	ConfigDMData* m_cNewSettingData;
 	InformationManager m_cValueData;
 	FileType m_cFileData;
 	CString m_strRootPath;
