@@ -13,15 +13,22 @@ TestType::~TestType(void)
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListFile.GetHeadPosition();
 
-	while(pPos)
+	while(pPos && m_pListFile.GetSize()>0)
 	{
 		pTemp = pPos;
-		FileType* temp = m_pListFile.GetNext(pPos);
-		delete temp;
-		m_pListFile.RemoveAt(pTemp);
+		
+		try
+		{
+			FileType* temp = m_pListFile.GetNext(pPos);
+			delete temp;
+			m_pListFile.RemoveAt(pTemp);
+		}
+		catch (CMemoryException* e)
+		{
+		}
 	}
-
-	m_pListFile.RemoveAll();
+	if( m_pListFile.GetSize()>0)
+		m_pListFile.RemoveAll();
 }
 
 void TestType::SetTestName(CString inData)
@@ -83,7 +90,7 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 	vFilePath.clear();
 }
 
-void TestType::GetFilePathInDir(CString inPath, std::vector<CString>& outvData)
+void TestType::GetFilePathInDir(static CString inPath, std::vector<CString>& outvData)
 {
 	CFileFind cFinder;
 

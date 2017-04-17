@@ -28,33 +28,44 @@ void ConfigDMData::InitListAndVectors()
 	{
 		m_vBaseFiles.erase(m_vBaseFiles.begin()+i);
 	}
+		
+		// 	for(int i = 0; i<m_vFilePath.size(); i++)
+		// 	{
+		// 		m_vFilePath.erase(m_vFilePath.begin()+i);
+		// 	}
+	try
+	{
+		if(m_vTestDirPath.size()>0)
+			m_vTestDirPath.clear();
+		if(m_vTestName.size()>0)
+			m_vTestName.clear();
+		if(m_vBaseFiles.size()>0)
+			m_vBaseFiles.clear();
+		//m_vFilePath.clear();
+	}
+	catch (CMemoryException* e)
+	{
+
+	}
 	
-	// 	for(int i = 0; i<m_vFilePath.size(); i++)
-	// 	{
-	// 		m_vFilePath.erase(m_vFilePath.begin()+i);
-	// 	}
-	m_vTestDirPath.clear();
-	m_vTestName.clear();
-	m_vBaseFiles.clear();
-	//m_vFilePath.clear();
-
-
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
 
-	while(pPos)
+	while(pPos && m_pListTestType.GetSize()>0)
 	{
 		pTemp = pPos;
+		
 		TestType* temp = m_pListTestType.GetNext(pPos);
 		delete temp;
 		m_pListTestType.RemoveAt(pTemp);
-
 	}
-
-	m_pListTestType.RemoveAll();
+	if (m_pListTestType.GetSize()>0)
+	{
+		m_pListTestType.RemoveAll();
+	}
 }
 
-void ConfigDMData::RefNameParsing(CString instrData)
+void ConfigDMData::RefNameParsing(static CString instrData)
 {
 	CString strProject, strConfig, strDOE, strTest;
 
@@ -171,7 +182,7 @@ CString ConfigDMData::GetBuildNum()
 }
 
 
-void ConfigDMData::GetTestDirFromVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
+void ConfigDMData::GetTestDirFromVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
 {
 	inRootPath+="\\";
 	
@@ -183,14 +194,9 @@ void ConfigDMData::GetTestDirFromVector(std::vector<CString> invData, std::vecto
 
 		outvData.push_back(temp);
 	}
-	for (int i= 0; i< invData.size(); i++)
-	{
-		invData.erase(invData.begin()+i);
-	}
-	invData.clear();
 }
 
-void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::vector<CString>& outvData)
+void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData, std::vector<CString>& outvData)
 {
 	for (INT i= 0 ; i<invData.size(); i++)
 	{
@@ -216,11 +222,7 @@ void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::v
 		if(temp!="")
 			outvData.push_back(temp);
 	}
-	for (int i= 0; i< invData.size(); i++)
-	{
-		invData.erase(invData.begin()+i);
-	}
-	invData.clear();
+	
 }
 
 void ConfigDMData::SetTestList(std::vector<CString> invData)

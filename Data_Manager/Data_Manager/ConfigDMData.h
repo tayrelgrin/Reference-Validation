@@ -11,7 +11,7 @@ class ConfigDMData
 public:
 	ConfigDMData(void);
 	~ConfigDMData(void);
-	void RefNameParsing(CString instrData);
+	void RefNameParsing(static CString instrData);
 	void GetDirList(CString instrPath, std::vector<CString>& inVDirList,std::vector<CString>& inVFileList);
 	void GetTestDirFromVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath);
 	void GetConfigInfoFromVector(std::vector<CString> invData, CString inRootPath, CString& outPrj, CString& outBuild, CString& outConfig, CString& outDOE);
@@ -22,7 +22,7 @@ public:
 	bool operator==(const ConfigDMData& inData);
 	CString GetBuildNum();
 	void GetDirPathList(std::vector<CString>& outvData);
-	void GetTestNameFromDirVector(std::vector<CString> invData, std::vector<CString>& outvData);
+	void GetTestNameFromDirVector(static std::vector<CString> invData, std::vector<CString>& outvData);
 	void SetTestList(std::vector<CString> invData);
 	void GetTestList(std::vector<CString>& outvPath);
 	void SetTestDirList(std::vector<CString> invData);

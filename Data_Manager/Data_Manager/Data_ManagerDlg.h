@@ -72,6 +72,10 @@ public:
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 	void MakeDataDirectory();
 	void AddToListControl(CString inStrFileName, FileType& inData);
+	void InsertItems();
+	void SetCell(HWND hWnd1, CString value, int nRow, int nCol);
+	CString GetItemText(HWND hWnd, int nItem, int nSubItem) const;
+
 private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;
@@ -87,7 +91,11 @@ private:
 	CString m_strBuildNum;
 	CString m_strConfigNum;
 	CString m_strDOE;
-	
+	bool m_bNewData;
+	int m_nItem;
+	int	m_nSubItem;
+	HWND m_hFocus;
+	bool m_bInit;
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;
@@ -98,4 +106,9 @@ public:
 	afx_msg void OnLbnSelchangeListConfignum();
 	afx_msg void OnLbnSelchangeListDoe();
 	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
+
+	afx_msg void OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult);
+//	afx_msg void OnEndlabeleditList1(NMHDR *pNMHDR, LRESULT *pResult);
+	virtual void OnOK();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 };

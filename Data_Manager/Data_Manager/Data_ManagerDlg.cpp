@@ -95,6 +95,9 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_LBN_SELCHANGE(IDC_LIST_CONFIGNUM, &CData_ManagerDlg::OnLbnSelchangeListConfignum)
 	ON_LBN_SELCHANGE(IDC_LIST_DOE, &CData_ManagerDlg::OnLbnSelchangeListDoe)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ManagerDlg::OnTvnSelchangedTreeMain)
+	
+	ON_WM_LBUTTONDOWN()
+	ON_NOTIFY(NM_CLICK, IDC_LIST1, &CData_ManagerDlg::OnNMClickList1)
 END_MESSAGE_MAP()
 
 
@@ -142,9 +145,15 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	AddRefinfoToListBox();
 
 	Button_Imaging();
-	
+
+	m_bNewData = false;
 	m_cNewConfigData	= new ConfigDMData();
 	m_cNewSettingData	= new ConfigDMData();
+
+	//Set the style to listControl
+	ListView_SetExtendedListViewStyle(::GetDlgItem(m_hWnd,IDC_LIST1),LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES); 
+	InsertItems();
+	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -234,10 +243,8 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
-	//AfxSetAllocStop(801);
-
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+	AfxSetAllocStop(15032);
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
 		m_cAddNewRefDlg.DestroyWindow();
@@ -249,16 +256,16 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_cNewConfigData->InitListAndVectors();
 		m_cNewSettingData->InitListAndVectors();
 
-		for(int i = 0; i<m_vTestList.size(); i++)
-		{
-			m_vTestList.erase(m_vTestList.begin()+i);
-		}
+// 		for(int i = 0; i<m_vTestList.size(); i++)
+// 		{
+// 			m_vTestList.erase(m_vTestList.begin()+i);
+// 		}
 		m_vTestList.clear();
 
-		for(int i = 0; i<m_vDirList.size(); i++)
-		{
-			m_vDirList.erase(m_vDirList.begin()+i);
-		}
+// 		for(int i = 0; i<m_vDirList.size(); i++)
+// 		{
+// 			m_vDirList.erase(m_vDirList.begin()+i);
+// 		}
 		m_vDirList.clear();
 
 		std::vector<CString> temp;
@@ -323,6 +330,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		if(m_lbDOE.FindStringExact(-1, m_strDOE) == -1)
 			AddDOEToListBox(m_strDOE);
+		m_bNewData = true;
 		EndWaitCursor();
 	}
 }
@@ -345,6 +353,8 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+	//AfxSetAllocStop(15032);
+
 	m_ListCtrlMain.DeleteAllItems();
 	for(int i = 0; i<m_vTestList.size(); i++)
 	{
@@ -358,10 +368,12 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 	}
 	m_vDirList.clear();
 	
-	m_cValueData.InitAllData();
-	m_cNewConfigData->InitListAndVectors();
-	m_cNewSettingData->InitListAndVectors();
-	
+ 	m_cValueData.InitAllData();
+	if(m_bNewData==false)
+  	{
+		m_cNewConfigData->InitListAndVectors();
+  		m_cNewSettingData->InitListAndVectors();
+	}
 
 	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 }
@@ -482,12 +494,12 @@ void CData_ManagerDlg::InitMainList()
 	m_ListCtrlMain.DeleteAllItems();
 
 	// List style
-	m_ListCtrlMain.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVCFMT_CENTER);
+	m_ListCtrlMain.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVCFMT_CENTER | LVS_EDITLABELS);
 
-	m_ListCtrlMain.InsertColumn(0, _T("Critical item"), LVCFMT_CENTER, 80,  -1);
+	m_ListCtrlMain.InsertColumn(0, _T("Critical item"), LVCFMT_CENTER, 20,  -1);
 	m_ListCtrlMain.InsertColumn(1, _T("File"),			LVCFMT_CENTER, 100, -1);
-	m_ListCtrlMain.InsertColumn(2, _T("Section"),		LVCFMT_CENTER, 100, -1);
-	m_ListCtrlMain.InsertColumn(3, _T("Item"),			LVCFMT_CENTER, 120, -1);
+	m_ListCtrlMain.InsertColumn(2, _T("Section"),		LVCFMT_CENTER, 125, -1);
+	m_ListCtrlMain.InsertColumn(3, _T("Item"),			LVCFMT_CENTER, 150, -1);
 	m_ListCtrlMain.InsertColumn(4, _T("Value"),			LVCFMT_CENTER, 120, -1);
 	m_ListCtrlMain.InsertColumn(5, _T("Description"),	LVCFMT_CENTER, 200, -1);
 
@@ -815,7 +827,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
 
 		strOri = temp->getValue();
-		AfxExtractSubString(strValue, strOri, 0, '/');
+		AfxExtractSubString(strValue,	strOri, 0, '/');
 		AfxExtractSubString(strDescrip, strOri, 1, '/');
 		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue ,0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip ,0,0,0,NULL);
@@ -823,4 +835,133 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 		nIndex++;
 	}
 	EndWaitCursor();
+}
+
+
+void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	Invalidate();
+	HWND hWnd1 =  ::GetDlgItem (m_hWnd,IDC_LIST1);
+	LPNMITEMACTIVATE temp = (LPNMITEMACTIVATE) pNMHDR;
+
+	//get the row number
+	m_nItem = temp->iItem;
+	//get the column number
+	m_nSubItem = temp->iSubItem;
+	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
+		return ;
+	//Retrieve the text of the selected subItem from the list
+	CString str = GetItemText(hWnd1,m_nItem ,m_nSubItem);
+
+	RECT rtListCtrl, rtDlg, rtSubItem;
+
+	// this macro is used to retrieve the Rectangle of the selected SubItem
+	ListView_GetSubItemRect(hWnd1,temp->iItem,temp->iSubItem,LVIR_BOUNDS,&rtSubItem);
+
+	//Get the Rectangle of the listControl
+	::GetWindowRect(temp->hdr.hwndFrom,&rtListCtrl);
+
+	//Get the Rectangle of the Dialog
+	::GetWindowRect(m_hWnd,&rtDlg);
+
+	int nThisLeft  = rtListCtrl.left - rtDlg.left;
+	int nThisTop = rtListCtrl.top - rtDlg.top;
+
+	if(m_nItem != -1)
+		::SetWindowPos(	::GetDlgItem(m_hWnd,IDC_EDIT1),
+						HWND_TOP,
+						rtSubItem.left+nThisLeft ,
+						rtSubItem.top +nThisTop-30,
+						rtSubItem.right - rtSubItem.left - 3,
+						rtSubItem.bottom - rtSubItem.top -1,
+						NULL);
+	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
+	::SetFocus(::GetDlgItem(m_hWnd,IDC_EDIT1));
+
+	//Draw a Rectangle around the SubItem
+	::Rectangle(::GetDC(temp->hdr.hwndFrom),rtSubItem.left,rtSubItem.top-1,rtSubItem.right,rtSubItem.bottom);
+
+	//Set the listItem text in the EditBox
+	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),str);
+
+	*pResult = 0;
+}
+
+//this function will returns the item text depending on the item and SubItem Index
+CString CData_ManagerDlg::GetItemText(HWND hWnd, int m_nItem, int nSubItem) const
+{
+	LVITEM lvi;
+	memset(&lvi, 0, sizeof(LVITEM));
+	lvi.iSubItem = nSubItem;
+	CString str;
+	int nLen = 128;
+	int nRes;
+	do
+	{
+		nLen *= 2;
+		lvi.cchTextMax = nLen;
+		lvi.pszText = str.GetBufferSetLength(nLen);
+		nRes  = (int)::SendMessage(hWnd, LVM_GETITEMTEXT, (WPARAM)m_nItem,
+			(LPARAM)&lvi);
+	} while (nRes == nLen-1);
+	str.ReleaseBuffer();
+	return str;
+}
+
+void CData_ManagerDlg::OnOK()
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	CWnd* pwndCtrl = GetFocus();
+	// get the control ID which is presently having the focus
+	int ctrl_ID = pwndCtrl->GetDlgCtrlID();
+	CString str;
+	switch (ctrl_ID)
+	{	//if the control is the EditBox	
+	case IDC_EDIT1:
+		//get the text from the EditBox
+		GetDlgItemText(IDC_EDIT1,str);
+		//set the value in the listContorl with the specified Item & SubItem values
+		SetCell(::GetDlgItem (m_hWnd,IDC_LIST1),str,m_nItem,m_nSubItem);
+		::SendDlgItemMessage(m_hWnd,IDC_EDIT1,WM_KILLFOCUS,0,0);
+		::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
+		break;     
+	default:
+		break;
+	}
+}
+
+
+void CData_ManagerDlg::SetCell(HWND hWnd1, CString value, int nRow, int nCol)
+{
+	TCHAR     szString [256];
+	wsprintf(szString,value ,0);
+
+	//Fill the LVITEM structure with the values given as parameters.
+	LVITEM lvItem;
+	lvItem.mask = LVIF_TEXT;
+	lvItem.iItem = nRow;
+	lvItem.pszText = szString;
+	lvItem.iSubItem = nCol;
+	if(nCol >0)
+		//set the value of listItem
+		::SendMessage(hWnd1,LVM_SETITEM, (WPARAM)0,(WPARAM)&lvItem);
+	else
+		//Insert the value into List
+		ListView_InsertItem(hWnd1,&lvItem);
+
+}
+
+// This function inserts the default values into the listControl
+void CData_ManagerDlg::InsertItems()
+{
+	HWND hWnd = ::GetDlgItem(m_hWnd, IDC_LIST1);
+}
+
+BOOL CData_ManagerDlg::PreTranslateMessage(MSG* pMsg)
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	//block esc closing
+	if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE) return TRUE;
+
+	return CDialogEx::PreTranslateMessage(pMsg);
 }

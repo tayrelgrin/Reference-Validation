@@ -23,8 +23,14 @@ void InformationManager::InitAllData()
 	{
 		ptemp = pPos;
 		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
-		delete pData;
-		m_listConfigs.RemoveAt(ptemp);
+		try
+		{
+			delete pData;
+			m_listConfigs.RemoveAt(ptemp);
+		}
+		catch (CMemoryException* e)
+		{
+		}
 	}
 
 	pPos = m_listSetting.GetHeadPosition();
@@ -32,8 +38,16 @@ void InformationManager::InitAllData()
 	{
 		ptemp = pPos;
 		ConfigDMData* pData = m_listSetting.GetNext(pPos);
-		delete pData;
-		m_listSetting.RemoveAt(ptemp);
+		
+		try
+		{
+			delete pData;
+			m_listSetting.RemoveAt(ptemp);
+		}
+		catch (CMemoryException* e)
+		{
+			
+		}
 	}
 
 	m_listSetting.RemoveAll();
@@ -46,19 +60,19 @@ void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 	inNewData->GetTestList(vTest);
 	inNewData->AddNewTest(m_vBasicFile);
 
-	if(m_listConfigs.IsEmpty())
-	{
-		m_listConfigs.AddHead(inNewData);
-	}
-	else
-	{
+// 	if(m_listConfigs.IsEmpty())
+// 	{
+// 		m_listConfigs.AddHead(inNewData);
+// 	}
+// 	else
+// 	{
 		m_listConfigs.AddTail(inNewData);
-	}
 
-	for(int i = 0; i<vTest.size(); i++)
-	{
-		vTest.erase(vTest.begin()+i);
-	}
+
+// 	for(int i = 0; i<vTest.size(); i++)
+// 	{
+// 		vTest.erase(vTest.begin()+i);
+// 	}
 	vTest.clear();
 }
 

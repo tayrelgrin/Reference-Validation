@@ -14,7 +14,7 @@ public:
 	void SetFileName(CString inData);
 	void AddNewData(CString inData, int inNInput = 2);
 	void AddNewData(BasicData* inData);
-	void INIFileReadByLine(CString inPath, std::vector<CString>& outData);
+	void INIFileReadByLine(static CString inPath, std::vector<CString>& outData);
 	CString GetFileName();
 	void LoadDataFromXML(tinyxml2::XMLAttribute* pParent);
 	void CopyDataInList(FileType& outData);

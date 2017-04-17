@@ -24,11 +24,6 @@ AddNewRef::~AddNewRef()
 
 void AddNewRef::InitAllData()
 {
-	for(int i = 0; i<m_vStrDir.size(); i++)
-	{
-		m_vStrDir.erase(m_vStrDir.begin()+i);
-	}
-
 	m_vStrDir.clear();
 }
 

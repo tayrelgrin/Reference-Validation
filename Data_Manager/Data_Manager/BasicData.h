@@ -30,7 +30,7 @@ public:
 // 	void writeItemToFile(tinyxml2::XMLDocument& file, CString instrData);
 // 	void writeSectionToFile(tinyxml2::XMLDocument& file, CString instrData);	
 // 	void writeValueToFile(tinyxml2::XMLDocument& file, CString instrData);
-	void readDataFromFile(CString inFilePath);
+	void readDataFromFile(static CString inFilePath);
 private:
 	CString m_strSection;
 	CString m_strItem;

@@ -17,15 +17,22 @@ void FileType::InitList()
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListData.GetHeadPosition();
 
-	while(pPos)
+	while(pPos && m_pListData.GetSize() > 0)
 	{
 		pTemp = pPos;
-		BasicData* temp = m_pListData.GetNext(pPos);
-		delete temp;
-		m_pListData.RemoveAt(pTemp);
+		try
+		{
+			BasicData* temp = m_pListData.GetNext(pPos);
+			delete temp;
+			m_pListData.RemoveAt(pTemp);
+		}
+		catch (CMemoryException* e)
+		{
+		}
 	}
 
-	m_pListData.RemoveAll();
+	if(m_pListData.GetSize() > 0)
+		m_pListData.RemoveAll();
 }
 
 void FileType::SaveDataToFile( tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement)
@@ -117,7 +124,7 @@ void FileType::AddNewData(BasicData* inData)
 		m_pListData.AddTail(inData);
 }
 
-void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
+void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& outData)
 {
 	CStdioFile sourceFile;
 	CString strLine;

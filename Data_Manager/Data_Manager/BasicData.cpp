@@ -161,7 +161,7 @@ void BasicData::writeDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEle
 // pre		: none
 // return	: none
 //////////////////////////////////////////////////////////////////////////
-void BasicData::readDataFromFile(CString inFilePath)
+void BasicData::readDataFromFile(static CString inFilePath)
 {
 	CStdioFile file;
 	file.Open(inFilePath, CFile::modeRead | CFile::typeText);
