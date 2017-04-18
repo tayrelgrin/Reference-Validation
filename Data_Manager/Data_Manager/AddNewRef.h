@@ -30,9 +30,18 @@ public:
 	afx_msg void OnBnClickedRadioUsedata();	
 	afx_msg void OnEnChangeMfceditbrowse1();
 	void GetDirList( std::vector<CString>& inVDirList);
-	void CopyConfigData(ConfigDMData inData);
 	void EditBoxSetting();
 	void InitAllData();
+	afx_msg void OnBnClickedButtonAddok();
+	CString GetBuild();
+	CString GetProject();
+	CString GetConfig();
+	CString GetDOE();
+	CString GetDirRootPath();
+	void LoadFileListInValue();
+	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
+	void AddProjectToCombo();
+	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 private:
 	CString m_strBuild;
 	CString m_strDOE;
@@ -42,15 +51,20 @@ private:
 	ConfigDMData m_cNewConfig;
 	CMFCEditBrowseCtrl m_editCtrl;
 	std::vector<CString> m_vStrDir;
+	std::vector<CString> m_vConfigName;
 public:
 	CEdit m_EditPrj;
 	CEdit m_EditBuild;
 	CEdit m_EditConfig;
 	CEdit m_EditDOE;
-	afx_msg void OnBnClickedButtonAddok();
-	CString GetBuild();
-	CString GetProject();
-	CString GetConfig();
-	CString GetDOE();
-	CString GetDirRootPath();
+
+	CComboBox m_cComboPrj;
+	CComboBox m_cComboBuild;
+	CComboBox m_cComboConfig;
+	CComboBox m_cComboDOE;
+
+	afx_msg void OnCbnSetfocusCombo1();
+	afx_msg void OnCbnSetfocusCombo3();
+	afx_msg void OnCbnSetfocusCombo4();
+	afx_msg void OnCbnSetfocusCombo2();
 };

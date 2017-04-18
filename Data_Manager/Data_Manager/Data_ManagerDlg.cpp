@@ -483,11 +483,13 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	
-	BeginWaitCursor();
-	m_cValueData.SaveRefToFile(_T("temp"));
-	EndWaitCursor();
-
-	MessageBox (NULL,NULL,MB_OK);
+	if (IDYES == AfxMessageBox("Save Data?",MB_YESNO))
+	{
+		BeginWaitCursor();
+		m_cValueData.SaveRefToFile(_T("temp"));
+		EndWaitCursor();
+		MessageBox ("Complete Save the data to File",NULL,MB_OK);
+	}
 }
 
 
