@@ -76,6 +76,7 @@ void CData_ManagerDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_BUILDNUM, m_lbBuild);
 	DDX_Control(pDX, IDC_LIST_CONFIGNUM, m_lbConfig);
 	DDX_Control(pDX, IDC_LIST_DOE, m_lbDOE);
+	DDX_Control(pDX, IDC_EDIT1, m_EditInListCtrl);
 }
 
 BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
@@ -151,8 +152,8 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	m_cNewSettingData	= new ConfigDMData();
 
 	//Set the style to listControl
-	ListView_SetExtendedListViewStyle(::GetDlgItem(m_hWnd,IDC_LIST1),LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES); 
-	InsertItems();
+	ListView_SetExtendedListViewStyle(::GetDlgItem(m_hWnd,IDC_LIST1),LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES); 
+	
 	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
@@ -391,13 +392,90 @@ void CData_ManagerDlg::OnBnClickedButtonDelete()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//m_cData.DeleteConfigData();
+	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
+	CString strValuePath, strSettingPath;
+	CString strMessage, strEXEDirectory;
+
+	ConfigDMData* pConfig = m_cNewConfigData;
+	ConfigDMData* pSetting = m_cNewSettingData;
+
+	strEXEDirectory = pConfig->GetEXEDirectoryPath();
+
+	if (m_strPrj != "" && m_strBuildNum != "" && m_strConfigNum != "" && m_strDOE != "")
+	{
+		strMessage.Format(_T("Delete %s-%s-%s-%s Files?"),m_strPrj, m_strBuildNum, m_strConfigNum,m_strDOE );
+		if(IDYES == AfxMessageBox(strMessage,MB_YESNO))
+		{
+			strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+			strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
+
+			::DeleteFile(strValuePath);
+			::DeleteFile(strSettingPath);
+
+			m_treeMainTest.DeleteAllItems();
+			m_ListCtrlMain.DeleteAllItems();
+
+			m_lbConfig.ResetContent();
+			m_lbDOE.ResetContent();
+			m_lbBuild.ResetContent();
+			m_lbProject.ResetContent();
+
+			// list box 수정 
+			pConfig->InitListAndVectors();
+			pSetting->InitListAndVectors();
+
+			m_cValueData.LoadXMLFileListInValue();
+
+			m_cValueData.GetConfigNameList(m_vConfigName);
+			AddRefinfoToListBox();
+		}
+	}	
 }
 
 
 void CData_ManagerDlg::OnBnClickedButtonReload()
 {
+	HTREEITEM hItem;
+	CString strDirName ="";
+	CString strFileName, strTestName;
+
+	hItem = m_treeMainTest.GetNextItem(NULL, TVGN_CARET); // 현재 선택된 아이템의 핸들을 가져온다.
+	strFileName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+	
+
+	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	strTestName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+
+
+	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위의 상위 아이템을 가져온다.
+	strDirName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+	
+
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	ConfigDMData* pConfig = m_cNewConfigData;
+	ConfigDMData* pSetting = m_cNewSettingData;
+	m_treeMainTest.DeleteAllItems();
+
+	BeginWaitCursor(); 
+
+	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
+	CString strTemp;
+	std::vector<CString> vFileList;
+
+	FindStringInVector(m_vConfigName, strTarget, vFileList);
+
+	// File Read 
+	CString strEXEDirectory, strValuePath, strSettingPath;
+
+	strEXEDirectory = pConfig->GetEXEDirectoryPath();
+
+	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
+
+	pConfig->LoadDataFiles(strValuePath);
+	pSetting->LoadDataFiles(strSettingPath);
+
+	EndWaitCursor();
 }
 
 
@@ -851,7 +929,8 @@ void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
 		return ;
 	//Retrieve the text of the selected subItem from the list
-	CString str = GetItemText(hWnd1,m_nItem ,m_nSubItem);
+	CString strPreData = GetItemText(hWnd1,m_nItem ,m_nSubItem);
+	CString strData = strPreData;
 
 	RECT rtListCtrl, rtDlg, rtSubItem;
 
@@ -882,7 +961,10 @@ void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 	::Rectangle(::GetDC(temp->hdr.hwndFrom),rtSubItem.left,rtSubItem.top-1,rtSubItem.right,rtSubItem.bottom);
 
 	//Set the listItem text in the EditBox
-	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),str);
+	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),strData);
+	m_EditInListCtrl.SetSel(strData.GetLength());
+
+	// m_cPreDataStack.push() 객체로? 추가, 위치 정보 추가
 
 	*pResult = 0;
 }
@@ -914,14 +996,14 @@ void CData_ManagerDlg::OnOK()
 	CWnd* pwndCtrl = GetFocus();
 	// get the control ID which is presently having the focus
 	int ctrl_ID = pwndCtrl->GetDlgCtrlID();
-	CString str;
+	CString strNewData;
 	switch (ctrl_ID)
 	{	//if the control is the EditBox	
 	case IDC_EDIT1:
 		//get the text from the EditBox
-		GetDlgItemText(IDC_EDIT1,str);
+		GetDlgItemText(IDC_EDIT1, strNewData);
 		//set the value in the listContorl with the specified Item & SubItem values
-		SetCell(::GetDlgItem (m_hWnd,IDC_LIST1),str,m_nItem,m_nSubItem);
+		SetCell(::GetDlgItem (m_hWnd,IDC_LIST1), strNewData, m_nItem, m_nSubItem);
 		::SendDlgItemMessage(m_hWnd,IDC_EDIT1,WM_KILLFOCUS,0,0);
 		::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
 		break;     

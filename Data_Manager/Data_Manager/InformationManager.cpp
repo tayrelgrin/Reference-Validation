@@ -227,6 +227,8 @@ void InformationManager::LoadXMLFileListInValue()
 
 	CString strEXEDirectory;
 
+	m_vConfigName.clear();
+
 	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
 
 	strEXEDirectory += "\\Data\\Value";

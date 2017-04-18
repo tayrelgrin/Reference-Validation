@@ -10,7 +10,7 @@
 #include "SettingBaseInfo.h"
 #include <string>
 #include "afxcmn.h"
-
+#include <stack>
 
 
 // CData_ManagerDlg 대화 상자
@@ -93,9 +93,9 @@ private:
 	CString m_strDOE;
 	bool m_bNewData;
 	int m_nItem;
-	int	m_nSubItem;
-	HWND m_hFocus;
-	bool m_bInit;
+	int	m_nSubItem;	
+	bool m_bModify;	// Data Modify Flag 
+	std::stack<BasicData*> m_cPreDataStack;	// stack for undo function
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;
@@ -106,9 +106,8 @@ public:
 	afx_msg void OnLbnSelchangeListConfignum();
 	afx_msg void OnLbnSelchangeListDoe();
 	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
-
 	afx_msg void OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult);
-//	afx_msg void OnEndlabeleditList1(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual void OnOK();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	CEdit m_EditInListCtrl;
 };
