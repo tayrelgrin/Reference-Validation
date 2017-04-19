@@ -12,7 +12,7 @@ public:
 	void ModifyConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
-	void SaveRefToFile(CString inFilePath);
+	bool SaveRefToFile(CString inFilePath);
 	void LoadXMLFileListInValue();
 	void LoadXMLFileListInSetting();
 	void LoadXMLValueFileList(CString inData);

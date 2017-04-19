@@ -331,7 +331,6 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 			m_cNewConfigData->LoadDataFiles(strValuePath);
 			m_cNewSettingData->LoadDataFiles(strSettingPath);
-
 		}
 
 		AddToTree(m_cNewSettingData);
@@ -501,10 +500,21 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 	
 	if (IDYES == AfxMessageBox("Save Data?",MB_YESNO))
 	{
-		BeginWaitCursor();
-		m_cValueData.SaveRefToFile(_T("temp"));
-		EndWaitCursor();
-		MessageBox ("Complete Save the data to File",NULL,MB_OK);
+		if( m_strPrj != "" &&
+			m_strBuildNum != "" &&
+			m_strConfigNum != "" &&
+			m_strDOE != "")
+		{
+			BeginWaitCursor();
+			bool bResult = m_cValueData.SaveRefToFile(_T("temp"));
+			EndWaitCursor();
+			if(bResult)
+				MessageBox ("Complete Save the data to File",NULL,MB_OK);
+			else
+				MessageBox ("FAIL!! There is a something missing",NULL,MB_OK);
+		}
+		else
+			AfxMessageBox("FAIL!! There is no data to save", MB_OK);
 	}
 }
 
@@ -535,7 +545,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 			AfxExtractSubString(strFile, strTemp, 1, ':');
 
  			if(m_treeMainTest.GetCount() >= 1 && i != 0)
- 				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
+ 				compare = m_treeMainTest.GetItemText(h_Root);	// Search in Root level in tree
 
 			if(strTest != compare)
 				h_Root = m_treeMainTest.InsertItem(strTest, TVI_ROOT, TVI_LAST);
@@ -549,7 +559,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 			AfxExtractSubString(strTemp,strTemp, 0, ':');
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)
-				compare = m_treeMainTest.GetItemText(h_Root);	// Serach in Root level in tree
+				compare = m_treeMainTest.GetItemText(h_Root);	// Search in Root level in tree
 
 			if(strTemp != compare)
 				h_Root = m_treeMainTest.InsertItem(strTemp, TVI_ROOT, TVI_LAST);
@@ -563,8 +573,6 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 				AfxExtractSubString(strTest, vTestName[i], 1, ':');
 				AfxExtractSubString(strFile, vTestName[i], 2, ':');
 			}
-
-			
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)	
 				compare = m_treeMainTest.GetItemText(h_Child);	// Serach in h_Child level in tree

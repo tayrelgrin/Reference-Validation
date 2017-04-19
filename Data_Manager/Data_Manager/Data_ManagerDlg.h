@@ -96,6 +96,7 @@ private:
 	int	m_nSubItem;	
 	bool m_bModify;	// Data Modify Flag 
 	std::stack<BasicData*> m_cPreDataStack;	// stack for undo function
+	bool m_bPreDataUsed;
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;

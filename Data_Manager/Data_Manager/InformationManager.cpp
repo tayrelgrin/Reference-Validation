@@ -121,35 +121,42 @@ void InformationManager::ModifyConfigData(ConfigDMData* inTargetData)
 
 }
 
-void InformationManager::SaveRefToFile(CString inFilePath)
+bool InformationManager::SaveRefToFile(CString inFilePath)
 {
 	ConfigDMData* pTemp;
-	pTemp = m_listConfigs.GetHead();
-
-	POSITION pos = m_listConfigs.GetHeadPosition();
-
-	while(pos)
+	bool bResult = false;
+	if(m_listConfigs.GetCount() > 0)
 	{
-		pTemp = m_listConfigs.GetNext(pos);
-		if(pTemp->GetNewDataFlag())
+		pTemp = m_listConfigs.GetHead();
+
+		POSITION pos = m_listConfigs.GetHeadPosition();
+
+		while(pos)
 		{
-			pTemp->SaveDataToFile(m_vBasicFile);
+			pTemp = m_listConfigs.GetNext(pos);
+			if(pTemp->GetNewDataFlag())
+			{
+				pTemp->SaveDataToFile(m_vBasicFile);
+			}
 		}
+
+		pTemp = m_listSetting.GetHead();
+
+		pos = m_listSetting.GetHeadPosition();
+
+		while(pos)
+		{
+			pTemp = m_listSetting.GetNext(pos);
+			if(pTemp->GetNewDataFlag())
+			{
+				pTemp->SaveSettingToFile(m_vBasicFile);
+			}
+		}
+		pTemp->SetNewDataFlag(false);
+		bResult = true;
 	}
 
-	pTemp = m_listSetting.GetHead();
-
-	pos = m_listSetting.GetHeadPosition();
-
-	while(pos)
-	{
-		pTemp = m_listSetting.GetNext(pos);
-		if(pTemp->GetNewDataFlag())
-		{
-			pTemp->SaveSettingToFile(m_vBasicFile);
-		}
-	}
-	pTemp->SetNewDataFlag(false);
+	return bResult;
 }
 
 void InformationManager::LoadBaseFileList()
