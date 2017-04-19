@@ -245,7 +245,7 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	AfxSetAllocStop(15032);
+//	AfxSetAllocStop(15032);
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
 		m_cAddNewRefDlg.DestroyWindow();
@@ -257,16 +257,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_cNewConfigData->InitListAndVectors();
 		m_cNewSettingData->InitListAndVectors();
 
-// 		for(int i = 0; i<m_vTestList.size(); i++)
-// 		{
-// 			m_vTestList.erase(m_vTestList.begin()+i);
-// 		}
 		m_vTestList.clear();
-
-// 		for(int i = 0; i<m_vDirList.size(); i++)
-// 		{
-// 			m_vDirList.erase(m_vDirList.begin()+i);
-// 		}
 		m_vDirList.clear();
 
 		std::vector<CString> temp;
@@ -279,46 +270,71 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_strBuildNum	= m_cAddNewRefDlg.GetBuild();
 		m_strConfigNum	= m_cAddNewRefDlg.GetConfig();
 		m_strDOE		= m_cAddNewRefDlg.GetDOE();
-		
-		m_strRootPath = m_cAddNewRefDlg.GetDirRootPath();
+		m_bPreDataUsed  = m_cAddNewRefDlg.GetPreDataUsed();
+		m_strRootPath   = m_cAddNewRefDlg.GetDirRootPath();
+
 		m_cAddNewRefDlg.GetDirList(m_vDirList);
 
-		m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
-		m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
-		m_cNewConfigData->SetTestList(m_vTestList);
-		m_cNewConfigData->SetTestDirList(m_vDirList);
-		m_cNewConfigData->SetBaseFiles(temp);
-		m_cNewConfigData->GetFilePathInDir(temp, m_vDirList);
-		
-		m_cNewSettingData->SetTestList(m_vTestList);
-		m_cNewSettingData->SetTestDirList(m_vDirList);
-		m_cNewSettingData->SetBaseFiles(temp);
-
-		AddNewConfig(m_cNewConfigData, m_cNewSettingData);
-
-		for(int i = 0; i<temp.size(); i++)
+		if(!m_bPreDataUsed)
 		{
-			temp.erase(temp.begin()+i);
+			m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
+			m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
+			m_cNewConfigData->SetTestList(m_vTestList);
+			m_cNewConfigData->SetTestDirList(m_vDirList);
+			m_cNewConfigData->SetBaseFiles(temp);
+			m_cNewConfigData->GetFilePathInDir(temp, m_vDirList);
+
+			m_cNewSettingData->SetTestList(m_vTestList);
+			m_cNewSettingData->SetTestDirList(m_vDirList);
+			m_cNewSettingData->SetBaseFiles(temp);
+
+			AddNewConfig(m_cNewConfigData, m_cNewSettingData);
+
+			for(int i = 0; i<temp.size(); i++)
+			{
+				temp.erase(temp.begin()+i);
+			}
+			temp.clear();
+
+			CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
+			std::vector<CString> vTemp;
+
+			FindStringInVector(m_vConfigName, strComb, vTemp);
+
+			if (vTemp.size()==0)
+			{
+				m_vConfigName.push_back(strComb);
+			}
+
+			vTemp.clear();
 		}
-		temp.clear();
+		else
+		{
+			CString strPrePrj		= m_cAddNewRefDlg.GetPreProject();
+			CString strPreBuildNum	= m_cAddNewRefDlg.GetPreBuild();
+			CString strPreConfigNum	= m_cAddNewRefDlg.GetPreConfig();
+			CString strPreDOE		= m_cAddNewRefDlg.GetPreDOE();
+
+			CString strTarget = strPrePrj + '_' + strPreBuildNum + '_' + strPreConfigNum + '_' + strPreDOE;
+			CString strTemp;
+			std::vector<CString> vFileList;
+
+			FindStringInVector(m_vConfigName, strTarget, vFileList);
+
+			// File Read 
+			CString strEXEDirectory, strValuePath, strSettingPath;
+
+			strEXEDirectory = m_cNewConfigData->GetEXEDirectoryPath();
+
+			strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+			strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
+
+			m_cNewConfigData->LoadDataFiles(strValuePath);
+			m_cNewSettingData->LoadDataFiles(strSettingPath);
+
+		}
 
 		AddToTree(m_cNewSettingData);
-
-		CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
-		std::vector<CString> vTemp;
-
-		FindStringInVector(m_vConfigName, strComb, vTemp);
-
-		if (vTemp.size()==0)
-		{
-			m_vConfigName.push_back(strComb);
-		}
-
-		for(int i = 0; i<vTemp.size(); i++)
-		{
-			vTemp.erase(vTemp.begin()+i);
-		}
-		vTemp.clear();
 
 		if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
 			AddProjectToListBox(m_strPrj);
@@ -429,7 +445,7 @@ void CData_ManagerDlg::OnBnClickedButtonDelete()
 			m_cValueData.GetConfigNameList(m_vConfigName);
 			AddRefinfoToListBox();
 		}
-	}	
+	}
 }
 
 

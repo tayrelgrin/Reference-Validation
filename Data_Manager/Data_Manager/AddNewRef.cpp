@@ -78,6 +78,8 @@ BOOL AddNewRef::OnInitDialog()
 	m_cComboPrj.AddString("");
 	m_cComboPrj.SetCurSel(0);
 
+	bPreDataUsed = false;
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
@@ -87,12 +89,28 @@ void AddNewRef::OnBnClickedRadioRef()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	((CButton*)GetDlgItem(IDC_RADIO_USEDATA))->SetCheck(FALSE);
+
+	m_cComboPrj.EnableWindow(FALSE);
+	m_cComboBuild.EnableWindow(FALSE);
+	m_cComboConfig.EnableWindow(FALSE);
+	m_cComboDOE.EnableWindow(FALSE);
+	m_editCtrl.EnableWindow(TRUE);
+
+	bPreDataUsed = false;
 }
 
 void AddNewRef::OnBnClickedRadioUsedata()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	((CButton*)GetDlgItem(IDC_RADIO_REF))->SetCheck(FALSE);
+
+	m_cComboPrj.EnableWindow(TRUE);
+	m_cComboBuild.EnableWindow(TRUE);
+	m_cComboConfig.EnableWindow(TRUE);
+	m_cComboDOE.EnableWindow(TRUE);
+	m_editCtrl.EnableWindow(FALSE);
+
+	bPreDataUsed = true;
 }
 
 void AddNewRef::OnEnChangeMfceditbrowse1()
@@ -137,6 +155,10 @@ void AddNewRef::OnBnClickedButtonAddok()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ConfigDMData cNewConfig;
 
+	int nIndex = m_cComboDOE.GetCurSel();
+	m_cComboDOE.GetLBText(nIndex, m_strDOE);
+	m_strPreDOE = m_strDOE;
+
 	m_EditPrj.GetWindowText(m_strPrj);
 	m_EditBuild.GetWindowText(m_strBuild);
 	m_EditConfig.GetWindowText(m_strConfig);
@@ -148,6 +170,7 @@ void AddNewRef::OnBnClickedButtonAddok()
 	cNewConfig.SetDOE(m_strDOE);
 
 	// file copy function
+	FileCopy();
 
 	CDialogEx::OnOK();
 }
@@ -171,6 +194,11 @@ CString AddNewRef::GetDOE()
 CString AddNewRef::GetConfig()
 {
 	return m_strConfig;
+}
+
+bool AddNewRef::GetPreDataUsed()
+{
+	return bPreDataUsed;
 }
 
 void AddNewRef::GetDirList(std::vector<CString>& inVDirList)
@@ -208,23 +236,23 @@ void AddNewRef::LoadFileListInValue()
 
 	CString strPrj, strBuild, strConfig, strDOE;
 
-	ConfigDMData* pAddConfig = new ConfigDMData;
+	//ConfigDMData* pAddConfig = new ConfigDMData;
 
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
-		pAddConfig->SetProject(strPrj);
-		pAddConfig->SetBuildNum(strBuild);
-		pAddConfig->SetConfigNum(strConfig);
-		pAddConfig->SetDOE(strDOE);
+// 		pAddConfig->SetProject(strPrj);
+// 		pAddConfig->SetBuildNum(strBuild);
+// 		pAddConfig->SetConfigNum(strConfig);
+// 		pAddConfig->SetDOE(strDOE);
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		m_vConfigName.push_back(strComb);
 	}
 
-	delete pAddConfig;
+	//delete pAddConfig;
 }
 
 void AddNewRef::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
@@ -412,18 +440,82 @@ void AddNewRef::OnCbnSetfocusCombo4()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int nIndex = m_cComboPrj.GetCurSel();
 	m_cComboPrj.GetLBText(nIndex, m_strPrj);
+	m_strPrePrj = m_strPrj;
 
 	nIndex = m_cComboBuild.GetCurSel();
 	m_cComboBuild.GetLBText(nIndex, m_strBuild);
+	m_strPreBuild = m_strBuild;
 
 	nIndex = m_cComboConfig.GetCurSel();
 	m_cComboConfig.GetLBText(nIndex, m_strConfig);
-
+	m_strPreConfig = m_strConfig;
 
 	nIndex = m_cComboDOE.GetCurSel();
 	m_cComboDOE.GetLBText(nIndex, m_strDOE);
+	m_strPreDOE = m_strDOE;
 
 	m_EditDOE.SetWindowText(m_strDOE);
 }
 
 
+void AddNewRef::FileCopy()
+{
+	m_EditPrj.GetWindowText(m_strPrj);
+	m_EditBuild.GetWindowText(m_strBuild);
+	m_EditConfig.GetWindowText(m_strConfig);
+	m_EditDOE.GetWindowText(m_strDOE);
+
+	ConfigDMData cTempConfig;
+
+	CString strPrj, strBuild, strConfig, strDOE;
+	CString strEXEDirectory;
+	CString strValuePath, strSettingPath;
+	CString strOriValuePath, strOriSettingPath;
+
+
+	int nIndex = m_cComboPrj.GetCurSel();
+	m_cComboPrj.GetLBText(nIndex, strPrj);
+
+	nIndex = m_cComboBuild.GetCurSel();
+	m_cComboBuild.GetLBText(nIndex, strBuild);
+
+	nIndex = m_cComboConfig.GetCurSel();
+	m_cComboConfig.GetLBText(nIndex, strConfig);
+
+
+	nIndex = m_cComboDOE.GetCurSel();
+	m_cComboDOE.GetLBText(nIndex, strDOE);
+
+	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
+
+	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정
+
+	strOriValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", strPrj, "\\", strBuild,"-", strConfig, "-", strDOE,".xml");
+	strOriSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", strPrj, "-", strBuild, "-", strConfig, "-", strDOE,".xml");
+
+	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuild,"-", m_strConfig, "-", m_strDOE,".xml");
+	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuild, "-", m_strConfig, "-", m_strDOE,".xml");
+
+
+	CopyFile(strOriValuePath, strValuePath, TRUE);
+	CopyFile(strOriSettingPath, strSettingPath, TRUE);
+}
+
+CString AddNewRef::GetPreBuild()
+{
+	return m_strPreBuild;
+}
+CString AddNewRef::GetPreProject()
+{
+	return m_strPrePrj;
+}
+
+CString AddNewRef::GetPreConfig()
+{
+	return m_strPreConfig;
+}
+
+CString AddNewRef::GetPreDOE()
+{
+	return m_strPreDOE;
+}

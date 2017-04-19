@@ -246,20 +246,20 @@ void InformationManager::LoadXMLFileListInValue()
 
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
-		ConfigDMData* pAddConfig = new ConfigDMData;
+		//ConfigDMData* pAddConfig = new ConfigDMData;
 
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
-		pAddConfig->SetProject(strPrj);
-		pAddConfig->SetBuildNum(strBuild);
-		pAddConfig->SetConfigNum(strConfig);
-		pAddConfig->SetDOE(strDOE);
+// 		pAddConfig->SetProject(strPrj);
+// 		pAddConfig->SetBuildNum(strBuild);
+// 		pAddConfig->SetConfigNum(strConfig);
+// 		pAddConfig->SetDOE(strDOE);
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		m_vConfigName.push_back(strComb);
 
-		delete pAddConfig;
+		//delete pAddConfig;
 	}
 }
 
@@ -286,20 +286,20 @@ void InformationManager::LoadXMLFileListInSetting()
 
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
-		ConfigDMData* pAddConfig = new ConfigDMData;
+		//ConfigDMData* pAddConfig = new ConfigDMData;
 
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
-		pAddConfig->SetProject(strPrj);
-		pAddConfig->SetBuildNum(strBuild);
-		pAddConfig->SetConfigNum(strConfig);
-		pAddConfig->SetDOE(strDOE);
+// 		pAddConfig->SetProject(strPrj);
+// 		pAddConfig->SetBuildNum(strBuild);
+// 		pAddConfig->SetConfigNum(strConfig);
+// 		pAddConfig->SetDOE(strDOE);
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		//m_vConfigName.push_back(strComb);
 
-		delete pAddConfig;
+		//delete pAddConfig;
 	}
 }
 
