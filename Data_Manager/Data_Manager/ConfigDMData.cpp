@@ -5,6 +5,10 @@
 ConfigDMData::ConfigDMData(void)
 {
 	m_bNewData = false;
+
+	m_pBaseData = new TestType;
+	m_pBaseData->SetTestName(_T("BaseInfo"));
+	m_pListTestType.RemoveAll();
 }
 
 
@@ -50,6 +54,7 @@ void ConfigDMData::InitListAndVectors()
 	
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
+	
 
 	while(pPos && m_pListTestType.GetSize()>0)
 	{
@@ -63,6 +68,12 @@ void ConfigDMData::InitListAndVectors()
 	{
 		m_pListTestType.RemoveAll();
 	}
+
+// 	if (m_pBaseData != nullptr)
+// 	{
+// 		delete m_pBaseData;
+// 	}
+	
 }
 
 void ConfigDMData::RefNameParsing(static CString instrData)
@@ -445,7 +456,7 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	for (int i = 0; i<m_vBaseFiles.size(); i++)
 	{
 		pElem2 = cXMLDocument.NewElement("File");
-		text = cXMLDocument.NewText( LPSTR(LPCTSTR(m_vBaseFiles[i])));
+		text = cXMLDocument.NewText( LPSTR(LPCTSTR(m_vBaseFiles[i])) );
 
 		pElem2->LinkEndChild(text);
 		pElem->LinkEndChild(pElem2);
@@ -453,6 +464,15 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	cXMLDocument.LinkEndChild(pElem);
 	//////////////////////////////////////////////////////////////////////////
 	
+	//////////////////////////////////////////////////////////////////////////
+// 	tinyxml2::XMLElement* pBaseElemenet = cXMLDocument.NewElement("BaseInfo");
+// 
+// 	std::vector<CString> vStrDummy;
+// 	cXMLDocument.LinkEndChild(pBaseElemenet);
+// 
+// 	m_pBaseData->SaveDataToFile(cXMLDocument, pBaseElemenet, vStrDummy);
+// 	
+	//////////////////////////////////////////////////////////////////////////
 	tinyxml2::XMLElement* pElemenet = cXMLDocument.NewElement("Setting");
 
 	cXMLDocument.LinkEndChild(pElemenet);
@@ -466,7 +486,6 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	}
 
 	cXMLDocument.SaveFile(strTemp);
-
 }
 
 
@@ -584,16 +603,25 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	}
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Name     : SaveBaseFileListToFile
+// Function : Save Base file list
+// pre		: none
+// return	: none
+//////////////////////////////////////////////////////////////////////////
 void ConfigDMData::SaveBaseFileListToFile(CString inFilePath, std::vector<CString> invData)
 {
-
 	tinyxml2::XMLDocument cDoc;
-	
 
-	
 	cDoc.SaveFile(LPSTR(LPCTSTR(inFilePath)));
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Name     : GetFileNames
+// Function : input Test names to outvData in this class
+// pre		: none
+// return	: none
+//////////////////////////////////////////////////////////////////////////
 void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 {
 	CString strTemp;

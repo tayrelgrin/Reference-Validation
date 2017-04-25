@@ -28,10 +28,12 @@ void BaseItem::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_DELETEITEMBI, m_cButton_BI_Remove);
 	DDX_Control(pDX, IDC_BUTTON_BILS, m_cButton_BI_LoadSetting);
 	DDX_Control(pDX, IDC_BUTTON_BIRL, m_cButton_BI_Reload);
+	DDX_Control(pDX, IDC_COMBO1, m_cComboFiles);
 }
 
 
 BEGIN_MESSAGE_MAP(BaseItem, CDialogEx)
+	ON_BN_CLICKED(IDC_BUTTON_BIRL, &BaseItem::OnBnClickedButtonBirl)
 END_MESSAGE_MAP()
 
 
@@ -55,6 +57,16 @@ BOOL BaseItem::OnInitDialog()
 	m_cButton_BI_Remove.LoadBitmaps(IDB_BITMAP_LEFT,IDB_BITMAP_LEFTPUSH,NULL,NULL);
 	m_cButton_BI_Remove.SizeToContent();
 
+
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+
+void BaseItem::OnBnClickedButtonBirl()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	
 }

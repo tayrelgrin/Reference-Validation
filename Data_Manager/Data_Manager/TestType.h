@@ -9,6 +9,7 @@ class TestType
 public:
 	TestType(void);
 	~TestType(void);
+	void InitList();
 	void SetTestName(CString inData);
 	CString GetTestName();
 	void AddNewFile(CString inStrFileName);
@@ -20,7 +21,7 @@ public:
 	void GetFileNames(CString inTestName, std::vector<CString>& outvFileNames);
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 private:
-	CList<FileType*> m_pListFile;
+	CList<FileType*> m_pFIleListFile;
 	CString m_strTestName;
 };
 

@@ -21,7 +21,7 @@ public:
 	void CopyDataToList(CList<BasicData*>& outListData);
 	void InitList();
 private:
-	CList<BasicData*> m_pListData;
+	CList<BasicData*> m_pDataListData;
 	CString m_strFileName;
 };
 

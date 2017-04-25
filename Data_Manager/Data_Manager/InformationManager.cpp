@@ -5,7 +5,6 @@
 
 InformationManager::InformationManager(void)
 {
-	 //SaveRefToFile();
 }
 
 
@@ -60,19 +59,8 @@ void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 	inNewData->GetTestList(vTest);
 	inNewData->AddNewTest(m_vBasicFile);
 
-// 	if(m_listConfigs.IsEmpty())
-// 	{
-// 		m_listConfigs.AddHead(inNewData);
-// 	}
-// 	else
-// 	{
-		m_listConfigs.AddTail(inNewData);
+	m_listConfigs.AddTail(inNewData);
 
-
-// 	for(int i = 0; i<vTest.size(); i++)
-// 	{
-// 		vTest.erase(vTest.begin()+i);
-// 	}
 	vTest.clear();
 }
 
@@ -110,10 +98,6 @@ void InformationManager::DeleteConfigData(CString instrPrj, CString instrBuild, 
 	cTargetData.SetBuildNum(instrBuild);
 	cTargetData.SetConfigNum(instrConfig);
 	cTargetData.SetDOE(instrDOE);
-
-	//pDelete = m_listConfigs.Find(cTargetData);
-//	m_listConfigs.RemoveAt(pDelete);
-	// add file delete
 }
 
 void InformationManager::ModifyConfigData(ConfigDMData* inTargetData)

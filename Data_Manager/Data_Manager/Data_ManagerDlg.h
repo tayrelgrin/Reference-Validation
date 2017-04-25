@@ -97,6 +97,7 @@ private:
 	bool m_bModify;	// Data Modify Flag 
 	std::stack<BasicData*> m_cPreDataStack;	// stack for undo function
 	bool m_bPreDataUsed;
+	std::vector<CString> m_vAllFileList;
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;
@@ -111,4 +112,6 @@ public:
 	virtual void OnOK();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	CEdit m_EditInListCtrl;
+	afx_msg void OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 };

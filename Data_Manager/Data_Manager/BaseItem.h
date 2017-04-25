@@ -1,5 +1,6 @@
 #pragma once
 #include "afxext.h"
+#include "afxwin.h"
 
 
 // BaseItem 대화 상자입니다.
@@ -25,4 +26,6 @@ public:
 	CBitmapButton m_cButton_BI_LoadSetting;
 	CBitmapButton m_cButton_BI_Reload;
 	virtual BOOL OnInitDialog();
+	CComboBox m_cComboFiles;
+	afx_msg void OnBnClickedButtonBirl();
 };

@@ -4,31 +4,36 @@
 
 TestType::TestType(void)
 {
-	
+	m_pFIleListFile.RemoveAll();
 }
 
 
 TestType::~TestType(void)
 {
-	POSITION pTemp = NULL;
-	POSITION pPos = m_pListFile.GetHeadPosition();
+	InitList();
+}
 
-	while(pPos && m_pListFile.GetSize()>0)
+void TestType::InitList()
+{
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+
+	while(pPos && m_pFIleListFile.GetSize()>0)
 	{
 		pTemp = pPos;
-		
+
 		try
 		{
-			FileType* temp = m_pListFile.GetNext(pPos);
+			FileType* temp = m_pFIleListFile.GetNext(pPos);
 			delete temp;
-			m_pListFile.RemoveAt(pTemp);
+			m_pFIleListFile.RemoveAt(pTemp);
 		}
 		catch (CMemoryException* e)
 		{
 		}
 	}
-	if( m_pListFile.GetSize()>0)
-		m_pListFile.RemoveAll();
+	if( m_pFIleListFile.GetSize()>0)
+		m_pFIleListFile.RemoveAll();
 }
 
 void TestType::SetTestName(CString inData)
@@ -46,12 +51,12 @@ void TestType::AddNewFile(CString inStrFileName)
 	FileType* newFile = new FileType;
 	
 	newFile->SetFileName(inStrFileName);
-	m_pListFile.AddTail(newFile);
+	m_pFIleListFile.AddTail(newFile);
 }
 
 void TestType::AddNewFile(FileType* inData)
 {
-	m_pListFile.AddTail(inData);
+	m_pFIleListFile.AddTail(inData);
 }
 
 void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int inNInput)
@@ -69,24 +74,21 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
 		cNewFile->AddNewData(vFilePath[i], inNInput);		// 파일 이름 적용
 
-		if (invBasicFile.size() > 0)
+		if (invBasicFile.size() > 0 && inNInput!= 2)
 		{
 			for(int j = 0; j<invBasicFile.size(); j++)
 			{
 				if(cNewFile->GetFileName().Find(invBasicFile[j]) != -1)
 				{
-					m_pListFile.AddTail(cNewFile);
+					m_pFIleListFile.AddTail(cNewFile);
 					break;
 				}
 			}
 		}
 		else
-			m_pListFile.AddTail(cNewFile);		
+			m_pFIleListFile.AddTail(cNewFile);		
 	}
-	for(int i = 0; i<vFilePath.size(); i++)
-	{
-		vFilePath.erase(vFilePath.begin()+i);
-	}
+
 	vFilePath.clear();
 }
 
@@ -137,11 +139,11 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 
 		cElement->LinkEndChild(Element);
 
-		POSITION pos = m_pListFile.GetHeadPosition();
+		POSITION pos = m_pFIleListFile.GetHeadPosition();
 
 		while(pos)
 		{
-			FileType* pData = m_pListFile.GetNext(pos);
+			FileType* pData = m_pFIleListFile.GetNext(pos);
 			if (invBasicFile.size() > 0)
 			{
 				for(int i = 0; i<invBasicFile.size(); i++)
@@ -184,7 +186,7 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 				pNewTest = new FileType;
 				
 				LoadDataFromXML(pElent,(CString)pNode->Value(), pNewTest);
-				m_pListFile.AddTail(pNewTest);
+				m_pFIleListFile.AddTail(pNewTest);
 			}
 		}
 	}
@@ -193,11 +195,11 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 
 void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNames)
 {
-	POSITION pPos = m_pListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleListFile.GetHeadPosition();
 	CString strFileName;
 	while(pPos)
 	{
-		FileType* temp = m_pListFile.GetNext(pPos);
+		FileType* temp = m_pFIleListFile.GetNext(pPos);
 		strFileName = temp->GetFileName();
 		strFileName = inTestName + ":" + strFileName;
 
@@ -207,13 +209,13 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 
 bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 {
-	POSITION pPos = m_pListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleListFile.GetHeadPosition();
 	CString strFileName;
 	bool bResult=false;
 
 	while(pPos)
 	{
-		FileType* temp = m_pListFile.GetNext(pPos);
+		FileType* temp = m_pFIleListFile.GetNext(pPos);
 		strFileName = temp->GetFileName();
 
 		if (strFileName == inStrTargetFile)

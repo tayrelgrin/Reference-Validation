@@ -99,6 +99,8 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	
 	ON_WM_LBUTTONDOWN()
 	ON_NOTIFY(NM_CLICK, IDC_LIST1, &CData_ManagerDlg::OnNMClickList1)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST1, &CData_ManagerDlg::OnLvnColumnclickList1)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
 END_MESSAGE_MAP()
 
 
@@ -359,6 +361,17 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 	{
 		m_cSettingDlg.DestroyWindow();
 	}
+	
+	m_cSettingDlg.m_strSettingText = m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE;
+
+	std::vector<CString> vConfigFileNames;				// ref 디렉토리에 있는 파일 정보를 가져오기 위한 벡터
+	m_cNewConfigData->GetFileNames(vConfigFileNames);	// ref 디렉토리에 있는 파일 정보 m_cNewConfigData에서 전부 가져오기
+	
+	m_cSettingDlg.m_vConfigFileList = vConfigFileNames;
+	m_cSettingDlg.m_vSettingFileList = m_vAllFileList;	// Base setting 을 위한 파일 리스트
+
+	m_cSettingDlg.m_pData = &m_cValueData;
+
 	m_cSettingDlg.Create(SettingBaseInfo::IDD, this);
 	m_cSettingDlg.CenterWindow();
 	m_cSettingDlg.ShowWindow(SW_SHOW);
@@ -398,8 +411,49 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	ConfigDMData* pSetting = m_cNewSettingData;
+
+	CString strEXEDirectory;
+
+	char szFilter[] = "All Files(*.*)|*.*||";
+
+	strEXEDirectory = pSetting->GetEXEDirectoryPath();
+
+	strEXEDirectory = strEXEDirectory + "\\Data\\Setting\\";
+
+	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, szFilter);
+
+	dlg.m_ofn.lpstrInitialDir = strEXEDirectory;	// 초기 경로 지정
 	
-	(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
+	if(IDOK == dlg.DoModal())
+	{
+		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+		BeginWaitCursor(); 
+
+		CString strSettingPath = dlg.GetPathName();
+		CString strFileName, strConfig, strResult;
+
+		pSetting->InitListAndVectors();
+
+		pSetting->LoadDataFiles(strSettingPath);
+
+		EndWaitCursor();
+		
+		int nIndex = strSettingPath.ReverseFind('\\');
+
+		strFileName = strSettingPath.Mid(nIndex+1);
+
+		nIndex = strFileName.ReverseFind('.');
+		strConfig = strFileName.Left(nIndex);
+
+		CString strTemp;
+		GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
+		strResult.Format("%s%s",strTemp, strConfig);
+		SetDlgItemText(IDC_STATIC_LOAD,strResult);
+		(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
+	}	
 }
 
 
@@ -523,23 +577,24 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 {
 	m_treeMainTest.DeleteAllItems();
 
-	std::vector<CString> vData, vTestName;
+	std::vector<CString> vData;
 	CString strTemp, strTest, strFile;
 	CString compare;
 
-	inpData->GetFileNames(vTestName);
+	inpData->GetFileNames(m_vAllFileList);
+
 
 	HTREEITEM h_BASEINFO = m_treeMainTest.InsertItem(_T("Base Info"), TVI_ROOT, TVI_LAST);
 	HTREEITEM h_Root;
 	HTREEITEM h_Child;
 	HTREEITEM h_2Child;
-	for(int i= 0 ; i < vTestName.size(); i++)
+	for(int i= 0 ; i < m_vAllFileList.size(); i++)
 	{
-		AfxExtractSubString(strTemp, vTestName[i], 2, ':');
+		AfxExtractSubString(strTemp, m_vAllFileList[i], 2, ':');
 
-		if(vTestName[i].Find('\\') == -1 && strTemp=="")
+		if(m_vAllFileList[i].Find('\\') == -1 && strTemp=="")
 		{
-			strTemp = vTestName[i];
+			strTemp = m_vAllFileList[i];
 
 			AfxExtractSubString(strTest, strTemp, 0, ':');
 			AfxExtractSubString(strFile, strTemp, 1, ':');
@@ -555,7 +610,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 		}
 		else
 		{
-			AfxExtractSubString(strTemp, vTestName[i], 0, '\\');
+			AfxExtractSubString(strTemp, m_vAllFileList[i], 0, '\\');
 			AfxExtractSubString(strTemp,strTemp, 0, ':');
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)
@@ -564,14 +619,14 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 			if(strTemp != compare)
 				h_Root = m_treeMainTest.InsertItem(strTemp, TVI_ROOT, TVI_LAST);
 
-			AfxExtractSubString(strTemp, vTestName[i], 1, '\\');
+			AfxExtractSubString(strTemp, m_vAllFileList[i], 1, '\\');
 			AfxExtractSubString(strTest, strTemp, 0, ':');
 			AfxExtractSubString(strFile, strTemp, 1, ':');
 
 			if(strTemp == "")	// 확인하자
 			{
-				AfxExtractSubString(strTest, vTestName[i], 1, ':');
-				AfxExtractSubString(strFile, vTestName[i], 2, ':');
+				AfxExtractSubString(strTest, m_vAllFileList[i], 1, ':');
+				AfxExtractSubString(strFile, m_vAllFileList[i], 2, ':');
 			}
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)	
@@ -826,7 +881,9 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	ConfigDMData* pConfig = m_cNewConfigData;
 	ConfigDMData* pSetting = m_cNewSettingData;
+	
 	m_treeMainTest.DeleteAllItems();
+	m_vAllFileList.clear();
 
 	int nIndex = m_lbDOE.GetCurSel();
 	m_lbDOE.GetText(nIndex, m_strDOE);
@@ -865,9 +922,9 @@ void CData_ManagerDlg::MakeDataDirectory()
 
 	int i = strEXEPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
 
-	strEXEPath = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
-
-	strEXEPath.Format(_T("%s%s"),strEXEPath,"\\Data");
+	CString strTemp = strEXEPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
+	
+	strEXEPath.Format(_T("%s%s"),strTemp,"\\Data");
 	CreateDirectory(strEXEPath,NULL);
 	CreateDirectory(strEXEPath+"\\Value",NULL);
 	CreateDirectory(strEXEPath+"\\Setting",NULL);
@@ -892,6 +949,11 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
  	hNode = m_treeMainTest.GetNextItem(hNode, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
  	strDirName = m_treeMainTest.GetItemText(hNode);				// 그 아이템의 이름을 얻어온다.
 
+	if(strFileName == "Base Info")
+	{
+		
+	}
+
 	if(strTestName!="")
 	{
 		if(strDirName!="")
@@ -899,7 +961,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 		else
 			strCombe = strTestName;
 		m_cNewConfigData->SearchTestInList(strCombe, strFileName, m_cFileData);
-
+		
 		AddToListControl(strFileName, m_cFileData);
 	}
 	else
@@ -954,6 +1016,7 @@ void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 	m_nSubItem = temp->iSubItem;
 	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
 		return ;
+
 	//Retrieve the text of the selected subItem from the list
 	CString strPreData = GetItemText(hWnd1,m_nItem ,m_nSubItem);
 	CString strData = strPreData;
@@ -974,12 +1037,12 @@ void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	if(m_nItem != -1)
 		::SetWindowPos(	::GetDlgItem(m_hWnd,IDC_EDIT1),
-						HWND_TOP,
-						rtSubItem.left+nThisLeft ,
-						rtSubItem.top +nThisTop-30,
-						rtSubItem.right - rtSubItem.left - 3,
-						rtSubItem.bottom - rtSubItem.top -1,
-						NULL);
+		HWND_TOP,
+		rtSubItem.left+nThisLeft ,
+		rtSubItem.top +nThisTop-30,
+		rtSubItem.right - rtSubItem.left - 3,
+		rtSubItem.bottom - rtSubItem.top -1,
+		NULL);
 	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
 	::SetFocus(::GetDlgItem(m_hWnd,IDC_EDIT1));
 
@@ -991,7 +1054,7 @@ void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 	m_EditInListCtrl.SetSel(strData.GetLength());
 
 	// m_cPreDataStack.push() 객체로? 추가, 위치 정보 추가
-
+	
 	*pResult = 0;
 }
 
@@ -1072,4 +1135,41 @@ BOOL CData_ManagerDlg::PreTranslateMessage(MSG* pMsg)
 	if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE) return TRUE;
 
 	return CDialogEx::PreTranslateMessage(pMsg);
+}
+
+
+void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	int nCnt = m_ListCtrlMain.GetItemCount();
+	if( pNMLV->iSubItem == 0 )
+	{
+// 		if( m_bIsAllCheck )
+// 		{
+// 			for( int i=0 ; i<nCnt ; i++ )
+// 				m_ListCtrlMain.SetCheck( i, FALSE );
+// 			m_bIsAllCheck = FALSE;
+// 			SetHeaderCheck( FALSE );
+// 		}
+// 		else
+// 		{
+// 			for( int i=0 ; i<nCnt ; i++ )
+// 				m_ListCtrlMain.SetCheck( i );
+// 			m_bIsAllCheck = TRUE;
+// 			SetHeaderCheck( TRUE );  
+// 		}
+	}
+
+	*pResult = 0;
+}
+
+
+
+void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
 }

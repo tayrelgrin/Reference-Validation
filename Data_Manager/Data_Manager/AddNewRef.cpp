@@ -127,7 +127,6 @@ void AddNewRef::OnEnChangeMfceditbrowse1()
 	}
 	std::vector<CString> vDummy;
 	m_vStrDir.clear();
-	//m_editCtrl.GetWindowTextW(m_strDirRootPath);
 	m_editCtrl.GetWindowText(m_strDirRootPath);
 	m_cNewConfig.GetDirList(m_strDirRootPath, m_vStrDir,vDummy);
 	m_cNewConfig.GetConfigInfoFromVector(m_vStrDir, m_strDirRootPath, m_strPrj, m_strBuild, m_strConfig, m_strDOE);
@@ -156,8 +155,11 @@ void AddNewRef::OnBnClickedButtonAddok()
 	ConfigDMData cNewConfig;
 
 	int nIndex = m_cComboDOE.GetCurSel();
-	m_cComboDOE.GetLBText(nIndex, m_strDOE);
-	m_strPreDOE = m_strDOE;
+	if(bPreDataUsed)
+	{
+		m_cComboDOE.GetLBText(nIndex, m_strDOE);
+		m_strPreDOE = m_strDOE;
+	}
 
 	m_EditPrj.GetWindowText(m_strPrj);
 	m_EditBuild.GetWindowText(m_strBuild);
@@ -169,8 +171,11 @@ void AddNewRef::OnBnClickedButtonAddok()
 	cNewConfig.SetConfigNum(m_strConfig);
 	cNewConfig.SetDOE(m_strDOE);
 
-	// file copy function
-	FileCopy();
+	if(bPreDataUsed)
+	{
+		// file copy function
+		FileCopy();
+	}	
 
 	CDialogEx::OnOK();
 }

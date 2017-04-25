@@ -1,6 +1,7 @@
 #pragma once
 #include "afxext.h"
-
+#include "afxcmn.h"
+#include "InformationManager.h"
 
 // CheckingFileList 대화 상자입니다.
 
@@ -28,4 +29,11 @@ public:
 	CBitmapButton m_cButton_Add;
 	CBitmapButton m_cButton_Remove;
 	afx_msg void OnBnClickedButtonDeleteitem();
+	CTreeCtrl m_treectrlFileList;
+	CListCtrl m_ListctrlFileList;
+	void AddFileNameToTreeView(CTreeCtrl& incTarget);
+	InformationManager* m_pData;
+	std::vector<CString> m_vConfigFileList;
+	std::vector<CString> m_vSettingFileList;
+	void AddFileNameToListview();
 };
