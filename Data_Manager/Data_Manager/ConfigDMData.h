@@ -43,6 +43,7 @@ public:
 	void SaveBaseFileListToFile(CString inFilePath, std::vector<CString> invData);
 	void GetFileNames(std::vector<CString>& outvData);
 	bool SearchTestInList(CString inTargetTest, CString inTargetFile, FileType& outData);
+	TestType* SearchTest(TestType& inoutTarget, bool& bResult);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

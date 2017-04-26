@@ -906,6 +906,9 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	pConfig->LoadDataFiles(strValuePath);
 	pSetting->LoadDataFiles(strSettingPath);
 
+	m_cValueData.AddNewConfigData(pConfig);
+	m_cValueData.AddNewSettingData(pSetting);
+
 	// treeviewø° ª—∑¡¡÷±‚
 	AddToTree(pSetting);
 	EndWaitCursor();

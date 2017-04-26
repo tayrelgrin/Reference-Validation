@@ -72,7 +72,13 @@ BOOL SettingBaseInfo::OnInitDialog()
 	// Base Info Items Tab init
 
 	AddFileNameToComboBox(m_TabBaseInfo.m_cComboFiles);
-	
+	m_TabBaseInfo.m_pData = m_pData;
+	CString strTemp = m_vConfigFileList[0];
+	CString strTestName;
+
+	AfxExtractSubString(strTestName, strTemp, 0, ':');
+	m_TabBaseInfo.m_strFirstTestName = strTestName;
+
 	m_TabBaseInfo.SetWindowPos(NULL, 5, 25, rect.Width()-10, rect.Height()-30, SWP_SHOWWINDOW | SWP_NOZORDER);
 	m_pwndShow = &m_TabBaseInfo;
 	//////////////////////////////////////////////////////////////////////////
@@ -94,51 +100,9 @@ BOOL SettingBaseInfo::OnInitDialog()
 
 void SettingBaseInfo::AddFileNameToComboBox(CComboBox& incTarget)
 {
-	CString strTEMPs;
-	strTEMPs.Empty();
-
-	for(int i = 0; i < m_vSettingFileList.size(); i++)
-	{
-		CString strOriFilePath = m_vSettingFileList[i];
-		CString strTest, strFile;
-		if(strOriFilePath.Find('\\') == -1 && strOriFilePath=="")
-		{
-			AfxExtractSubString(strTest, strOriFilePath, 0, ':');
-			AfxExtractSubString(strFile, strOriFilePath, 1, ':');
-		}
-		else
-		{
-			AfxExtractSubString(strTEMPs, strOriFilePath, 1, '\\');
-			AfxExtractSubString(strTest, strTEMPs, 0, ':');
-			AfxExtractSubString(strFile, strTEMPs, 1, ':');
-
-			if(strTEMPs == "")	// 확인하자
-			{
-				AfxExtractSubString(strTest, strOriFilePath, 2, ':');
-				if(strTest != "")
-				{
-					AfxExtractSubString(strTest, strOriFilePath, 1, ':');
-					AfxExtractSubString(strFile, strOriFilePath, 2, ':');
-				}
-				else
-				{
-					AfxExtractSubString(strTest, strOriFilePath, 0, ':');
-					AfxExtractSubString(strFile, strOriFilePath, 1, ':');
-				}
-			}
-		}
-		CString strCompare;
-		bool bResult = false;
-
-		for (int index = 0; incTarget.GetCount() > index; index++ )
-		{
-			incTarget.GetLBText(index, strCompare);
-			if(strCompare == strTest)
-				bResult = true;
-		}
-		if(!bResult)
-			incTarget.AddString(strTest);
-	}
+	incTarget.InsertString(0, "ItemVersion");
+	incTarget.InsertString(1, "Register");
+	incTarget.InsertString(2, "Reference");
 }
 
 

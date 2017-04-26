@@ -27,6 +27,7 @@ public:
 	void AddToConfig(CString inData);
 	void AddToDOE(CString inData);
 	void InitAllData();
+	TestType* SearchSettingData(TestType& inoutTarget, bool& bResult);
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;

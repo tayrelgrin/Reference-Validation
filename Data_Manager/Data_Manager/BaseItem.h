@@ -1,7 +1,8 @@
 #pragma once
 #include "afxext.h"
 #include "afxwin.h"
-
+#include "InformationManager.h"
+#include "afxcmn.h"
 
 // BaseItem 대화 상자입니다.
 
@@ -28,4 +29,9 @@ public:
 	virtual BOOL OnInitDialog();
 	CComboBox m_cComboFiles;
 	afx_msg void OnBnClickedButtonBirl();
+	afx_msg void OnCbnSelchangeCombo1();
+	InformationManager* m_pData;
+	CListCtrl m_ListCtrl_BaseItem;
+	CString m_strFirstTestName;
+	CTreeCtrl m_TreeCtrl_BaseFile;
 };

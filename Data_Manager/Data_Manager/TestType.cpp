@@ -215,10 +215,11 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 
 	while(pPos)
 	{
+		FileType* pOutData = &outData;
 		FileType* temp = m_pFIleListFile.GetNext(pPos);
 		strFileName = temp->GetFileName();
 
-		if (strFileName == inStrTargetFile)
+		if (strFileName.Find(inStrTargetFile) != -1)
 		{
 			temp->CopyDataInList(outData);
 			bResult = true;

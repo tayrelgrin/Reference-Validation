@@ -364,3 +364,21 @@ void InformationManager::GetConfigNameList(std::vector<CString>& outvData)
 	outvData.clear();
 	outvData = m_vConfigName;
 }
+
+TestType* InformationManager::SearchSettingData(TestType& inoutTarget, bool& bResult)
+{
+	bResult = false;
+	POSITION pPos = m_listSetting.GetHeadPosition();
+	POSITION ptemp = NULL;
+	TestType* temp = &inoutTarget;
+	while(pPos)
+	{
+		ptemp = pPos;
+		ConfigDMData* pData = m_listSetting.GetNext(pPos);
+		temp = pData->SearchTest(*temp, bResult);
+
+	}
+
+	return temp;
+}
+

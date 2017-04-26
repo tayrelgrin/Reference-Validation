@@ -56,6 +56,7 @@ BOOL CheckingFileList::OnInitDialog()
 	m_cButton_LoadSetting.SizeToContent();
 
 	AddFileNameToTreeView(m_treectrlFileList);
+	
 
 	m_cButton_LoadSetting.LoadBitmaps(IDB_BITMAP_LOADSETTING,IDB_BITMAP_LOADSETTINGPUSH,NULL,NULL);
 	m_cButton_LoadSetting.SizeToContent();
@@ -64,6 +65,13 @@ BOOL CheckingFileList::OnInitDialog()
 	m_cButton_Add.SizeToContent();
 	m_cButton_Remove.LoadBitmaps(IDB_BITMAP_LEFT,IDB_BITMAP_LEFTPUSH,NULL,NULL);
 	m_cButton_Remove.SizeToContent();
+
+
+	m_ListctrlFileList.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVCFMT_CENTER | LVS_EDITLABELS);
+
+	m_ListctrlFileList.InsertColumn(0, _T("Test"), LVCFMT_CENTER, 110,  -1);
+	m_ListctrlFileList.InsertColumn(1, _T("File"), LVCFMT_CENTER, 170, -1);
+	AddFileNameToListview();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -81,7 +89,7 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 	for(int i = 0; i < m_vConfigFileList.size(); i++)
 	{
 		CString strOriFilePath = m_vConfigFileList[i];
-		CString strTest, strFile;
+		CString strDir, strTest, strFile;
 
 		if(strOriFilePath.Find('\\') == -1 && strOriFilePath=="")
 		{
@@ -99,7 +107,9 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 				AfxExtractSubString(strTest, strOriFilePath, 2, ':');
 				if(strTest != "")
 				{
+					AfxExtractSubString(strDir, strOriFilePath, 0, ':');
 					AfxExtractSubString(strTest, strOriFilePath, 1, ':');
+					strTest = strDir + "-" + strTest;
 					AfxExtractSubString(strFile, strOriFilePath, 2, ':');
 				}
 				else
@@ -130,7 +140,7 @@ void CheckingFileList::AddFileNameToListview()
 	for(int i = 0; i < m_vSettingFileList.size(); i++)
 	{
 		CString strOriFilePath = m_vSettingFileList[i];
-		CString strTest, strFile;
+		CString strDir, strTest, strFile;
 		if(strOriFilePath.Find('\\') == -1 && strOriFilePath=="")
 		{
 			AfxExtractSubString(strTest, strOriFilePath, 0, ':');
@@ -147,7 +157,9 @@ void CheckingFileList::AddFileNameToListview()
 				AfxExtractSubString(strTest, strOriFilePath, 2, ':');
 				if(strTest != "")
 				{
+					AfxExtractSubString(strDir, strOriFilePath, 0, ':');
 					AfxExtractSubString(strTest, strOriFilePath, 1, ':');
+					strTest = strDir + "-" + strTest;
 					AfxExtractSubString(strFile, strOriFilePath, 2, ':');
 				}
 				else
@@ -160,12 +172,26 @@ void CheckingFileList::AddFileNameToListview()
 		CString strCompare;
 		bool bResult = false;
 
-// 		for (int index = 0; m_vSettingFileList.size() > index; index++ )
-// 		{
-// 			m_ListctrlFileList.GetItemText(i,)
-// 		}
-// 		if(!bResult)
-// 			incTarget.AddString(strTest);
+		int nIndex;
+		CString strTempTest;
+		CString strTempFile;
+
+		for (nIndex = 0; m_ListctrlFileList.GetItemCount() > nIndex; nIndex++ )
+		{
+			strTempTest = m_ListctrlFileList.GetItemText(nIndex,0);
+			strTempFile = m_ListctrlFileList.GetItemText(nIndex,1);
+			if(strTempFile == strFile && strTempTest == strTest)
+			{
+				bResult = true;
+				break;
+			}
+		}
+
+		if(!bResult)
+		{
+			m_ListctrlFileList.InsertItem(nIndex, strTest);
+			m_ListctrlFileList.SetItem(nIndex, 1,LVIF_TEXT,  strFile ,0,0,0,NULL);
+		}
 	}
 	
 }

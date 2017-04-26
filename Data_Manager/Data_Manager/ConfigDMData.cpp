@@ -655,3 +655,27 @@ bool ConfigDMData::SearchTestInList(CString inTargetTest, CString inTargetFile ,
 
 	return bResult;
 }
+
+TestType* ConfigDMData::SearchTest(TestType& inoutTarget, bool& bResult)
+{
+	bResult = false;
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+
+	TestType* temp;
+
+	while(pPos)
+	{
+		temp = m_pListTestType.GetNext(pPos);
+		CString strTemp = temp->GetTestName();
+
+		if(strTemp == inoutTarget.GetTestName())
+		{
+			TestType* pTemp = &inoutTarget;
+			delete pTemp;
+			bResult = true;
+			break;
+		}
+	}
+
+	return temp;
+}

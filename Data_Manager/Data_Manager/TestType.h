@@ -20,6 +20,7 @@ public:
 	void LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName=_T(""), FileType* pNewTest=nullptr);
 	void GetFileNames(CString inTestName, std::vector<CString>& outvFileNames);
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
+	void GetFileData(CString inFileName);
 private:
 	CList<FileType*> m_pFIleListFile;
 	CString m_strTestName;

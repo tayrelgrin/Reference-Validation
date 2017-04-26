@@ -129,7 +129,8 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
  
 	while(TRUE) {			
 		BOOL bIsNotEOL = sourceFile.ReadString(strLine);
-		outData.push_back(strLine);
+		if(strLine!="")	// 공란 제거
+			outData.push_back(strLine);
 		if(!bIsNotEOL) break;
 	}
 
