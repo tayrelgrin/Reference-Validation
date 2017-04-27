@@ -101,6 +101,7 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_NOTIFY(NM_CLICK, IDC_LIST1, &CData_ManagerDlg::OnNMClickList1)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST1, &CData_ManagerDlg::OnLvnColumnclickList1)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
+	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CData_ManagerDlg::OnNMDblclkList1)
 END_MESSAGE_MAP()
 
 
@@ -1009,54 +1010,6 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 
 void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	Invalidate();
-	HWND hWnd1 =  ::GetDlgItem (m_hWnd,IDC_LIST1);
-	LPNMITEMACTIVATE temp = (LPNMITEMACTIVATE) pNMHDR;
-
-	//get the row number
-	m_nItem = temp->iItem;
-	//get the column number
-	m_nSubItem = temp->iSubItem;
-	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
-		return ;
-
-	//Retrieve the text of the selected subItem from the list
-	CString strPreData = GetItemText(hWnd1,m_nItem ,m_nSubItem);
-	CString strData = strPreData;
-
-	RECT rtListCtrl, rtDlg, rtSubItem;
-
-	// this macro is used to retrieve the Rectangle of the selected SubItem
-	ListView_GetSubItemRect(hWnd1,temp->iItem,temp->iSubItem,LVIR_BOUNDS,&rtSubItem);
-
-	//Get the Rectangle of the listControl
-	::GetWindowRect(temp->hdr.hwndFrom,&rtListCtrl);
-
-	//Get the Rectangle of the Dialog
-	::GetWindowRect(m_hWnd,&rtDlg);
-
-	int nThisLeft  = rtListCtrl.left - rtDlg.left;
-	int nThisTop = rtListCtrl.top - rtDlg.top;
-
-	if(m_nItem != -1)
-		::SetWindowPos(	::GetDlgItem(m_hWnd,IDC_EDIT1),
-		HWND_TOP,
-		rtSubItem.left+nThisLeft ,
-		rtSubItem.top +nThisTop-30,
-		rtSubItem.right - rtSubItem.left - 3,
-		rtSubItem.bottom - rtSubItem.top -1,
-		NULL);
-	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
-	::SetFocus(::GetDlgItem(m_hWnd,IDC_EDIT1));
-
-	//Draw a Rectangle around the SubItem
-	::Rectangle(::GetDC(temp->hdr.hwndFrom),rtSubItem.left,rtSubItem.top-1,rtSubItem.right,rtSubItem.bottom);
-
-	//Set the listItem text in the EditBox
-	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),strData);
-	m_EditInListCtrl.SetSel(strData.GetLength());
-
-	// m_cPreDataStack.push() 객체로? 추가, 위치 정보 추가
 	
 	*pResult = 0;
 }
@@ -1174,5 +1127,63 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+}
+
+
+void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	Invalidate();
+	HWND hWnd1 =  ::GetDlgItem (m_hWnd,IDC_LIST1);
+	LPNMITEMACTIVATE temp = (LPNMITEMACTIVATE) pNMHDR;
+
+	//get the row number
+	m_nItem = temp->iItem;
+	//get the column number
+	m_nSubItem = temp->iSubItem;
+	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
+		return ;
+
+	//Retrieve the text of the selected subItem from the list
+	CString strPreData = GetItemText(hWnd1,m_nItem ,m_nSubItem);
+	CString strData = strPreData;
+
+	RECT rtListCtrl, rtDlg, rtSubItem;
+
+	// this macro is used to retrieve the Rectangle of the selected SubItem
+	ListView_GetSubItemRect(hWnd1,temp->iItem,temp->iSubItem,LVIR_BOUNDS,&rtSubItem);
+
+	//Get the Rectangle of the listControl
+	::GetWindowRect(temp->hdr.hwndFrom,&rtListCtrl);
+
+	//Get the Rectangle of the Dialog
+	::GetWindowRect(m_hWnd,&rtDlg);
+
+	int nThisLeft  = rtListCtrl.left - rtDlg.left;
+	int nThisTop = rtListCtrl.top - rtDlg.top;
+
+	if(m_nItem != -1)
+		::SetWindowPos(	::GetDlgItem(m_hWnd,IDC_EDIT1),
+		HWND_TOP,
+		rtSubItem.left+nThisLeft ,
+		rtSubItem.top +nThisTop-30,
+		rtSubItem.right - rtSubItem.left - 3,
+		rtSubItem.bottom - rtSubItem.top -1,
+		NULL);
+	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
+	::SetFocus(::GetDlgItem(m_hWnd,IDC_EDIT1));
+
+	//Draw a Rectangle around the SubItem
+	::Rectangle(::GetDC(temp->hdr.hwndFrom),rtSubItem.left,rtSubItem.top-1,rtSubItem.right,rtSubItem.bottom);
+
+	//Set the listItem text in the EditBox
+	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),strData);
+	m_EditInListCtrl.SetSel(strData.GetLength());
+
+	// m_cPreDataStack.push() 객체로? 추가, 위치 정보 추가
+
+
 	*pResult = 0;
 }

@@ -37,6 +37,9 @@ void BaseItem::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(BaseItem, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_BIRL, &BaseItem::OnBnClickedButtonBirl)
 	ON_CBN_SELCHANGE(IDC_COMBO1, &BaseItem::OnCbnSelchangeCombo1)
+
+	ON_NOTIFY(NM_CLICK, IDC_TREE_BI, &BaseItem::OnNMClickTreeBi)
+	ON_BN_CLICKED(IDC_BUTTON_ADDITEMBI, &BaseItem::OnBnClickedButtonAdditembi)
 END_MESSAGE_MAP()
 
 
@@ -124,7 +127,9 @@ void BaseItem::OnCbnSelchangeCombo1()
 	HTREEITEM h_Child;
 
 	POSITION pPos = FileListData.GetHeadPosition();
-	CString strSection, strItem, compare = "";
+	std::string strSection;
+	std::string strItem;
+	std::string compare = "";
 
 	while(pPos)
 	{
@@ -136,8 +141,72 @@ void BaseItem::OnCbnSelchangeCombo1()
 		if(m_TreeCtrl_BaseFile.GetCount() >= 1)
 			compare = m_TreeCtrl_BaseFile.GetItemText(h_Root);	// Search in Root level in tree
 
-		if(strSection != compare)
-			h_Root = m_TreeCtrl_BaseFile.InsertItem(strSection, TVI_ROOT, TVI_LAST);
-		h_Child = m_TreeCtrl_BaseFile.InsertItem(strItem, h_Root, NULL);
+		if(strSection.compare(compare) != 0)
+			h_Root = m_TreeCtrl_BaseFile.InsertItem(strSection.c_str(), TVI_ROOT, TVI_LAST);
+		h_Child = m_TreeCtrl_BaseFile.InsertItem(strItem.c_str(), h_Root, NULL);
 	}
+}
+
+
+void BaseItem::OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	TV_HITTESTINFO hit_info;
+
+	// 화면상에서 마우스의 위치를 얻는다.
+	::GetCursorPos(&hit_info.pt);
+
+	// 얻은 마우스 좌표를 트리컨트롤 기준의 좌표로 변경한다.
+	::ScreenToClient(m_TreeCtrl_BaseFile.m_hWnd, &hit_info.pt);
+
+	// 현재 마우스 좌표가 위치한 항목 정보를 얻는다.
+	HTREEITEM current_item = m_TreeCtrl_BaseFile.HitTest(&hit_info);
+
+	if(current_item != NULL)
+	{
+		// 마우스가 위치한 항목을 찾았다면 해당 항목을 선택한다.
+		m_TreeCtrl_BaseFile.Select(current_item, TVGN_CARET);
+	}
+
+	HTREEITEM hNode;
+	CString strFileName ="";
+	CString strTestName = "";
+	CString strCombe = "";
+
+	hNode = m_TreeCtrl_BaseFile.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
+	strFileName = m_TreeCtrl_BaseFile.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+
+	
+	if(strFileName.Find('[') != -1 && (hit_info.flags & TVHT_ONITEMSTATEICON) != 0)
+	{
+		HTREEITEM hChildItem = m_TreeCtrl_BaseFile.GetChildItem(hNode);
+
+		while (hChildItem != NULL)
+		{
+			if (m_TreeCtrl_BaseFile.GetCheck(hNode))
+			{
+				m_TreeCtrl_BaseFile.SetCheck(hChildItem,FALSE);
+			}
+			else
+			{
+				m_TreeCtrl_BaseFile.SetCheck(hChildItem,TRUE);
+			}
+
+			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);
+		}
+	}
+
+	hNode = m_TreeCtrl_BaseFile.GetNextItem(hNode, TVGN_PARENT);	// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	strTestName = m_TreeCtrl_BaseFile.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+
+	*pResult = 0;
+}
+
+
+void BaseItem::OnBnClickedButtonAdditembi()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+
 }

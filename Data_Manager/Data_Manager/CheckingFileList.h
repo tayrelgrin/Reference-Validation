@@ -36,4 +36,5 @@ public:
 	std::vector<CString> m_vConfigFileList;
 	std::vector<CString> m_vSettingFileList;
 	void AddFileNameToListview();
+	afx_msg void OnNMClickTree2(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -34,4 +34,5 @@ public:
 	CListCtrl m_ListCtrl_BaseItem;
 	CString m_strFirstTestName;
 	CTreeCtrl m_TreeCtrl_BaseFile;
+	afx_msg void OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult);
 };

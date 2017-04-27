@@ -37,6 +37,7 @@ BEGIN_MESSAGE_MAP(CheckingFileList, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LSFL, &CheckingFileList::OnBnClickedButtonLsfl)
 	ON_BN_CLICKED(IDC_BUTTON_ADDITEM, &CheckingFileList::OnBnClickedButtonAdditem)
 	ON_BN_CLICKED(IDC_BUTTON_DELETEITEM, &CheckingFileList::OnBnClickedButtonDeleteitem)
+	ON_NOTIFY(NM_CLICK, IDC_TREE2, &CheckingFileList::OnNMClickTree2)
 END_MESSAGE_MAP()
 
 
@@ -67,7 +68,7 @@ BOOL CheckingFileList::OnInitDialog()
 	m_cButton_Remove.SizeToContent();
 
 
-	m_ListctrlFileList.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES | LVCFMT_CENTER | LVS_EDITLABELS);
+	m_ListctrlFileList.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
 
 	m_ListctrlFileList.InsertColumn(0, _T("Test"), LVCFMT_CENTER, 110,  -1);
 	m_ListctrlFileList.InsertColumn(1, _T("File"), LVCFMT_CENTER, 170, -1);
@@ -119,13 +120,13 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 				}
 			}
 		}
-		CString strCompare;
+		std::string strCompare;
 		bool bResult = false;
 
 		if(incTarget.GetCount() > 0 && i != 0)	
 			strCompare = incTarget.GetItemText(h_Child);	// Serach in h_Child level in tree
 
-		if(strTest != strCompare)
+		if(strTest != strCompare.c_str())
 			h_Child = incTarget.InsertItem(strTest, TVI_ROOT, TVI_LAST);
 
 		h_2Child = incTarget.InsertItem(strFile, h_Child, NULL);
@@ -212,12 +213,28 @@ void CheckingFileList::OnBnClickedButtonAdditem()
 	UINT uCount = m_treectrlFileList.GetVisibleCount();
 	HTREEITEM hItem = m_treectrlFileList.GetFirstVisibleItem();
 
+	bool bChecked;
+	CString strFileName;
+	CString strItem;
 	// Toggle the check state of all the visible items.
 	for (UINT i = 0; i < uCount; i++)
 	{
 		ASSERT(hItem != NULL);
-		m_treectrlFileList.SetCheck(hItem, !m_treectrlFileList.GetCheck(hItem));
-		hItem = m_treectrlFileList.GetNextVisibleItem(hItem);
+		bChecked = m_treectrlFileList.GetCheck(hItem);
+
+		if(bChecked)
+		{
+			hItem = m_treectrlFileList.GetNextItem(NULL, TVGN_CARET);
+			strItem = m_treectrlFileList.GetItemText(hItem);
+
+			hItem = m_treectrlFileList.GetNextItem(hItem, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+			strFileName = m_treectrlFileList.GetItemText(hItem);			// 그 아이템의 이름을 얻어온다.
+
+			int nCount = m_ListctrlFileList.GetItemCount();
+			m_ListctrlFileList.InsertItem(nCount, strFileName);
+			m_ListctrlFileList.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
+		}
+		//hItem = m_treectrlFileList.GetNextVisibleItem(hItem);
 	}
 	
 	// tree에 체크 해제하기
@@ -231,4 +248,34 @@ void CheckingFileList::OnBnClickedButtonDeleteitem()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	// listctrl에서 아이템 삭제
+}
+
+
+void CheckingFileList::OnNMClickTree2(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+
+	CPoint point;
+	UINT nFlags = 0;
+
+	GetCursorPos(&point);
+	::ScreenToClient(m_treectrlFileList.m_hWnd, &point);
+
+	HTREEITEM hItem = m_treectrlFileList.HitTest(point,&nFlags);
+
+	if(hItem != NULL && (nFlags & TVHT_ONITEMSTATEICON) != 0)
+	{
+		if(m_treectrlFileList.GetCheck(hItem))
+		{
+			HTREEITEM hChildItem = m_treectrlFileList.GetChildItem(hItem);
+
+			while(hChildItem != NULL)
+			{
+				m_treectrlFileList.SetCheck(hChildItem,TRUE);
+
+				hChildItem = m_treectrlFileList.GetNextItem(hChildItem,TVGN_NEXT);
+			}
+		}
+	}
 }

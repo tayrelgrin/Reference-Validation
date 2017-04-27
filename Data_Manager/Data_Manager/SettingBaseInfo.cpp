@@ -101,8 +101,7 @@ BOOL SettingBaseInfo::OnInitDialog()
 void SettingBaseInfo::AddFileNameToComboBox(CComboBox& incTarget)
 {
 	incTarget.InsertString(0, "ItemVersion");
-	incTarget.InsertString(1, "Register");
-	incTarget.InsertString(2, "Reference");
+	incTarget.InsertString(1, "Reference");
 }
 
 
@@ -128,11 +127,6 @@ void SettingBaseInfo::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 	switch (nIndex)
 	{
 	case 0:
-		for(int i = 0; i < m_vSettingFileList.size(); i++)
-		{
-			m_TabBaseInfo.m_cComboFiles.AddString(m_vSettingFileList[i]);
-		}
-		
 		m_TabBaseInfo.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_TabBaseInfo;
 		break;
