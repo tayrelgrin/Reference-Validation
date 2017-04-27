@@ -254,28 +254,52 @@ void CheckingFileList::OnBnClickedButtonDeleteitem()
 void CheckingFileList::OnNMClickTree2(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	*pResult = 0;
+	TV_HITTESTINFO hit_info;
 
-	CPoint point;
-	UINT nFlags = 0;
+	// 화면상에서 마우스의 위치를 얻는다.
+	::GetCursorPos(&hit_info.pt);
 
-	GetCursorPos(&point);
-	::ScreenToClient(m_treectrlFileList.m_hWnd, &point);
+	// 얻은 마우스 좌표를 트리컨트롤 기준의 좌표로 변경한다.
+	::ScreenToClient(m_treectrlFileList.m_hWnd, &hit_info.pt);
 
-	HTREEITEM hItem = m_treectrlFileList.HitTest(point,&nFlags);
+	// 현재 마우스 좌표가 위치한 항목 정보를 얻는다.
+	HTREEITEM current_item = m_treectrlFileList.HitTest(&hit_info);
 
-	if(hItem != NULL && (nFlags & TVHT_ONITEMSTATEICON) != 0)
+	if(current_item != NULL)
 	{
-		if(m_treectrlFileList.GetCheck(hItem))
-		{
-			HTREEITEM hChildItem = m_treectrlFileList.GetChildItem(hItem);
+		// 마우스가 위치한 항목을 찾았다면 해당 항목을 선택한다.
+		m_treectrlFileList.Select(current_item, TVGN_CARET);
+	}
 
-			while(hChildItem != NULL)
+	HTREEITEM hNode;
+	CString strFileName ="";
+	CString strTestName = "";
+	CString strCombe = "";
+
+	hNode = m_treectrlFileList.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
+	strFileName = m_treectrlFileList.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+
+
+	if((hit_info.flags & TVHT_ONITEMSTATEICON) != 0)
+	{
+		HTREEITEM hChildItem = m_treectrlFileList.GetChildItem(hNode);
+
+		while (hChildItem != NULL)
+		{
+			if (m_treectrlFileList.GetCheck(hNode))
+			{
+				m_treectrlFileList.SetCheck(hChildItem,FALSE);
+			}
+			else
 			{
 				m_treectrlFileList.SetCheck(hChildItem,TRUE);
-
-				hChildItem = m_treectrlFileList.GetNextItem(hChildItem,TVGN_NEXT);
 			}
+
+			hChildItem = m_treectrlFileList.GetNextItem(hChildItem, TVGN_NEXT);
 		}
 	}
+
+	hNode = m_treectrlFileList.GetNextItem(hNode, TVGN_PARENT);	// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	strTestName = m_treectrlFileList.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+
 }

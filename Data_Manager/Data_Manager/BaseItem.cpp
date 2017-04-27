@@ -40,6 +40,7 @@ BEGIN_MESSAGE_MAP(BaseItem, CDialogEx)
 
 	ON_NOTIFY(NM_CLICK, IDC_TREE_BI, &BaseItem::OnNMClickTreeBi)
 	ON_BN_CLICKED(IDC_BUTTON_ADDITEMBI, &BaseItem::OnBnClickedButtonAdditembi)
+	ON_BN_CLICKED(IDC_BUTTON_BILS, &BaseItem::OnBnClickedButtonBils)
 END_MESSAGE_MAP()
 
 
@@ -208,5 +209,46 @@ void BaseItem::OnBnClickedButtonAdditembi()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+	// 아이템 추가
 
+	HTREEITEM hParent;
+	CString strSectionName ="";
+	CString strTestName = "";
+	CString strFileName = "";
+
+	int nIndex = m_cComboFiles.GetCurSel();
+	m_cComboFiles.SelectString(nIndex, strFileName);
+
+	hParent = m_TreeCtrl_BaseFile.GetNextItem(m_TreeCtrl_BaseFile.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
+	strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);										// 그 아이템의 이름을 얻어온다.
+
+	while(hParent != NULL)
+	{
+		HTREEITEM hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hParent, TVGN_CHILD);
+
+		while (hChildItem != NULL)
+		{
+			if (m_TreeCtrl_BaseFile.GetCheck(hChildItem))
+			{
+				strTestName = m_TreeCtrl_BaseFile.GetItemText(hChildItem);
+
+				int nCount = m_ListCtrl_BaseItem.GetItemCount();
+				m_ListCtrl_BaseItem.InsertItem(nCount, strFileName);
+				m_ListCtrl_BaseItem.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
+				m_ListCtrl_BaseItem.SetItem(nCount, 1,LVIF_TEXT,  strSectionName,0,0,0,NULL );
+				m_ListCtrl_BaseItem.SetItem(nCount, 2,LVIF_TEXT,  strTestName,0,0,0,NULL );
+			}
+
+			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);
+		}
+
+		hParent = m_TreeCtrl_BaseFile.GetNextItem(hParent,TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
+		strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);			// 그 아이템의 이름을 얻어온다.
+	}
+}
+
+
+void BaseItem::OnBnClickedButtonBils()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 }

@@ -31,6 +31,7 @@ public:
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;
+	CList<BasicData*>	 m_listBaseInfo;
 	std::vector<CString> m_vBasicFile;
 	std::vector<CString> m_vConfigName;
 

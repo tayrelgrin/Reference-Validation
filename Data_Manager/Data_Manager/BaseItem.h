@@ -3,6 +3,7 @@
 #include "afxwin.h"
 #include "InformationManager.h"
 #include "afxcmn.h"
+#include "BasicData.h"
 
 // BaseItem 대화 상자입니다.
 
@@ -35,4 +36,6 @@ public:
 	CString m_strFirstTestName;
 	CTreeCtrl m_TreeCtrl_BaseFile;
 	afx_msg void OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonAdditembi();
+	afx_msg void OnBnClickedButtonBils();
 };
