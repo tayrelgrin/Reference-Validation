@@ -342,6 +342,32 @@ void InformationManager::LoadXMLSettingFileList(CString inData)
 	delete pAddConfig;
 }
 
+void InformationManager::SetBaseInfoFromConfig(const CList<BasicData*>& outList)
+{
+	if(m_listBaseInfo.GetCount() > 0)
+	{
+		POSITION pPos = m_listBaseInfo.GetHeadPosition();
+		POSITION pTemp = NULL;
+
+		while(pPos)
+		{
+			pTemp = pPos;
+			BasicData* cTemp = m_listBaseInfo.GetNext(pPos);
+			delete cTemp;
+			m_listBaseInfo.RemoveAt(pTemp);
+		}
+		m_listBaseInfo.RemoveAll();
+	}
+
+	POSITION pPos = outList.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* cTemp = outList.GetNext(pPos);
+		m_listBaseInfo.AddTail(cTemp);
+	}
+}
+
 void InformationManager::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
 {
 	int nIndex = inStr.ReverseFind('\\');

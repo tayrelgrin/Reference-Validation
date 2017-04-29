@@ -936,6 +936,11 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	pSetting->SetConfigNum(m_strConfigNum);
 	pSetting->SetDOE(m_strDOE);
 
+	CList<BasicData*> cTemp;
+
+	pSetting->GetBaseInfoList(cTemp);
+
+	m_cValueData.SetBaseInfoFromConfig(cTemp);
 
 	m_cValueData.AddNewConfigData(pConfig);
 	m_cValueData.AddNewSettingData(pSetting);

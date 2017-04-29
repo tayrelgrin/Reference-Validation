@@ -603,24 +603,28 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 		{
 			tinyxml2::XMLAttribute* pAttr;
 			/*tinyxml2::XMLAttribute* pAttrTemp;*/
-			pAttr =(tinyxml2::XMLAttribute*) pNode->FirstChild();
-			if(pElent = pNode->ToElement())
+			tinyxml2::XMLNode* pChild;
+			pChild = pNode->FirstChild();
+			if(pElent = pChild->ToElement())
 			{
-				for (pAttr = (tinyxml2::XMLAttribute*)pElent; pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
+				for (pElent; pElent!= 0 ; pElent = pElent->NextSiblingElement())
 				{
-	 				BasicData* outData = new BasicData;
-	 				//CString strTemp = (CString)pAttr->Name();
-	 
-	 				if("Section" == strTemp)
-	 					outData->setSection((CString)pAttr->Value());
-	 				else if("Item" == strTemp)
-	 					outData->setItem((CString)pAttr->Value());
-	 				else if("Value" == strTemp)
-	 				{
-	 					outData->setValue((CString)pAttr->Value());
-	 					/*bFlag = true;*/
-	 				}
-	 				m_lBaseInfo.AddTail(outData);				
+					BasicData* outData = new BasicData;
+					for (pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute(); pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
+					{
+						CString strTemp = (CString)pAttr->Name();
+
+						if("Section" == strTemp)
+							outData->setSection((CString)pAttr->Value());
+						else if("Item" == strTemp)
+							outData->setItem((CString)pAttr->Value());
+						else if("Value" == strTemp)
+						{
+							outData->setValue((CString)pAttr->Value());
+							/*bFlag = true;*/
+						}
+					}
+					m_lBaseInfo.AddTail(outData);
 				}
 			}
 		}
@@ -742,7 +746,7 @@ void ConfigDMData::GetBaseInfoList(CList<BasicData*>& outList)
 		outList.RemoveAll();
 	}
 
-	POSITION pPos = outList.GetHeadPosition();
+	POSITION pPos = m_lBaseInfo.GetHeadPosition();
 
 	while(pPos)
 	{

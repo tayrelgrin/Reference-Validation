@@ -32,6 +32,7 @@ public:
 	void GetBaseInfo(FileType& inFileData);
 	void AddNewBaseInfo(BasicData& inData);
 	void InitBaseInfo();
+	void SetBaseInfoFromConfig(const CList<BasicData*>& outList);
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;
