@@ -30,8 +30,10 @@ void TestType::InitList()
 		}
 		catch (CMemoryException* e)
 		{
+			e->Delete();
 		}
 	}
+
 	if( m_pFIleListFile.GetSize()>0)
 		m_pFIleListFile.RemoveAll();
 }
@@ -161,6 +163,31 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 	}	
 }
 
+void TestType::SaveBaseInfoToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement, CList<BasicData*> inData)
+{
+	tinyxml2::XMLElement* Element;
+	if(m_strTestName != "")
+	{
+		if(m_strTestName.Find('\\') != -1)
+			m_strTestName.Replace('\\',':');
+
+		Element = cXMLDoc.NewElement(LPSTR(LPCTSTR(m_strTestName)));
+
+		cElement->LinkEndChild(Element);
+
+		POSITION pos = inData.GetHeadPosition();
+
+		while(pos)
+		{
+			BasicData* pData = inData.GetNext(pos);
+
+			
+			break;
+
+		}
+	}	
+}
+
 void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName, FileType* pNewTest)
 {
 	tinyxml2::XMLNode* pNode;
@@ -177,9 +204,7 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 					pNewTest = new FileType;
 
 				pNewTest->SetFileName(inStrFileName);
-
 				pNewTest->LoadDataFromXML((tinyxml2::XMLAttribute*)pAttr);
-				
 			}
 			else
 			{
@@ -215,7 +240,6 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 
 	while(pPos)
 	{
-		FileType* pOutData = &outData;
 		FileType* temp = m_pFIleListFile.GetNext(pPos);
 		strFileName = temp->GetFileName();
 
@@ -223,6 +247,7 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 		{
 			temp->CopyDataInList(outData);
 			bResult = true;
+			break;
 		}
 	}
 	return bResult;

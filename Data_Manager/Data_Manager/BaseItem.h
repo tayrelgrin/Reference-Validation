@@ -38,4 +38,6 @@ public:
 	afx_msg void OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonAdditembi();
 	afx_msg void OnBnClickedButtonBils();
+	bool m_bModifyFlag;
+	void AddBaseInfoItemToList();
 };

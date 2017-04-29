@@ -362,20 +362,37 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 	{
 		m_cSettingDlg.DestroyWindow();
 	}
-	
-	m_cSettingDlg.m_strSettingText = m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE;
+	if(m_strDOE!="")
+	{
+		m_cSettingDlg.m_strSettingText = m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE;
 
-	std::vector<CString> vConfigFileNames;				// ref 디렉토리에 있는 파일 정보를 가져오기 위한 벡터
-	m_cNewConfigData->GetFileNames(vConfigFileNames);	// ref 디렉토리에 있는 파일 정보 m_cNewConfigData에서 전부 가져오기
-	
-	m_cSettingDlg.m_vConfigFileList = vConfigFileNames;
-	m_cSettingDlg.m_vSettingFileList = m_vAllFileList;	// Base setting 을 위한 파일 리스트
+		std::vector<CString> vConfigFileNames;				// ref 디렉토리에 있는 파일 정보를 가져오기 위한 벡터
+		m_cNewConfigData->GetFileNames(vConfigFileNames);	// ref 디렉토리에 있는 파일 정보 m_cNewConfigData에서 전부 가져오기
 
-	m_cSettingDlg.m_pData = &m_cValueData;
+		m_cSettingDlg.m_vConfigFileList = vConfigFileNames;
+		m_cSettingDlg.m_vSettingFileList = m_vAllFileList;	// Base setting 을 위한 파일 리스트
 
-	m_cSettingDlg.Create(SettingBaseInfo::IDD, this);
-	m_cSettingDlg.CenterWindow();
-	m_cSettingDlg.ShowWindow(SW_SHOW);
+		m_cSettingDlg.m_pData = &m_cValueData;
+
+		m_cSettingDlg.DoModal();
+
+		m_vAllFileList = m_cSettingDlg.m_vSettingFileList;
+
+		HTREEITEM hNode;
+		TestType cBaseInfoTest;
+		hNode = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
+		CString strTest = m_treeMainTest.GetItemText(hNode);
+		cBaseInfoTest.SetTestName(strTest);
+		bool bResult;
+		
+		m_cValueData.GetBaseInfo(m_cBasicData);
+		//AddValueToBaseInfo(cBaseInfoTest);
+		m_cNewSettingData->SetNewDataFlag(true);
+	}
+	else
+	{
+		AfxMessageBox("Choose DOE", MB_OK);
+	}
 }
 
 
@@ -768,6 +785,7 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 	m_lbBuild.ResetContent();
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
+	m_strDOE = "";
 
 	int nIndex = m_lbProject.GetCurSel();
 	m_lbProject.GetText(nIndex, m_strPrj);
@@ -813,6 +831,7 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	m_lbConfig.ResetContent();
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
+	m_strDOE = "";
 
 	int nIndex = m_lbBuild.GetCurSel();
 	m_lbBuild.GetText(nIndex, m_strBuildNum);
@@ -847,6 +866,7 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_lbDOE.ResetContent();
 	m_treeMainTest.DeleteAllItems();
+	m_strDOE = "";
 
 	int nIndex = m_lbConfig.GetCurSel();
 	m_lbConfig.GetText(nIndex, m_strConfigNum);
@@ -905,7 +925,17 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
 
 	pConfig->LoadDataFiles(strValuePath);
+	pConfig->SetProject(m_strPrj);
+	pConfig->SetBuildNum(m_strBuildNum);
+	pConfig->SetConfigNum(m_strConfigNum);
+	pConfig->SetDOE(m_strDOE);
+
 	pSetting->LoadDataFiles(strSettingPath);
+	pSetting->SetProject(m_strPrj);
+	pSetting->SetBuildNum(m_strBuildNum);
+	pSetting->SetConfigNum(m_strConfigNum);
+	pSetting->SetDOE(m_strDOE);
+
 
 	m_cValueData.AddNewConfigData(pConfig);
 	m_cValueData.AddNewSettingData(pSetting);
@@ -940,9 +970,10 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
+	m_ListCtrlMain.DeleteAllItems();
 
 	HTREEITEM hNode;
-	CString strFileName, strTestName, strDirName, strCombe;
+	std::string strFileName, strTestName, strDirName, strCombe;
 
 	hNode = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
 	strFileName = m_treeMainTest.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
@@ -953,23 +984,40 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
  	hNode = m_treeMainTest.GetNextItem(hNode, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
  	strDirName = m_treeMainTest.GetItemText(hNode);				// 그 아이템의 이름을 얻어온다.
 
-	if(strFileName == "Base Info")
+	if (strDirName.length()>100)
 	{
-		
+		strDirName = "";
 	}
 
-	if(strTestName!="")
+	if(strFileName == "Base Info")
 	{
-		if(strDirName!="")
-			strCombe = strDirName+":"+strTestName;
-		else
-			strCombe = strTestName;
-		m_cNewConfigData->SearchTestInList(strCombe, strFileName, m_cFileData);
+		//TestType cBaseInfoTest;
+		hNode = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);
+		hNode = m_treeMainTest.GetNextItem(hNode, TVGN_NEXT);
+		//cBaseInfoTest.SetTestName(m_treeMainTest.GetItemText(hNode));
 		
-		AddToListControl(strFileName, m_cFileData);
+		//m_cBasicData.InitList();
+		m_cValueData.GetBaseInfo(m_cBasicData);
+		//cBaseInfoTest.AddNewFile(&m_cBasicData);
+
+		AddBaseInfoToListControl(m_treeMainTest.GetItemText(hNode));
+		
 	}
 	else
-		m_ListCtrlMain.DeleteAllItems();
+	{
+		if(strTestName!="")
+		{
+			if(strDirName!="")
+				strCombe = strDirName+":"+strTestName;
+			else
+				strCombe = strTestName;
+			m_cNewConfigData->SearchTestInList(strCombe.c_str(), strFileName.c_str(), m_cFileData);
+
+			AddToListControl(strFileName.c_str(), m_cFileData);
+		}
+		else
+			m_ListCtrlMain.DeleteAllItems();
+	}
 }
 
 
@@ -980,7 +1028,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 	CList<BasicData*> Items;
 	inData.CopyDataToList(Items);
 
-	POSITION pos = Items.GetHeadPosition();;
+	POSITION pos = Items.GetHeadPosition();
 	int nIndex = 0;
 	CString strSequence;
 	CString strOri, strValue, strDescrip;
@@ -992,6 +1040,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 		BasicData* temp = Items.GetNext(pos);
 		m_ListCtrlMain.InsertItem(nIndex, strSequence);
 		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
+		
 		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
 		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
@@ -1002,8 +1051,160 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue ,0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip ,0,0,0,NULL);
 
+
 		nIndex++;
 	}
+
+	pos = Items.GetHeadPosition();
+
+	POSITION pTemp = NULL;
+
+	while(pos && Items.GetSize()>0)
+	{
+		pTemp = pos;
+
+		BasicData* temp = Items.GetNext(pos);
+		delete temp;
+		Items.RemoveAt(pTemp);
+	}
+	
+	EndWaitCursor();
+}
+
+
+// void CData_ManagerDlg::AddValueToBaseInfo(TestType& inData)
+// {
+// 	m_ListCtrlMain.DeleteAllItems(); 
+// 
+// 	CList<BasicData*> lBaseItems;
+// 	CList<BasicData*> lBaseValueItems;
+// 	FileType* pFile = new FileType;
+// 	std::vector<CString> vFileNames;
+// 
+// 	
+// 	m_cBasicData.CopyDataToList(lBaseItems);
+// 
+// 	std::string strTarget = _T("");
+// 	std::string strPreItem = _T("");
+// 
+// 	int nIndex = 0;
+// 	CString strSequence;
+// 	CString strOri, strValue, strDescrip;
+// 
+// 
+// 	POSITION pos = lBaseItems.GetHeadPosition();
+// 
+// 	while(pos)
+// 	{
+// 		BasicData* temp = lBaseItems.GetNext(pos);
+// 		strTarget = temp->getValue();
+// 		if(strTarget.compare(strPreItem) != 0)
+// 		{
+// 			strPreItem = strTarget;
+// 			CString strTemp = strTarget.c_str();
+// 			strTemp = strTemp+".ini";
+// 
+// 			m_cNewConfigData->SearchTestInList(inData.GetTestName(),strTemp,*pFile) ;
+// 
+// 			pFile->CopyDataToList(lBaseValueItems);
+// 		}
+// 
+// 		POSITION pValuePos = lBaseValueItems.GetHeadPosition();
+// 
+// 		while(pValuePos)
+// 		{
+// 			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
+// 			if (tempValue->getSection()== temp->getSection() && tempValue->getItem()==temp->getItem())
+// 			{
+// 				temp->setValue(tempValue->getValue());
+// 				break;
+// 			}
+// 		}
+// 	}
+// // 	m_cValueData.InitBaseInfo();
+// // 
+// // 	pos = lBaseItems.GetHeadPosition();
+// // 
+// // 	while (pos)
+// // 	{
+// // 		BasicData* temp = lBaseItems.GetNext(pos);
+// // 		m_cValueData.AddNewBaseInfo(*temp);
+// // 	}
+// // 	m_cBasicData.SetListCountZero();
+// // 	m_cValueData.GetBaseInfo(m_cBasicData);
+// }
+
+void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
+{
+	m_ListCtrlMain.DeleteAllItems(); 
+
+	CList<BasicData*> lBaseItems;
+	CList<BasicData*> lBaseValueItems;
+	FileType* pFile = new FileType;
+	std::vector<CString> vFileNames;
+
+	m_cBasicData.CopyDataToList(lBaseItems);
+
+	std::string strTarget = _T("");
+	std::string strPreItem = _T("");
+
+	int nIndex = 0;
+	CString strSequence = "";
+	CString strOri = "";
+	std::string strValue = "";
+	std::string strDescrip = "";
+	BeginWaitCursor();
+
+	POSITION pos = lBaseItems.GetHeadPosition();
+
+	while(pos)
+	{
+		strSequence.Format(_T("%d"), nIndex);
+		BasicData* temp = lBaseItems.GetNext(pos);
+		strTarget = temp->getValue();
+		if(strTarget.compare(strPreItem) != 0)
+		{
+			strPreItem = strTarget;
+			CString strTemp = strTarget.c_str();
+			strTemp = strTemp+".ini";
+
+			m_cNewConfigData->SearchTestInList(inData,strTemp,*pFile) ;
+
+			pFile->CopyDataToList(lBaseValueItems);
+		}
+
+		POSITION pValuePos = lBaseValueItems.GetHeadPosition();
+		CString strFileName;
+		while(pValuePos)
+		{
+			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
+			if (tempValue->getSection()== temp->getSection() && tempValue->getItem()==temp->getItem())
+			{
+				strFileName = temp->getValue();
+				temp->setValue(tempValue->getValue());
+				break;
+			}
+		}
+
+		m_ListCtrlMain.InsertItem(nIndex, strSequence);
+		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
+
+		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  strFileName,0,0,0,NULL );
+		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
+		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
+
+		CString strTemp1, strTemp2;
+
+		strOri = temp->getValue();
+		if(AfxExtractSubString(strTemp1,	strOri, 0, '/'))
+			strValue = LPSTR(LPCTSTR(strTemp1));
+		if(AfxExtractSubString(strTemp2, strOri, 1, '/'))
+			strDescrip = LPSTR(LPCTSTR(strTemp2));
+		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue.c_str() ,0,0,0,NULL);
+		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip.c_str() ,0,0,0,NULL);
+		nIndex++;
+	}
+
 	EndWaitCursor();
 }
 

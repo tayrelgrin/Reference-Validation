@@ -31,7 +31,7 @@ public:
 	void INIFileReadLine(std::vector<CString> invPath);
 	void SetFilePath(std::vector<CString> invPath);
 	void SaveDataToFile(std::vector<CString> invBasicFile);
-	void SaveSettingToFile(std::vector<CString> invBasicFile);
+	void SaveSettingToFile(std::vector<CString> invBasicFile, CList<BasicData*>* inlBaseInfo);
 	bool GetNewDataFlag();
 	void SetNewDataFlag(bool inData);
 	void AddCommonBaseFile(std::vector<CString> invFileName);
@@ -44,6 +44,7 @@ public:
 	void GetFileNames(std::vector<CString>& outvData);
 	bool SearchTestInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	TestType* SearchTest(TestType& inoutTarget, bool& bResult);
+	void GetBaseInfoList(CList<BasicData*>& outList);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;
@@ -51,11 +52,12 @@ private:
 	CString m_strConfigNum;
 	CString m_strDOE;
 	std::vector<CString> m_vTestName;
-//	std::vector<CString> m_vFilePath;
+	std::vector<CString> m_vFilePath;
 	TestType* m_pBaseData;
 	CList<TestType*> m_pListTestType;
 	std::vector<CString> m_vTestDirPath;
 	std::vector<CString> m_vBaseFiles;
+	CList<BasicData*> m_lBaseInfo;
 	bool m_bNewData;
 	
 };

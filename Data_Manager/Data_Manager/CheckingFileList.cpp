@@ -47,8 +47,9 @@ END_MESSAGE_MAP()
 BOOL CheckingFileList::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
-
+	
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	m_bModifyFlag = false;
 
 	m_cButton_Reload.LoadBitmaps(IDB_BITMAP_RELOAD,IDB_BITMAP_RELOADPUSH,NULL,NULL);
 	m_cButton_Reload.SizeToContent();
@@ -110,7 +111,7 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 				{
 					AfxExtractSubString(strDir, strOriFilePath, 0, ':');
 					AfxExtractSubString(strTest, strOriFilePath, 1, ':');
-					strTest = strDir + "-" + strTest;
+					strTest = strDir + ":" + strTest;
 					AfxExtractSubString(strFile, strOriFilePath, 2, ':');
 				}
 				else
@@ -160,7 +161,7 @@ void CheckingFileList::AddFileNameToListview()
 				{
 					AfxExtractSubString(strDir, strOriFilePath, 0, ':');
 					AfxExtractSubString(strTest, strOriFilePath, 1, ':');
-					strTest = strDir + "-" + strTest;
+					strTest = strDir + ":" + strTest;
 					AfxExtractSubString(strFile, strOriFilePath, 2, ':');
 				}
 				else
@@ -233,6 +234,8 @@ void CheckingFileList::OnBnClickedButtonAdditem()
 			int nCount = m_ListctrlFileList.GetItemCount();
 			m_ListctrlFileList.InsertItem(nCount, strFileName);
 			m_ListctrlFileList.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
+			
+			m_bModifyFlag = true;
 		}
 		//hItem = m_treectrlFileList.GetNextVisibleItem(hItem);
 	}
@@ -247,7 +250,15 @@ void CheckingFileList::OnBnClickedButtonAdditem()
 void CheckingFileList::OnBnClickedButtonDeleteitem()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// listctrl에서 아이템 삭제
+	POSITION pos = m_ListctrlFileList.GetFirstSelectedItemPosition();
+
+	while (pos != NULL)
+	{
+		int nItem = m_ListctrlFileList.GetNextSelectedItem(pos);
+		m_ListctrlFileList.DeleteItem(nItem);
+		pos = m_ListctrlFileList.GetFirstSelectedItemPosition();
+		m_bModifyFlag = true;
+	}
 }
 
 
@@ -299,7 +310,30 @@ void CheckingFileList::OnNMClickTree2(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 	}
 
-	hNode = m_treectrlFileList.GetNextItem(hNode, TVGN_PARENT);	// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	hNode = m_treectrlFileList.GetNextItem(hNode, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
 	strTestName = m_treectrlFileList.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+}
 
+
+void CheckingFileList::SaveFileListInListctrlToList()
+{
+	m_vSettingFileList.clear();
+
+	CString strNewData;
+
+	std::string strFileName, strItemName;
+	CString strTemp1, strTemp2;
+
+	for(int i = 0; m_ListctrlFileList.GetItemCount() ; i++)
+	{
+		strFileName = m_ListctrlFileList.GetItemText(i,0);
+		strItemName = m_ListctrlFileList.GetItemText(i,1);
+
+		strTemp1 = strFileName.c_str();
+		strTemp2 = strItemName.c_str();
+
+		strNewData = strTemp1 + ":" + strTemp2;
+
+		m_vSettingFileList.push_back(strNewData);
+	}	
 }

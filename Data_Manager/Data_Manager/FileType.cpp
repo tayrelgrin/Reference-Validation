@@ -35,6 +35,12 @@ void FileType::InitList()
 		m_pDataListData.RemoveAll();
 }
 
+void FileType::SetListCountZero()
+{
+	m_pDataListData.RemoveAll();
+}
+
+
 void FileType::SaveDataToFile( tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement)
 {
 	tinyxml2::XMLElement* Element;
@@ -115,7 +121,23 @@ void FileType::AddNewData(CString inData, int inNInput)
 
 void FileType::AddNewData(BasicData* inData)
 {
-	m_pDataListData.AddTail(inData);
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pDataListData.GetHeadPosition();
+	bool bSearchResult = false;
+
+	while(pPos && m_pDataListData.GetSize() > 0)
+	{
+		pTemp = pPos;
+		
+		BasicData* temp = m_pDataListData.GetNext(pPos);
+		if(temp==inData)
+		{
+			bSearchResult = true;
+			break;
+		}
+	}
+	if(!bSearchResult)
+		m_pDataListData.AddTail(inData);
 }
 
 void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& outData)
@@ -187,15 +209,20 @@ void FileType::CopyDataInList(FileType& outData)
 
 void FileType::CopyDataToList(CList<BasicData*>& outListData)
 {
-	POSITION pPos = m_pDataListData.GetHeadPosition();
+	outListData.RemoveAll();
 
-	while(pPos)
+	if(!m_pDataListData.IsEmpty())
 	{
-		BasicData* temp = m_pDataListData.GetNext(pPos);
-		BasicData* cNewData = new BasicData;
+		POSITION pPos = m_pDataListData.GetHeadPosition();
 
-		cNewData->setData(*temp);
+		while(pPos)
+		{
+			BasicData* temp = m_pDataListData.GetNext(pPos);
+			BasicData* cNewData = new BasicData;
 
-		outListData.AddTail(cNewData);
-	}
+			cNewData->setData(*temp);
+
+			outListData.AddTail(cNewData);
+		}
+	}	
 }

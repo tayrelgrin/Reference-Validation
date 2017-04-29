@@ -14,7 +14,7 @@ IMPLEMENT_DYNAMIC(BaseItem, CDialogEx)
 BaseItem::BaseItem(CWnd* pParent /*=NULL*/)
 	: CDialogEx(BaseItem::IDD, pParent)
 {
-
+	
 }
 
 BaseItem::~BaseItem()
@@ -52,6 +52,7 @@ BOOL BaseItem::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	m_bModifyFlag = false;
 
 	m_cButton_BI_Reload.LoadBitmaps(IDB_BITMAP_RELOAD,IDB_BITMAP_RELOADPUSH,NULL,NULL);
 	m_cButton_BI_Reload.SizeToContent();
@@ -96,10 +97,10 @@ void BaseItem::OnCbnSelchangeCombo1()
 	if(nIndex == -1)
 		return;
 
-	CString strSelect = "";
-	m_cComboFiles.GetLBText(nIndex,LPSTR(LPCTSTR(strSelect)));
+	std::string strSelect = "";
+	m_cComboFiles.GetLBText(nIndex,(LPTSTR)strSelect.c_str());
 
-	 if(strSelect == "Register")
+	 if(strSelect.compare("Register") == 0)
 		 strSelect = "_Register";
 	// else if(strSelect == "Reference")
 
@@ -118,7 +119,7 @@ void BaseItem::OnCbnSelchangeCombo1()
 	}
 	cTarget = cTemp;
 	CString strFileName;
-	strFileName.Format("%s%s",strFileName,".ini");
+	strFileName.Format("%s%s",strSelect.c_str(),".ini");
 	cTarget->SearchFileInList(strFileName,cFile);
 	CList<BasicData*> FileListData;
 	cFile.CopyDataToList(FileListData);
@@ -217,7 +218,7 @@ void BaseItem::OnBnClickedButtonAdditembi()
 	CString strFileName = "";
 
 	int nIndex = m_cComboFiles.GetCurSel();
-	m_cComboFiles.SelectString(nIndex, strFileName);
+	m_cComboFiles.GetLBText(nIndex, strFileName);
 
 	hParent = m_TreeCtrl_BaseFile.GetNextItem(m_TreeCtrl_BaseFile.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
 	strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);										// 그 아이템의 이름을 얻어온다.
@@ -237,6 +238,8 @@ void BaseItem::OnBnClickedButtonAdditembi()
 				m_ListCtrl_BaseItem.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
 				m_ListCtrl_BaseItem.SetItem(nCount, 1,LVIF_TEXT,  strSectionName,0,0,0,NULL );
 				m_ListCtrl_BaseItem.SetItem(nCount, 2,LVIF_TEXT,  strTestName,0,0,0,NULL );
+
+				m_bModifyFlag = true;
 			}
 
 			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);
@@ -251,4 +254,25 @@ void BaseItem::OnBnClickedButtonAdditembi()
 void BaseItem::OnBnClickedButtonBils()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+
+void BaseItem::AddBaseInfoItemToList()
+{
+	CString strFile, strSection, strItem;
+
+	for(int i = 0; i < m_ListCtrl_BaseItem.GetItemCount(); i++)
+	{
+		BasicData* cNewData = new BasicData;
+
+		strFile		= m_ListCtrl_BaseItem.GetItemText(i,0);
+		strSection	= m_ListCtrl_BaseItem.GetItemText(i,1);
+		strItem		= m_ListCtrl_BaseItem.GetItemText(i,2);
+
+		cNewData->setSection(strSection);
+		cNewData->setItem(strItem);
+		cNewData->setValue(strFile);
+
+		m_pData->AddNewBaseInfo(*cNewData);
+	}
 }

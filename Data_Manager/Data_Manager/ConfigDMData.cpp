@@ -425,7 +425,7 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 	//SetNewDataFlag(false);
 }
 
-void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
+void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile, CList<BasicData*>* inlBaseInfo)
 {
 	CString strEXEPath;
 
@@ -465,13 +465,29 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile)
 	//////////////////////////////////////////////////////////////////////////
 	
 	//////////////////////////////////////////////////////////////////////////
-// 	tinyxml2::XMLElement* pBaseElemenet = cXMLDocument.NewElement("BaseInfo");
-// 
-// 	std::vector<CString> vStrDummy;
-// 	cXMLDocument.LinkEndChild(pBaseElemenet);
-// 
-// 	m_pBaseData->SaveDataToFile(cXMLDocument, pBaseElemenet, vStrDummy);
-// 	
+	{
+		tinyxml2::XMLElement* pBaseElemenet = cXMLDocument.NewElement("BaseInfo");
+
+		std::vector<CString> vStrDummy;
+		cXMLDocument.LinkEndChild(pBaseElemenet);
+		// 여기서 직접 저장
+		POSITION pPos = inlBaseInfo->GetHeadPosition();
+		tinyxml2::XMLElement* RootElement;
+		//RootElement = cXMLDocument.NewElement(inlBaseInfo);
+		while(pPos)
+		{
+			tinyxml2::XMLElement* Element;
+			
+			Element = cXMLDocument.NewElement("Element");
+			BasicData* temp = inlBaseInfo->GetNext(pPos);
+
+			pBaseElemenet->LinkEndChild(Element);
+			Element->SetAttribute("Section",	temp->getSection());
+			Element->SetAttribute("Item",		temp->getItem());
+			Element->SetAttribute("Value",		temp->getValue());
+			
+		}
+	}
 	//////////////////////////////////////////////////////////////////////////
 	tinyxml2::XMLElement* pElemenet = cXMLDocument.NewElement("Setting");
 
@@ -583,21 +599,49 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 		{
 			continue;
 		}
-		if(pElent = pNode->ToElement())
+		if (strTemp == "BaseInfo")
 		{
-			if(inIndex==1)
+			tinyxml2::XMLAttribute* pAttr;
+			/*tinyxml2::XMLAttribute* pAttrTemp;*/
+			pAttr =(tinyxml2::XMLAttribute*) pNode->FirstChild();
+			if(pElent = pNode->ToElement())
 			{
-				TestType* cNewTest = new TestType;
-
-				cNewTest->SetTestName((CString)pElent->Value());
-				m_vTestName.push_back((CString)pElent->Value());
-
-				cNewTest->LoadDataFromXML(pNode);
-				m_pListTestType.AddTail(cNewTest);
+				for (pAttr = (tinyxml2::XMLAttribute*)pElent; pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
+				{
+	 				BasicData* outData = new BasicData;
+	 				//CString strTemp = (CString)pAttr->Name();
+	 
+	 				if("Section" == strTemp)
+	 					outData->setSection((CString)pAttr->Value());
+	 				else if("Item" == strTemp)
+	 					outData->setItem((CString)pAttr->Value());
+	 				else if("Value" == strTemp)
+	 				{
+	 					outData->setValue((CString)pAttr->Value());
+	 					/*bFlag = true;*/
+	 				}
+	 				m_lBaseInfo.AddTail(outData);				
+				}
 			}
-			else
+		}
+		else
+		{
+			if(pElent = pNode->ToElement())
 			{
-				SearchXMLData(pNode, ++inIndex);
+				if(inIndex==1)
+				{
+					TestType* cNewTest = new TestType;
+
+					cNewTest->SetTestName((CString)pElent->Value());
+					m_vTestName.push_back((CString)pElent->Value());
+
+					cNewTest->LoadDataFromXML(pNode);
+					m_pListTestType.AddTail(cNewTest);
+				}
+				else
+				{
+					SearchXMLData(pNode, ++inIndex);
+				}
 			}
 		}
 	}
@@ -678,4 +722,31 @@ TestType* ConfigDMData::SearchTest(TestType& inoutTarget, bool& bResult)
 	}
 
 	return temp;
+}
+
+
+void ConfigDMData::GetBaseInfoList(CList<BasicData*>& outList)
+{
+	if(outList.GetCount() > 0)
+	{
+		POSITION pPos = outList.GetHeadPosition();
+		POSITION pTemp = NULL;
+
+		while(pPos)
+		{
+			pTemp = pPos;
+			BasicData* cTemp = outList.GetNext(pPos);
+			delete cTemp;
+			m_pListTestType.RemoveAt(pTemp);
+		}
+		outList.RemoveAll();
+	}
+
+	POSITION pPos = outList.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* cTemp = m_lBaseInfo.GetNext(pPos);
+		outList.AddTail(cTemp);
+	}
 }

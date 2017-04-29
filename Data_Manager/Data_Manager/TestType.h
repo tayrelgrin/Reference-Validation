@@ -17,10 +17,11 @@ public:
 	void GetFilePathInDir(static CString inPath, std::vector<CString>& outvData);
 	void AddNewTest(CString inPath,std::vector<CString> invBasicFile, int inNInput = 2);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement, std::vector<CString> invBasicFile);
+	void SaveBaseInfoToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement, CList<BasicData*> inData);
 	void LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName=_T(""), FileType* pNewTest=nullptr);
 	void GetFileNames(CString inTestName, std::vector<CString>& outvFileNames);
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
-	void GetFileData(CString inFileName);
+	
 private:
 	CList<FileType*> m_pFIleListFile;
 	CString m_strTestName;

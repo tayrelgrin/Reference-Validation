@@ -100,15 +100,13 @@ void InformationManager::DeleteConfigData(CString instrPrj, CString instrBuild, 
 	cTargetData.SetDOE(instrDOE);
 }
 
-void InformationManager::ModifyConfigData(ConfigDMData* inTargetData)
-{
-
-}
 
 bool InformationManager::SaveRefToFile(CString inFilePath)
 {
 	ConfigDMData* pTemp;
 	bool bResult = false;
+	
+
 	if(m_listConfigs.GetCount() > 0)
 	{
 		pTemp = m_listConfigs.GetHead();
@@ -133,7 +131,7 @@ bool InformationManager::SaveRefToFile(CString inFilePath)
 			pTemp = m_listSetting.GetNext(pos);
 			if(pTemp->GetNewDataFlag())
 			{
-				pTemp->SaveSettingToFile(m_vBasicFile);
+				pTemp->SaveSettingToFile(m_vBasicFile, &m_listBaseInfo);
 			}
 		}
 		pTemp->SetNewDataFlag(false);
@@ -337,6 +335,8 @@ void InformationManager::LoadXMLSettingFileList(CString inData)
 
 	//m_vConfigName.push_back(strComb);
 
+	pAddConfig->GetBaseInfoList(m_listBaseInfo);
+
 	m_listSetting.AddTail(pAddConfig);
 
 	delete pAddConfig;
@@ -376,9 +376,37 @@ TestType* InformationManager::SearchSettingData(TestType& inoutTarget, bool& bRe
 		ptemp = pPos;
 		ConfigDMData* pData = m_listSetting.GetNext(pPos);
 		temp = pData->SearchTest(*temp, bResult);
-
 	}
 
 	return temp;
 }
 
+void InformationManager::GetBaseInfo(FileType& inFileData)
+{
+	POSITION pPos = m_listBaseInfo.GetHeadPosition();
+	POSITION ptemp = NULL;
+	
+	while(pPos)
+	{
+		BasicData* pData = m_listBaseInfo.GetNext(pPos);
+		inFileData.AddNewData(pData);
+	}
+}
+
+void InformationManager::AddNewBaseInfo(BasicData& inData)
+{
+	m_listBaseInfo.AddTail(&inData);
+}
+
+void InformationManager::InitBaseInfo()
+{
+	POSITION pPos = m_listBaseInfo.GetHeadPosition();
+	POSITION pTemp = NULL;
+	while(pPos)
+	{
+		pTemp = pPos;
+		BasicData* pData = m_listBaseInfo.GetNext(pPos);
+		delete pData;
+	}
+	m_listBaseInfo.RemoveAll();
+}

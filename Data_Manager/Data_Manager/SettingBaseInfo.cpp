@@ -108,6 +108,19 @@ void SettingBaseInfo::AddFileNameToComboBox(CComboBox& incTarget)
 void SettingBaseInfo::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	// 각 List ctrl에 있는 데이터들 저장할 것
+	if(m_TabBaseInfo.m_bModifyFlag)
+	{
+		m_TabBaseInfo.AddBaseInfoItemToList();
+		m_TabBaseInfo.m_bModifyFlag = false;
+	}
+	if (m_TabFileList.m_bModifyFlag)
+	{
+		m_TabFileList.SaveFileListInListctrlToList();
+		m_vSettingFileList = m_TabFileList.m_vSettingFileList;
+		m_TabFileList.m_bModifyFlag = false;
+	}
 }
 
 

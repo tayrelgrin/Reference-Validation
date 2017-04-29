@@ -71,7 +71,9 @@ public:
 	void AddRefinfoToListBox();
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 	void MakeDataDirectory();
+	//void AddValueToBaseInfo(TestType& inData);
 	void AddToListControl(CString inStrFileName, FileType& inData);
+	void AddBaseInfoToListControl(CString inData);
 	void InsertItems();
 	void SetCell(HWND hWnd1, CString value, int nRow, int nCol);
 	CString GetItemText(HWND hWnd, int nItem, int nSubItem) const;
@@ -86,6 +88,7 @@ private:
 	ConfigDMData* m_cNewSettingData;
 	InformationManager m_cValueData;
 	FileType m_cFileData;
+	FileType m_cBasicData;
 	CString m_strRootPath;
 	CString m_strPrj;
 	CString m_strBuildNum;

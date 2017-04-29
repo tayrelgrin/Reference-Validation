@@ -20,6 +20,7 @@ public:
 	void CopyDataInList(FileType& outData);
 	void CopyDataToList(CList<BasicData*>& outListData);
 	void InitList();
+	void SetListCountZero();
 private:
 	CList<BasicData*> m_pDataListData;
 	CString m_strFileName;

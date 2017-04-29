@@ -26,8 +26,12 @@ public:
 	void AddToBuild(CString inData);
 	void AddToConfig(CString inData);
 	void AddToDOE(CString inData);
+	void AddSettingFileList(CString inData);
 	void InitAllData();
 	TestType* SearchSettingData(TestType& inoutTarget, bool& bResult);
+	void GetBaseInfo(FileType& inFileData);
+	void AddNewBaseInfo(BasicData& inData);
+	void InitBaseInfo();
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;
