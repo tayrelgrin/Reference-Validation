@@ -54,11 +54,11 @@ private:
 	CString m_strDOE;
 	std::vector<CString> m_vTestName;
 	std::vector<CString> m_vFilePath;
-	TestType* m_pBaseData;
-	CList<TestType*> m_pListTestType;
 	std::vector<CString> m_vTestDirPath;
 	std::vector<CString> m_vBaseFiles;
+//	TestType* m_pBaseData;	
 	CList<BasicData*> m_lBaseInfo;
+	CList<TestType*> m_pListTestType;
 	bool m_bNewData;
 	
 };

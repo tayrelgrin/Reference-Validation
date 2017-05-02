@@ -6,8 +6,8 @@ ConfigDMData::ConfigDMData(void)
 {
 	m_bNewData = false;
 
-	m_pBaseData = new TestType;
-	m_pBaseData->SetTestName(_T("BaseInfo"));
+// 	m_pBaseData = new TestType;
+// 	m_pBaseData->SetTestName(_T("BaseInfo"));
 	m_pListTestType.RemoveAll();
 }
 
@@ -69,11 +69,22 @@ void ConfigDMData::InitListAndVectors()
 		m_pListTestType.RemoveAll();
 	}
 
-// 	if (m_pBaseData != nullptr)
-// 	{
-// 		delete m_pBaseData;
-// 	}
-	
+	pTemp = NULL;
+	pPos = m_lBaseInfo.GetHeadPosition();
+
+
+	while(pPos && m_lBaseInfo.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		BasicData* temp = m_lBaseInfo.GetNext(pPos);
+		delete temp;
+		m_lBaseInfo.RemoveAt(pTemp);
+	}
+	if (m_lBaseInfo.GetSize()>0)
+	{
+		m_lBaseInfo.RemoveAll();
+	}	
 }
 
 void ConfigDMData::RefNameParsing(static CString instrData)

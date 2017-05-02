@@ -100,7 +100,6 @@ BOOL BaseItem::OnInitDialog()
 
 		nIndex++;		
 	}
-
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -110,8 +109,6 @@ BOOL BaseItem::OnInitDialog()
 void BaseItem::OnBnClickedButtonBirl()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	
 }
 
 
@@ -248,7 +245,7 @@ void BaseItem::OnBnClickedButtonAdditembi()
 	m_cComboFiles.GetLBText(nIndex, strFileName);
 
 	hParent = m_TreeCtrl_BaseFile.GetNextItem(m_TreeCtrl_BaseFile.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
-	strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);										// 그 아이템의 이름을 얻어온다.
+	strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);									// 그 아이템의 이름을 얻어온다.
 
 	while(hParent != NULL)
 	{
@@ -272,7 +269,9 @@ void BaseItem::OnBnClickedButtonAdditembi()
 					strCompareSection	= m_ListCtrl_BaseItem.GetItemText(i,1);
 					strCompareItem		= m_ListCtrl_BaseItem.GetItemText(i,2);
 
-					if(strCompareFileName == strFileName && strCompareSection == strSectionName && strCompareItem == strTestName)
+					if(strCompareFileName == strFileName && 
+						strCompareSection == strSectionName &&
+						strCompareItem == strTestName)	// Same item case
 					{
 						bCompare = true;
 						break;

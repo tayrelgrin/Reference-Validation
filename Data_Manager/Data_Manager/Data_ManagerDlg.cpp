@@ -868,6 +868,7 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	m_treeMainTest.DeleteAllItems();
 	m_strDOE = "";
 
+
 	int nIndex = m_lbConfig.GetCurSel();
 	m_lbConfig.GetText(nIndex, m_strConfigNum);
 
@@ -905,6 +906,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	
 	m_treeMainTest.DeleteAllItems();
 	m_vAllFileList.clear();
+	m_cBasicData.SetListCountZero();
 
 	int nIndex = m_lbDOE.GetCurSel();
 	m_lbDOE.GetText(nIndex, m_strDOE);
@@ -1001,7 +1003,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 		hNode = m_treeMainTest.GetNextItem(hNode, TVGN_NEXT);
 		//cBaseInfoTest.SetTestName(m_treeMainTest.GetItemText(hNode));
 		
-		//m_cBasicData.InitList();
+		m_cBasicData.SetListCountZero();
 		m_cValueData.GetBaseInfo(m_cBasicData);
 		//cBaseInfoTest.AddNewFile(&m_cBasicData);
 

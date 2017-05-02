@@ -346,16 +346,6 @@ void InformationManager::SetBaseInfoFromConfig(const CList<BasicData*>& outList)
 {
 	if(m_listBaseInfo.GetCount() > 0)
 	{
-		POSITION pPos = m_listBaseInfo.GetHeadPosition();
-		POSITION pTemp = NULL;
-
-		while(pPos)
-		{
-			pTemp = pPos;
-			BasicData* cTemp = m_listBaseInfo.GetNext(pPos);
-			delete cTemp;
-			m_listBaseInfo.RemoveAt(pTemp);
-		}
 		m_listBaseInfo.RemoveAll();
 	}
 
