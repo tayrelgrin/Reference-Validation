@@ -436,3 +436,27 @@ void InformationManager::InitBaseInfo()
 	}
 	m_listBaseInfo.RemoveAll();
 }
+
+void InformationManager::ModifyConfigData(CString inTargetTest,CString inTargetFileName, BasicData* inTarget)
+{
+	POSITION pPos = m_listConfigs.GetHeadPosition();
+
+	while(pPos)
+	{
+		ConfigDMData* temp = m_listConfigs.GetNext(pPos);
+
+		temp->ModifyData(inTargetTest, inTargetFileName, inTarget);
+	}
+}
+
+void InformationManager::ModifySettingData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget)
+{
+	POSITION pPos = m_listSetting.GetHeadPosition();
+
+	while(pPos)
+	{
+		ConfigDMData* temp = m_listSetting.GetNext(pPos);
+
+		temp->ModifyData(inTargetTestName,inTargetFileName, inTarget);
+	}
+}

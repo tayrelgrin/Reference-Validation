@@ -252,3 +252,24 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 	}
 	return bResult;
 }
+
+
+void TestType::ModifyData(CString inTargetFileName, BasicData* inTarget)
+{
+	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+	CString strFileName;
+	bool bResult=false;
+
+	while(pPos)
+	{
+		FileType* temp = m_pFIleListFile.GetNext(pPos);
+		strFileName = temp->GetFileName();
+
+		if (strFileName.Find(inTargetFileName) != -1)
+		{
+			temp->ModifyData(inTarget);
+			break;
+		}
+	}
+
+}

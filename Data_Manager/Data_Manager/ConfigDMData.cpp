@@ -754,3 +754,22 @@ void ConfigDMData::GetBaseInfoList(CList<BasicData*>& outList)
 		outList.AddTail(cTemp);
 	}
 }
+
+void ConfigDMData::ModifyData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget)
+{
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+	POSITION pTemp = NULL;
+
+	while(pPos)
+	{
+		pTemp = pPos;
+		TestType* cTemp = m_pListTestType.GetNext(pPos);
+		if(cTemp->GetTestName() == inTargetTestName)
+		{
+			cTemp->ModifyData(inTargetFileName, inTarget);
+			SetNewDataFlag(true);
+			break;
+		}
+	}
+	
+}

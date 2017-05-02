@@ -19,6 +19,7 @@ public:
 	void SetBuildNum(CString inData);
 	void SetConfigNum(CString inData);
 	void SetDOE(CString inData);
+	void ModifyData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget);
 	bool operator==(const ConfigDMData& inData);
 	CString GetBuildNum();
 	void GetDirPathList(std::vector<CString>& outvData);

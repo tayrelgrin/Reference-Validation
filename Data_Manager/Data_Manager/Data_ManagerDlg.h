@@ -72,7 +72,7 @@ public:
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 	void MakeDataDirectory();
 	//void AddValueToBaseInfo(TestType& inData);
-	void AddToListControl(CString inStrFileName, FileType& inData);
+	void AddToListControl(CString inStrFileName, FileType& inData, FileType& inSetting);
 	void AddBaseInfoToListControl(CString inData);
 	void InsertItems();
 	void SetCell(HWND hWnd1, CString value, int nRow, int nCol);

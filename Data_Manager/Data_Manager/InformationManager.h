@@ -9,7 +9,8 @@ public:
 	~InformationManager(void);
 	void AddNewConfigData(ConfigDMData* inNewData);
 	void AddNewSettingData(ConfigDMData* inNewData);
-	void ModifyConfigData(ConfigDMData* inTargetData);
+	void ModifyConfigData(CString inTargetTest, CString inTargetFileName, BasicData* inTarget);
+	void ModifySettingData(CString inTargetTestName,CString inTargetFileName, BasicData* inTarget);
 	void DeleteConfigData(ConfigDMData* inTargetData);
 	void DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE);
 	bool SaveRefToFile(CString inFilePath);

@@ -226,3 +226,20 @@ void FileType::CopyDataToList(CList<BasicData*>& outListData)
 		}
 	}	
 }
+
+
+void FileType::ModifyData(BasicData* inTarget)
+{
+	POSITION pPos = m_pDataListData.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* temp = m_pDataListData.GetNext(pPos);
+
+		if (temp->getSection() == inTarget->getSection() && temp->getItem() == inTarget->getItem())
+		{
+			temp->setValue(inTarget->getValue());
+			break;
+		}
+	}
+}

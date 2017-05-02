@@ -1012,13 +1012,18 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 		if(strTestName!="")
 		{
+			FileType* cSetting = new FileType;
 			if(strDirName!="")
 				strCombe = strDirName+":"+strTestName;
 			else
 				strCombe = strTestName;
 			m_cNewConfigData->SearchTestInList(strCombe.c_str(), strFileName.c_str(), m_cFileData);
+			m_cNewSettingData->SearchTestInList(strCombe.c_str(), strFileName.c_str(), *cSetting);
 
-			AddToListControl(strFileName.c_str(), m_cFileData);
+
+			AddToListControl(strFileName.c_str(), m_cFileData, *cSetting);
+
+			delete cSetting;
 		}
 		else
 			m_ListCtrlMain.DeleteAllItems();
@@ -1026,7 +1031,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 
-void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
+void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData, FileType& inSetting)
 {
 	m_ListCtrlMain.DeleteAllItems(); 
 
@@ -1059,6 +1064,31 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData)
 
 		nIndex++;
 	}
+
+	// fill check boxes
+	//////////////////////////////////////////////////////////////////////////
+	CList<BasicData*> Settings;
+	inSetting.CopyDataToList(Settings);
+
+	pos = Settings.GetHeadPosition();
+	nIndex = 0;
+	strSequence;
+
+	while(pos)
+	{
+		BasicData* temp = Items.GetNext(pos);
+
+		strValue = temp->getValue();
+
+		if (strValue == "1")
+		{
+			m_ListCtrlMain.SetCheck(nIndex,1);
+		}
+		nIndex++;
+	}
+	
+
+	//////////////////////////////////////////////////////////////////////////
 
 	pos = Items.GetHeadPosition();
 
@@ -1210,14 +1240,18 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		nIndex++;
 	}
 
+
+
 	EndWaitCursor();
 }
 
 
 void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	
 	*pResult = 0;
+
+	
+	
 }
 
 //this function will returns the item text depending on the item and SubItem Index
@@ -1320,7 +1354,7 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 // 			for( int i=0 ; i<nCnt ; i++ )
 // 				m_ListCtrlMain.SetCheck( i );
 // 			m_bIsAllCheck = TRUE;
-// 			SetHeaderCheck( TRUE );  
+// 			SetHeaderCheck( TRUE );
 // 		}
 	}
 
@@ -1334,6 +1368,57 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
+	int nCheckValue = 0;
+
+	int nSelIndex = pNMLV->iItem; // 클릭한 아이템의 인덱스 얻어옴
+	bool bFlag = false;
+	CString strFile, strSection, strItem, strValue, strDescrip;
+
+	if(pNMLV->uChanged)
+	{
+		if (nSelIndex > -1)
+		{
+			strFile		= m_ListCtrlMain.GetItemText(nSelIndex,1);
+			strSection	= m_ListCtrlMain.GetItemText(nSelIndex,2);
+			strItem		= m_ListCtrlMain.GetItemText(nSelIndex,3);
+			strValue	= m_ListCtrlMain.GetItemText(nSelIndex,4);
+			strDescrip	= m_ListCtrlMain.GetItemText(nSelIndex,5);
+
+			// 체크 박스에 체크 여부에 따라 세팅 값이 0 또는 1로 변경
+			if((pNMLV->uNewState & 0x1000) && (pNMLV->uOldState & 0x2000))
+			{
+				nCheckValue = 0; // uncheck : release checking
+				bFlag = true;
+			}
+			else if((pNMLV->uNewState & 0x2000) && (pNMLV->uOldState & 0x1000))
+			{
+				nCheckValue = 1;	// check 
+				bFlag = true;
+			}
+
+			if (bFlag)
+			{
+				// 변경된 세팅 값을 해당 객체에 저장
+				strValue.Format("%d", nCheckValue);
+
+				BasicData* cModifyTarget = new BasicData;
+
+				cModifyTarget->setItem(strItem);
+				cModifyTarget->setValue(strValue);
+				cModifyTarget->setSection(strSection);
+
+				HTREEITEM selectedItem;
+
+				selectedItem = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
+				CString strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
+
+				m_cValueData.ModifySettingData(strTestName, strFile, cModifyTarget);
+
+				bFlag = false;
+				m_bNewData = true;	// file save 를 위한 flag 변경
+			}
+		}
+	}
 }
 
 
