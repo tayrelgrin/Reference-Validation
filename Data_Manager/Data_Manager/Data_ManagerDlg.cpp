@@ -1378,6 +1378,14 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 	{
 		if (nSelIndex > -1)
 		{
+			TV_HITTESTINFO hit_info;
+
+			// 화면상에서 마우스의 위치를 얻는다.
+			::GetCursorPos(&hit_info.pt);
+
+			// 얻은 마우스 좌표를 트리컨트롤 기준의 좌표로 변경한다.
+			::ScreenToClient(m_ListCtrlMain.m_hWnd, &hit_info.pt);
+
 			strFile		= m_ListCtrlMain.GetItemText(nSelIndex,1);
 			strSection	= m_ListCtrlMain.GetItemText(nSelIndex,2);
 			strItem		= m_ListCtrlMain.GetItemText(nSelIndex,3);
@@ -1396,7 +1404,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 				bFlag = true;
 			}
 
-			if (bFlag)
+			if (bFlag && (hit_info.flags & TVHT_ONITEMSTATEICON) != 0)
 			{
 				// 변경된 세팅 값을 해당 객체에 저장
 				strValue.Format("%d", nCheckValue);
@@ -1410,7 +1418,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 				HTREEITEM selectedItem;
 
 				selectedItem = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
-				CString strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
+				CString strTestName = m_treeMainTest.GetItemText(selectedItem);							// 그 아이템의 이름을 얻어온다.
 
 				m_cValueData.ModifySettingData(strTestName, strFile, cModifyTarget);
 

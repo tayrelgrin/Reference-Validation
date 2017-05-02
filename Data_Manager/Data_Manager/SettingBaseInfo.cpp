@@ -66,13 +66,15 @@ BOOL SettingBaseInfo::OnInitDialog()
 
 	m_Tab.GetClientRect(&rect);
 
+	m_TabBaseInfo.m_pData = m_pData;
+
 	m_TabBaseInfo.Create(IDD_DIALOG_BASEITEM, &m_Tab);
 
 	//////////////////////////////////////////////////////////////////////////
 	// Base Info Items Tab init
 
 	AddFileNameToComboBox(m_TabBaseInfo.m_cComboFiles);
-	m_TabBaseInfo.m_pData = m_pData;
+	
 	CString strTemp = m_vConfigFileList[0];
 	CString strTestName;
 

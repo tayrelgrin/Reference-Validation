@@ -74,6 +74,33 @@ BOOL BaseItem::OnInitDialog()
 	m_ListCtrl_BaseItem.InsertColumn(1, _T("Section"),			LVCFMT_CENTER, 90,  -1);
 	m_ListCtrl_BaseItem.InsertColumn(2, _T("Base Info"),		LVCFMT_CENTER, 125, -1);
 
+	FileType cBaseInfo;
+	m_pData->GetBaseInfo(cBaseInfo);
+	CList<BasicData*> lBaseInfoList;
+	cBaseInfo.CopyDataToList(lBaseInfoList);
+
+	POSITION pPos = lBaseInfoList.GetHeadPosition();
+
+	CString strSection, strItem, strValue;
+
+	int nIndex = 0;
+
+	while(pPos)
+	{
+		BasicData* temp = lBaseInfoList.GetNext(pPos);
+
+		strSection	= temp->getSection();
+		strItem		= temp->getItem();
+		strValue	= temp->getValue();
+
+		m_ListCtrl_BaseItem.InsertItem(nIndex, strValue);
+		m_ListCtrl_BaseItem.SetItem(nIndex, 0,LVIF_TEXT,  strValue,0,0,0,NULL );
+		m_ListCtrl_BaseItem.SetItem(nIndex, 1,LVIF_TEXT,  strSection,0,0,0,NULL );
+		m_ListCtrl_BaseItem.SetItem(nIndex, 2,LVIF_TEXT,  strItem,0,0,0,NULL );
+
+		nIndex++;		
+	}
+
 	
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -234,12 +261,33 @@ void BaseItem::OnBnClickedButtonAdditembi()
 				strTestName = m_TreeCtrl_BaseFile.GetItemText(hChildItem);
 
 				int nCount = m_ListCtrl_BaseItem.GetItemCount();
-				m_ListCtrl_BaseItem.InsertItem(nCount, strFileName);
-				m_ListCtrl_BaseItem.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
-				m_ListCtrl_BaseItem.SetItem(nCount, 1,LVIF_TEXT,  strSectionName,0,0,0,NULL );
-				m_ListCtrl_BaseItem.SetItem(nCount, 2,LVIF_TEXT,  strTestName,0,0,0,NULL );
 
-				m_bModifyFlag = true;
+				CString strCompareSection, strCompareItem, strCompareFileName;
+				bool bCompare = false;
+
+				// check same item in list control
+				for (int i = 0; i< nCount ; i++)
+				{
+					strCompareFileName	= m_ListCtrl_BaseItem.GetItemText(i,0);
+					strCompareSection	= m_ListCtrl_BaseItem.GetItemText(i,1);
+					strCompareItem		= m_ListCtrl_BaseItem.GetItemText(i,2);
+
+					if(strCompareFileName == strFileName && strCompareSection == strSectionName && strCompareItem == strTestName)
+					{
+						bCompare = true;
+						break;
+					}
+				}
+
+				if(bCompare == false)
+				{
+					m_ListCtrl_BaseItem.InsertItem(nCount, strFileName);
+					m_ListCtrl_BaseItem.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
+					m_ListCtrl_BaseItem.SetItem(nCount, 1,LVIF_TEXT,  strSectionName,0,0,0,NULL );
+					m_ListCtrl_BaseItem.SetItem(nCount, 2,LVIF_TEXT,  strTestName,0,0,0,NULL );
+
+					m_bModifyFlag = true;
+				}
 			}
 
 			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);

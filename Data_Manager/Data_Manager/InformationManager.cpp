@@ -409,6 +409,8 @@ TestType* InformationManager::SearchSettingData(TestType& inoutTarget, bool& bRe
 
 void InformationManager::GetBaseInfo(FileType& inFileData)
 {
+/*	inFileData.InitList();*/
+
 	POSITION pPos = m_listBaseInfo.GetHeadPosition();
 	POSITION ptemp = NULL;
 	
