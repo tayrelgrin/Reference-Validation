@@ -195,7 +195,6 @@ void CheckingFileList::AddFileNameToListview()
 			m_ListctrlFileList.SetItem(nIndex, 1,LVIF_TEXT,  strFile ,0,0,0,NULL);
 		}
 	}
-	
 }
 
 void CheckingFileList::OnBnClickedButtonLsfl()
@@ -209,41 +208,57 @@ void CheckingFileList::OnBnClickedButtonAdditem()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	// tree에서 체크 된 아이템들 가지고 오기
-	
 	UINT uCount = m_treectrlFileList.GetVisibleCount();
-	HTREEITEM hItem = m_treectrlFileList.GetFirstVisibleItem();
-
+	HTREEITEM hParent = m_treectrlFileList.GetFirstVisibleItem();		// 현재 선택된 아이템의 핸들을 가져온다.
+	HTREEITEM hItem;
+	
 	bool bChecked;
-	CString strFileName;
+	bool bCompare = false;
+	CString strTestName;
 	CString strItem;
-	// Toggle the check state of all the visible items.
-	for (UINT i = 0; i < uCount; i++)
+	CString strCompareTestName, strCompareFileName;
+
+	while(hParent != NULL)
 	{
-		ASSERT(hItem != NULL);
-		bChecked = m_treectrlFileList.GetCheck(hItem);
+		strTestName = m_treectrlFileList.GetItemText(hParent);
+		HTREEITEM hChildItem = m_treectrlFileList.GetNextItem(hParent, TVGN_CHILD);
 
-		if(bChecked)
+		while (hChildItem != NULL)
 		{
-			hItem = m_treectrlFileList.GetNextItem(NULL, TVGN_CARET);
-			strItem = m_treectrlFileList.GetItemText(hItem);
+			if (m_treectrlFileList.GetCheck(hChildItem))
+			{
+				int nCount = m_ListctrlFileList.GetItemCount();
 
-			hItem = m_treectrlFileList.GetNextItem(hItem, TVGN_PARENT);		// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
-			strFileName = m_treectrlFileList.GetItemText(hItem);			// 그 아이템의 이름을 얻어온다.
+				strTestName = m_treectrlFileList.GetItemText(hParent);
+				strItem = m_treectrlFileList.GetItemText(hChildItem);
 
-			int nCount = m_ListctrlFileList.GetItemCount();
-			m_ListctrlFileList.InsertItem(nCount, strFileName);
-			m_ListctrlFileList.SetItem(nCount, 0,LVIF_TEXT,  strFileName,0,0,0,NULL );
-			
-			m_bModifyFlag = true;
+				// check same item in list control
+				for (int i = 0; i< nCount ; i++)
+				{
+					strCompareTestName	= m_ListctrlFileList.GetItemText(i,0);
+					strCompareFileName	= m_ListctrlFileList.GetItemText(i,1);
+								 
+					if(strCompareFileName == strTestName && 
+						strCompareFileName == strItem )	// Same item case
+					{
+						bCompare = true;
+						break;
+					}
+				}
+
+				if(bCompare == false)
+				{
+					m_ListctrlFileList.InsertItem(nCount, strTestName);
+					m_ListctrlFileList.SetItem(nCount, 0,LVIF_TEXT,  strTestName,0,0,0,NULL );
+					m_ListctrlFileList.SetItem(nCount, 1,LVIF_TEXT,  strItem,0,0,0,NULL );
+					
+					m_bModifyFlag = true;
+				}
+			}
+			hChildItem = m_treectrlFileList.GetNextItem(hChildItem, TVGN_NEXT);
 		}
-		//hItem = m_treectrlFileList.GetNextVisibleItem(hItem);
+		hParent = m_treectrlFileList.GetNextItem(hParent,TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
 	}
-	
-	// tree에 체크 해제하기
-	
-
-	// listctrl에 아이템 추가하기
 }
 
 
@@ -324,7 +339,7 @@ void CheckingFileList::SaveFileListInListctrlToList()
 	std::string strFileName, strItemName;
 	CString strTemp1, strTemp2;
 
-	for(int i = 0; m_ListctrlFileList.GetItemCount() ; i++)
+	for(int i = 0; i < m_ListctrlFileList.GetItemCount() ; i++)
 	{
 		strFileName = m_ListctrlFileList.GetItemText(i,0);
 		strItemName = m_ListctrlFileList.GetItemText(i,1);

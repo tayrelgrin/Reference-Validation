@@ -3,9 +3,7 @@
 
 FileType::FileType(void)
 {
-	m_pDataListData.RemoveAll();
 }
-
 
 FileType::~FileType(void)
 {
@@ -35,6 +33,7 @@ void FileType::InitList()
 		m_pDataListData.RemoveAll();
 }
 
+
 void FileType::SetListCountZero()
 {
 	m_pDataListData.RemoveAll();
@@ -59,10 +58,12 @@ void FileType::SaveDataToFile( tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElem
 	}
 }
 
+
 void FileType::SetFileName(CString inData)
 {
 	m_strFileName = inData;
 }
+
 
 void FileType::AddNewData(CString inData, int inNInput)
 {
@@ -94,7 +95,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 				strValue.Format(_T("%d"), inNInput);
 			}
 			else
-				AfxExtractSubString(strValue,		strTemp, 1, '=');
+				AfxExtractSubString(strValue,	strTemp, 1, '=');
 
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
@@ -110,26 +111,34 @@ void FileType::AddNewData(CString inData, int inNInput)
 
 				cNewData = NULL;
 			}
+			else
+			{
+				if (cNewData != NULL)
+				{
+					delete cNewData;
+					cNewData = NULL;
+				}
+			}
 		}	
 	}
-	for(int i = 0; i<vtemp.size(); i++)
-	{
-		vtemp.erase(vtemp.begin()+i);
-	}
+
 	vtemp.clear();
 }
 
-void FileType::AddNewData(BasicData* inData)
+
+bool FileType::AddNewData(BasicData* inData)
 {
+	bool bReulst = false;
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pDataListData.GetHeadPosition();
 	bool bSearchResult = false;
+	BasicData* temp = NULL;
 
 	while(pPos && m_pDataListData.GetSize() > 0)
 	{
 		pTemp = pPos;
 		
-		BasicData* temp = m_pDataListData.GetNext(pPos);
+		temp = m_pDataListData.GetNext(pPos);
 		if(temp==inData)
 		{
 			bSearchResult = true;
@@ -137,8 +146,13 @@ void FileType::AddNewData(BasicData* inData)
 		}
 	}
 	if(!bSearchResult)
+	{
 		m_pDataListData.AddTail(inData);
+		bReulst = true;
+	}
+	return bReulst;
 }
+
 
 void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& outData)
 {
@@ -159,10 +173,12 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 	sourceFile.Close();
 }
 
+
 CString FileType::GetFileName()
 {
 	return m_strFileName;
 }
+
 
 void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 {
@@ -189,6 +205,7 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 		m_pDataListData.AddTail(outData);
 }
 
+
 void FileType::CopyDataInList(FileType& outData)
 {
 	outData.InitList();
@@ -202,7 +219,10 @@ void FileType::CopyDataInList(FileType& outData)
 
 		cNewData->setData(*temp);
 
-		outData.AddNewData(cNewData);
+		if(outData.AddNewData(cNewData) == false)
+		{
+			delete cNewData;
+		}
 	}
 }
 

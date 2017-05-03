@@ -19,43 +19,17 @@ ConfigDMData::~ConfigDMData(void)
 
 void ConfigDMData::InitListAndVectors()
 {
-	for(int i = 0; i<m_vTestDirPath.size(); i++)
-	{
-		m_vTestDirPath.erase(m_vTestDirPath.begin()+i);
-	}
-	for(int i = 0; i<m_vTestName.size(); i++)
-	{
-		m_vTestName.erase(m_vTestName.begin()+i);
-	}
 
-	for(int i = 0; i<m_vBaseFiles.size(); i++)
-	{
-		m_vBaseFiles.erase(m_vBaseFiles.begin()+i);
-	}
-		
-		// 	for(int i = 0; i<m_vFilePath.size(); i++)
-		// 	{
-		// 		m_vFilePath.erase(m_vFilePath.begin()+i);
-		// 	}
-	try
-	{
-		if(m_vTestDirPath.size()>0)
-			m_vTestDirPath.clear();
-		if(m_vTestName.size()>0)
-			m_vTestName.clear();
-		if(m_vBaseFiles.size()>0)
-			m_vBaseFiles.clear();
-		//m_vFilePath.clear();
-	}
-	catch (CMemoryException* e)
-	{
+	if(!m_vTestDirPath.empty())
+		m_vTestDirPath.erase( m_vTestDirPath.begin(), m_vTestDirPath.end() );
+	if(!m_vTestName.empty())
+		m_vTestName.erase( m_vTestName.begin(), m_vTestName.end() );
+	if(!m_vBaseFiles.empty())
+		m_vBaseFiles.erase( m_vBaseFiles.begin(), m_vBaseFiles.end() );;
 
-	}
-	
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
 	
-
 	while(pPos && m_pListTestType.GetSize()>0)
 	{
 		pTemp = pPos;
@@ -69,18 +43,6 @@ void ConfigDMData::InitListAndVectors()
 		m_pListTestType.RemoveAll();
 	}
 
-	pTemp = NULL;
-	pPos = m_lBaseInfo.GetHeadPosition();
-
-
-	while(pPos && m_lBaseInfo.GetSize()>0)
-	{
-		pTemp = pPos;
-
-		BasicData* temp = m_lBaseInfo.GetNext(pPos);
-		delete temp;
-		m_lBaseInfo.RemoveAt(pTemp);
-	}
 	if (m_lBaseInfo.GetSize()>0)
 	{
 		m_lBaseInfo.RemoveAll();
@@ -356,13 +318,6 @@ void ConfigDMData::GetFilePathInDir(std::vector<CString> invPath, std::vector<CS
 
 void ConfigDMData::SetFilePath(std::vector<CString> invPath)
 {
-// 	m_vFilePath.clear();
-// 	m_vFilePath.assign(invPath.begin(), invPath.end());
-// 
-// 	for (int i= 0; i< invPath.size(); i++)
-// 	{
-// 		invPath.erase(invPath.begin()+i);
-// 	}
 	invPath.clear();
 }
 
@@ -484,7 +439,14 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile, CList<Ba
 		// 여기서 직접 저장
 		POSITION pPos = inlBaseInfo->GetHeadPosition();
 		tinyxml2::XMLElement* RootElement;
-		//RootElement = cXMLDocument.NewElement(inlBaseInfo);
+		
+		if (pPos == NULL)
+		{
+			tinyxml2::XMLElement* Element;
+
+			Element = cXMLDocument.NewElement("Element");
+			pBaseElemenet->LinkEndChild(Element);
+		}
 		while(pPos)
 		{
 			tinyxml2::XMLElement* Element;
@@ -603,6 +565,7 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	tinyxml2::XMLNode* pNode;
 	tinyxml2::XMLElement* pElent;
 
+
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{
 		CString strTemp = (CString)pNode->Value();
@@ -648,7 +611,9 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					TestType* cNewTest = new TestType;
 
 					cNewTest->SetTestName((CString)pElent->Value());
-					m_vTestName.push_back((CString)pElent->Value());
+					CString strTemp = pElent->Value();
+
+					m_vTestName.push_back(strTemp);
 
 					cNewTest->LoadDataFromXML(pNode);
 					m_pListTestType.AddTail(cNewTest);
@@ -662,18 +627,6 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Name     : SaveBaseFileListToFile
-// Function : Save Base file list
-// pre		: none
-// return	: none
-//////////////////////////////////////////////////////////////////////////
-void ConfigDMData::SaveBaseFileListToFile(CString inFilePath, std::vector<CString> invData)
-{
-	tinyxml2::XMLDocument cDoc;
-
-	cDoc.SaveFile(LPSTR(LPCTSTR(inFilePath)));
-}
 
 //////////////////////////////////////////////////////////////////////////
 // Name     : GetFileNames
@@ -782,5 +735,4 @@ void ConfigDMData::ModifyData(CString inTargetTestName, CString inTargetFileName
 			break;
 		}
 	}
-	
 }

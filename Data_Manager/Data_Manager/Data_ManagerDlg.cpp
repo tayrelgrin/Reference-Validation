@@ -262,6 +262,8 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		m_vTestList.clear();
 		m_vDirList.clear();
+		m_cBasicData.InitList();
+		m_cFileData.InitList();
 
 		std::vector<CString> temp;
 		for(int i = 0; i<temp.size(); i++)
@@ -388,6 +390,8 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 		m_cValueData.GetBaseInfo(m_cBasicData);
 		//AddValueToBaseInfo(cBaseInfoTest);
 		m_cNewSettingData->SetNewDataFlag(true);
+
+		AddToTree(m_cNewSettingData);
 	}
 	else
 	{
@@ -400,19 +404,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	//AfxSetAllocStop(15032);
-
-	m_ListCtrlMain.DeleteAllItems();
-	for(int i = 0; i<m_vTestList.size(); i++)
-	{
-		m_vTestList.erase(m_vTestList.begin()+i);
-	}
 	m_vTestList.clear();
-
-	for(int i = 0; i<m_vDirList.size(); i++)
-	{
-		m_vDirList.erase(m_vDirList.begin()+i);
-	}
 	m_vDirList.clear();
 	
  	m_cValueData.InitAllData();
@@ -598,7 +590,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	std::vector<CString> vData;
 	CString strTemp, strTest, strFile;
 	CString compare;
-
+	m_vAllFileList.clear();
 	inpData->GetFileNames(m_vAllFileList);
 
 
@@ -904,6 +896,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	ConfigDMData* pConfig = m_cNewConfigData;
 	ConfigDMData* pSetting = m_cNewSettingData;
 	
+
 	m_treeMainTest.DeleteAllItems();
 	m_vAllFileList.clear();
 	m_cBasicData.SetListCountZero();
@@ -1044,27 +1037,31 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 	int nIndex = 0;
 	CString strSequence;
 	CString strOri, strValue, strDescrip;
+	CString strSection, strItem;
+
 	BeginWaitCursor();
 	while(pos)
 	{
 		strSequence.Format(_T("%d"), nIndex);
 
 		BasicData* temp = Items.GetNext(pos);
-		m_ListCtrlMain.InsertItem(nIndex, strSequence);
-		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
-		
-		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
-		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
-		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
-
+		strSection = temp->getSection();
+		strItem = temp->getItem();
 		strOri = temp->getValue();
 		AfxExtractSubString(strValue,	strOri, 0, '/');
 		AfxExtractSubString(strDescrip, strOri, 1, '/');
+
+		m_ListCtrlMain.InsertItem(nIndex, strSequence);
+		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
+
+		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
+		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  strSection,0,0,0,NULL);
+		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  strItem ,0,0,0,NULL);
+
 		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue ,0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip ,0,0,0,NULL);
 
-
-		nIndex++;
+		nIndex++;		
 	}
 
 	// fill check boxes

@@ -82,6 +82,8 @@ private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;
 	std::vector<CString> m_vConfigName;
+	std::vector<CString> m_vAllFileList;
+	std::stack<BasicData*> m_cPreDataStack;	// stack for undo function
 	AddNewRef m_cAddNewRefDlg;
 	SettingBaseInfo m_cSettingDlg;
 	ConfigDMData* m_cNewConfigData;
@@ -98,9 +100,8 @@ private:
 	int m_nItem;
 	int	m_nSubItem;	
 	bool m_bModify;	// Data Modify Flag 
-	std::stack<BasicData*> m_cPreDataStack;	// stack for undo function
 	bool m_bPreDataUsed;
-	std::vector<CString> m_vAllFileList;
+	
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;

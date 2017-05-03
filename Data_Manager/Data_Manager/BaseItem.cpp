@@ -74,10 +74,10 @@ BOOL BaseItem::OnInitDialog()
 	m_ListCtrl_BaseItem.InsertColumn(1, _T("Section"),			LVCFMT_CENTER, 90,  -1);
 	m_ListCtrl_BaseItem.InsertColumn(2, _T("Base Info"),		LVCFMT_CENTER, 125, -1);
 
-	FileType cBaseInfo;
-	m_pData->GetBaseInfo(cBaseInfo);
+	FileType* cBaseInfo = new FileType;
+	m_pData->GetBaseInfo(*cBaseInfo);
 	CList<BasicData*> lBaseInfoList;
-	cBaseInfo.CopyDataToList(lBaseInfoList);
+	cBaseInfo->CopyDataToList(lBaseInfoList);
 
 	POSITION pPos = lBaseInfoList.GetHeadPosition();
 

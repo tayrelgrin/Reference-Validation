@@ -59,8 +59,8 @@ BOOL SettingBaseInfo::OnInitDialog()
 	m_cButton_EXIT.LoadBitmaps(IDB_BITMAP_EXIT, IDB_BITMAP_EXITPUSH, NULL, NULL);
 	m_cButton_EXIT.SizeToContent();
 	m_Tab.InsertItem(1,_T("Base Info Items"));
-	m_Tab.InsertItem(2,_T("Register"));
-	m_Tab.InsertItem(3,_T("File List"));
+// 	m_Tab.InsertItem(2,_T("Register"));
+// 	m_Tab.InsertItem(3,_T("File List"));
  	
 	CRect rect;
 
@@ -145,14 +145,14 @@ void SettingBaseInfo::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 		m_TabBaseInfo.ShowWindow(SW_SHOW);
 		m_pwndShow = &m_TabBaseInfo;
 		break;
-	case 1:
-		m_TabRegister.ShowWindow(SW_SHOW);
-		m_pwndShow = &m_TabRegister;
-		break;
-	case 2:
-		m_TabFileList.ShowWindow(SW_SHOW);
-		m_pwndShow = &m_TabFileList;
-		break;
+// 	case 1:
+// 		m_TabRegister.ShowWindow(SW_SHOW);
+// 		m_pwndShow = &m_TabRegister;
+// 		break;
+// 	case 2:
+// 		m_TabFileList.ShowWindow(SW_SHOW);
+// 		m_pwndShow = &m_TabFileList;
+// 		break;
 	}
 }
 

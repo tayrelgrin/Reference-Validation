@@ -51,6 +51,7 @@ BOOL CData_ManagerApp::InitInstance()
 
 	CWinApp::InitInstance();
 
+/*	afxAmbientActCtx = FALSE;*/
 
 	AfxEnableControlContainer();
 
