@@ -257,7 +257,7 @@ void CheckingFileList::OnBnClickedButtonAdditem()
 			}
 			hChildItem = m_treectrlFileList.GetNextItem(hChildItem, TVGN_NEXT);
 		}
-		hParent = m_treectrlFileList.GetNextItem(hParent,TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
+		hParent = m_treectrlFileList.GetNextItem(hParent,TVGN_NEXT);		
 	}
 }
 

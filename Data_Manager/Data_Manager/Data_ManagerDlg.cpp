@@ -87,7 +87,6 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_SETTING, &CData_ManagerDlg::OnBnClickedButtonSetting)
 	ON_BN_CLICKED(IDC_BUTTON_EXIT, &CData_ManagerDlg::OnBnClickedButtonExit)
 	ON_BN_CLICKED(IDC_BUTTON_LOADSETTING, &CData_ManagerDlg::OnBnClickedButtonLoadsetting)
-	ON_LBN_SETFOCUS(IDC_LIST_PRJ, &CData_ManagerDlg::OnLbnSetfocusListPrj)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CData_ManagerDlg::OnBnClickedButtonDelete)
 	ON_BN_CLICKED(IDC_BUTTON_RELOAD, &CData_ManagerDlg::OnBnClickedButtonReload)
 	ON_BN_CLICKED(IDC_BUTTON_SAVE, &CData_ManagerDlg::OnBnClickedButtonSave)
@@ -95,10 +94,8 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_LBN_SELCHANGE(IDC_LIST_BUILDNUM, &CData_ManagerDlg::OnLbnSelchangeListBuildnum)
 	ON_LBN_SELCHANGE(IDC_LIST_CONFIGNUM, &CData_ManagerDlg::OnLbnSelchangeListConfignum)
 	ON_LBN_SELCHANGE(IDC_LIST_DOE, &CData_ManagerDlg::OnLbnSelchangeListDoe)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ManagerDlg::OnTvnSelchangedTreeMain)
-	
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ManagerDlg::OnTvnSelchangedTreeMain)	
 	ON_WM_LBUTTONDOWN()
-	ON_NOTIFY(NM_CLICK, IDC_LIST1, &CData_ManagerDlg::OnNMClickList1)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST1, &CData_ManagerDlg::OnLvnColumnclickList1)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CData_ManagerDlg::OnNMDblclkList1)
@@ -651,12 +648,6 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 }
 
 
-void CData_ManagerDlg::OnLbnSetfocusListPrj()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
 void CData_ManagerDlg::InitMainList()
 {
 	// init List
@@ -1047,21 +1038,19 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 		BasicData* temp = Items.GetNext(pos);
 		strSection = temp->getSection();
 		strItem = temp->getItem();
-		strOri = temp->getValue();
+		strOri	= temp->getValue();
 		AfxExtractSubString(strValue,	strOri, 0, '/');
 		AfxExtractSubString(strDescrip, strOri, 1, '/');
 
 		m_ListCtrlMain.InsertItem(nIndex, strSequence);
 		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
-
 		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  inStrFileName,0,0,0,NULL );
 		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  strSection,0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  strItem ,0,0,0,NULL);
-
 		m_ListCtrlMain.SetItem(nIndex, 4,LVIF_TEXT,  strValue ,0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strDescrip ,0,0,0,NULL);
 
-		nIndex++;		
+		nIndex++;
 	}
 
 	// fill check boxes
@@ -1168,6 +1157,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 // // 	m_cValueData.GetBaseInfo(m_cBasicData);
 // }
 
+
 void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 {
 	m_ListCtrlMain.DeleteAllItems(); 
@@ -1196,7 +1186,15 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		strSequence.Format(_T("%d"), nIndex);
 		BasicData* temp = lBaseItems.GetNext(pos);
 		strTarget = temp->getValue();
-		if(strTarget.compare(strPreItem) != 0)
+
+		if(strTarget.find('/') != -1)
+		{
+			CString temp;
+			AfxExtractSubString(temp, strTarget.c_str(), 0,'/');
+			strTarget = temp;
+		}
+
+		if(strTarget.compare(strPreItem) != 0)	// 아이템 체인지
 		{
 			strPreItem = strTarget;
 			CString strTemp = strTarget.c_str();
@@ -1208,14 +1206,26 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		}
 
 		POSITION pValuePos = lBaseValueItems.GetHeadPosition();
-		CString strFileName;
+		CString strFileName, strSetting, strDescription;
 		while(pValuePos)
 		{
 			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
 			if (tempValue->getSection()== temp->getSection() && tempValue->getItem()==temp->getItem())
 			{
-				strFileName = temp->getValue();
-				temp->setValue(tempValue->getValue());
+				CString strTemp = "";
+				strTemp = temp->getValue();
+
+				// 파일 이름에서 세팅값 분리
+				AfxExtractSubString(strFileName, strTemp, 0,'/');
+				AfxExtractSubString(strSetting,	 strTemp, 1,'/');
+				AfxExtractSubString(strDescription,  strTemp, 2,'/');	// 주석 분리
+
+				if (strTemp == "")
+				{
+					strFileName = strTemp;
+				}
+
+				temp->setValue(tempValue->getValue());	// Value 값 저장
 				break;
 			}
 		}
@@ -1226,6 +1236,11 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  strFileName,0,0,0,NULL );
 		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
+
+		if (strSetting == "1")
+		{
+			m_ListCtrlMain.SetCheck(nIndex,1);
+		}
 
 		CString strTemp1, strTemp2;
 
@@ -1239,19 +1254,9 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		nIndex++;
 	}
 
-
-
 	EndWaitCursor();
 }
 
-
-void CData_ManagerDlg::OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult)
-{
-	*pResult = 0;
-
-	
-	
-}
 
 //this function will returns the item text depending on the item and SubItem Index
 CString CData_ManagerDlg::GetItemText(HWND hWnd, int m_nItem, int nSubItem) const
@@ -1416,10 +1421,38 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 				HTREEITEM selectedItem;
 
-				selectedItem = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
-				CString strTestName = m_treeMainTest.GetItemText(selectedItem);							// 그 아이템의 이름을 얻어온다.
+				selectedItem = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
+				CString strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
 
-				m_cValueData.ModifySettingData(strTestName, strFile, cModifyTarget);
+				if(strTestName == "Base Info")
+				{
+					m_cValueData.ModifyBaseInfoData(strTestName, strFile, cModifyTarget);
+					HTREEITEM hItem = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
+					
+					CString strTest = m_treeMainTest.GetItemText(hItem);
+
+					while(hItem != NULL)
+					{
+						m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
+
+						hItem = m_treeMainTest.GetNextItem(hItem, TVGN_NEXT);						
+						strTest = m_treeMainTest.GetItemText(hItem);
+
+						HTREEITEM hChild = m_treeMainTest.GetNextItem(hItem, TVGN_CHILD);
+						HTREEITEM hGrandChild = m_treeMainTest.GetNextItem(hChild, TVGN_CHILD);
+						if (hGrandChild != NULL)
+						{
+							CString strChild = m_treeMainTest.GetItemText(hChild);
+							CString strTemp = strTest + ":" + strChild;
+							strTest = strTemp;
+						}
+					}
+					//m_cValueData.GetBaseInfo(m_cBasicData);
+				}
+				else
+					m_cValueData.ModifySettingData(strTestName, strFile, cModifyTarget);
+
+				delete cModifyTarget;
 
 				bFlag = false;
 				m_bNewData = true;	// file save 를 위한 flag 변경
@@ -1485,3 +1518,5 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	*pResult = 0;
 }
+
+

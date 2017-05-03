@@ -292,8 +292,8 @@ void BaseItem::OnBnClickedButtonAdditembi()
 			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);
 		}
 
-		hParent = m_TreeCtrl_BaseFile.GetNextItem(hParent,TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
-		strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);			// 그 아이템의 이름을 얻어온다.
+		hParent = m_TreeCtrl_BaseFile.GetNextItem(hParent,TVGN_NEXT);		
+		strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);			
 	}
 }
 

@@ -56,7 +56,6 @@ public:
 
 	CListCtrl m_ListCtrlMain;
 	CTreeCtrl m_treeMainTest;
-	afx_msg void OnLbnSetfocusListPrj();	
 	afx_msg void OnBnClickedButtonDelete();
 	afx_msg void OnBnClickedButtonReload();
 	afx_msg void OnBnClickedButtonSave();
@@ -71,7 +70,6 @@ public:
 	void AddRefinfoToListBox();
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
 	void MakeDataDirectory();
-	//void AddValueToBaseInfo(TestType& inData);
 	void AddToListControl(CString inStrFileName, FileType& inData, FileType& inSetting);
 	void AddBaseInfoToListControl(CString inData);
 	void InsertItems();
@@ -112,7 +110,6 @@ public:
 	afx_msg void OnLbnSelchangeListConfignum();
 	afx_msg void OnLbnSelchangeListDoe();
 	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMClickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	virtual void OnOK();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	CEdit m_EditInListCtrl;

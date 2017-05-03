@@ -451,3 +451,20 @@ void InformationManager::ModifySettingData(CString inTargetTestName, CString inT
 		temp->ModifyData(inTargetTestName,inTargetFileName, inTarget);
 	}
 }
+
+void InformationManager::ModifyBaseInfoData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget)
+{
+	POSITION pPos = m_listBaseInfo.GetHeadPosition();
+
+	while(pPos)
+	{
+		BasicData* temp = m_listBaseInfo.GetNext(pPos);
+
+		if(temp->getSection() == inTarget->getSection() && temp->getItem()== inTarget->getItem())
+		{
+			CString strTemp = temp->getValue() +"/" +inTarget->getValue();
+			temp->setValue(strTemp);
+			break;
+		}
+	}
+}
