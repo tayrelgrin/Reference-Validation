@@ -616,6 +616,25 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					m_vTestName.push_back(strTemp);
 
 					cNewTest->LoadDataFromXML(pNode);
+					std::vector<CString> vTemp;
+
+					cNewTest->GetFileNames(strTemp,vTemp);
+					
+					for (int i = 0; i<vTemp.size(); i++)
+					{
+						CString strFile;
+						CString strDir;
+
+						AfxExtractSubString(strDir, vTemp[i], 2,':');
+						if (strDir=="")
+						{
+							AfxExtractSubString(strFile, vTemp[i], 1,':');
+						}
+						else
+							strFile = strDir;
+
+						m_vBaseFiles.push_back(strFile);
+					}
 					m_pListTestType.AddTail(cNewTest);
 				}
 				else

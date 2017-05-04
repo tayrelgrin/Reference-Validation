@@ -43,6 +43,7 @@ public:
 	CString GetPreProject();
 	CString GetPreConfig();
 	CString GetPreDOE();
+	bool CheckRefEffective(CString instrPath, std::vector<CString> invData);
 
 	CString GetDirRootPath();
 	void GetDirList( std::vector<CString>& inVDirList);
@@ -69,6 +70,7 @@ private:
 	std::vector<CString> m_vStrDir;
 	std::vector<CString> m_vConfigName;
 	bool bPreDataUsed;
+	bool bEffectiveResult;
 public:
 	CEdit m_EditPrj;
 	CEdit m_EditBuild;

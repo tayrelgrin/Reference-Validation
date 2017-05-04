@@ -135,6 +135,8 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+/*	AfxSetAllocStop(98269);*/
+
 	InitMainList();
 	MakeDataDirectory();
 
@@ -245,7 +247,7 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-//	AfxSetAllocStop(15032);
+
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
 		m_cAddNewRefDlg.DestroyWindow();
@@ -263,10 +265,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		m_cFileData.InitList();
 
 		std::vector<CString> temp;
-		for(int i = 0; i<temp.size(); i++)
-		{
-			temp.erase(temp.begin()+i);
-		}
+		temp.clear();
 
 		m_strPrj		= m_cAddNewRefDlg.GetProject();
 		m_strBuildNum	= m_cAddNewRefDlg.GetBuild();
@@ -887,14 +886,13 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	ConfigDMData* pConfig = m_cNewConfigData;
 	ConfigDMData* pSetting = m_cNewSettingData;
 	
-
 	m_treeMainTest.DeleteAllItems();
 	m_vAllFileList.clear();
 	m_cBasicData.SetListCountZero();
 
 	int nIndex = m_lbDOE.GetCurSel();
 	m_lbDOE.GetText(nIndex, m_strDOE);
-	BeginWaitCursor(); 
+	BeginWaitCursor();
 
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
 	CString strTemp;

@@ -79,6 +79,7 @@ BOOL AddNewRef::OnInitDialog()
 	m_cComboPrj.SetCurSel(0);
 
 	bPreDataUsed = false;
+	GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
@@ -121,16 +122,22 @@ void AddNewRef::OnEnChangeMfceditbrowse1()
 	// 이 알림 메시지를 보내지 않습니다.
 
 	// TODO:  여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	for(int i= 0; i<m_vStrDir.size(); i++)
-	{
-		m_vStrDir.erase(m_vStrDir.begin()+i);
-	}
 	std::vector<CString> vDummy;
 	m_vStrDir.clear();
 	m_editCtrl.GetWindowText(m_strDirRootPath);
 	m_cNewConfig.GetDirList(m_strDirRootPath, m_vStrDir,vDummy);
 	m_cNewConfig.GetConfigInfoFromVector(m_vStrDir, m_strDirRootPath, m_strPrj, m_strBuild, m_strConfig, m_strDOE);
 	EditBoxSetting();
+
+	if(!CheckRefEffective(m_strDirRootPath, m_vStrDir))
+	{
+		AfxMessageBox("The Reference has some problem, Check it Please!", MB_OK);
+		GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
+	}
+	else
+	{
+		GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(TRUE);
+	}
 }
 
 
@@ -176,8 +183,8 @@ void AddNewRef::OnBnClickedButtonAddok()
 		// file copy function
 		FileCopy();
 	}	
-
-	CDialogEx::OnOK();
+	if(bEffectiveResult)
+		CDialogEx::OnOK();
 }
 
 
@@ -523,4 +530,116 @@ CString AddNewRef::GetPreConfig()
 CString AddNewRef::GetPreDOE()
 {
 	return m_strPreDOE;
+}
+
+
+bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invData)
+{
+	SetCurrentDirectory(instrPath); //현재 검색할 디렉터리 설정.
+
+	bool bResult = true;
+	bEffectiveResult = false;
+
+	int nFileCount = 0;
+	int nDirCount = 0;
+	CFileFind cFinder;
+	CString strFileName;
+	CString strDirName;
+	CString strDirPath;
+	int nFindIndex;
+	CString strRegister;
+	CString strRefFile;
+
+	std::vector<bool> vResult;
+
+	nDirCount = invData.size();
+
+	if (nDirCount > 3)
+	{
+		for (int i = 0; i < nDirCount; i++)
+		{
+			CString strTemp = invData[i];
+			SetCurrentDirectory(strTemp);
+
+			BOOL bSearching = cFinder.FindFile();
+			nFindIndex = strTemp.ReverseFind('\\');
+			strDirName = strTemp.Mid(nFindIndex+1);
+			bool bRefFile = false;
+			bool bRegister = false;
+			bool bSpec = false;		
+			bool bDirectory = false;
+
+			strRefFile	= strDirName + ".ini";
+			strRegister = strDirName + "_Register.ini";
+			nFileCount = 0;
+
+			while(bSearching)
+			{
+				bSearching = cFinder.FindNextFile();
+				strFileName = cFinder.GetFileName();
+
+				if(cFinder.IsArchived())
+				{
+					strFileName = cFinder.GetFileName();
+
+					if( strFileName == _T(".") || 
+						strFileName == _T("..")|| 
+						strFileName == _T("Thumbs.db") ) continue;
+
+					if (strFileName == strRefFile)
+					{
+						bRefFile = true;
+					}
+					else if(strFileName == strRegister)
+					{
+						bRegister = true;
+					}
+					else if(strFileName == "Spec.ini")
+					{
+						bSpec = true;
+					}
+
+					if (bRegister && bRefFile && bSpec)
+					{
+						break;
+					}
+					nFileCount++;
+				}
+				else if (cFinder.IsDirectory() && !cFinder.IsDots())	// no-spec and REL
+				{
+					bDirectory = true;
+				}
+			}
+			if (!bDirectory)
+			{
+				if (bRegister && bRefFile && bSpec && (nFileCount >4) )
+				{
+					vResult.push_back(true);
+				}
+				else
+				{
+					vResult.push_back(false);
+				}
+			}
+			
+		}
+
+		for (int i = 0; i < vResult.size() ; i++)
+		{
+			if(vResult[i] == false)
+			{
+				bResult = false;
+				break;
+			}
+		}	
+	}
+	if(vResult.size()<3)
+		bResult = false;
+
+	if (bResult)
+	{
+		bEffectiveResult = true;
+	}
+
+	return bResult;
 }
