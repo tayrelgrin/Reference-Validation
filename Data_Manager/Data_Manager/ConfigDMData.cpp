@@ -43,6 +43,16 @@ void ConfigDMData::InitListAndVectors()
 		m_pListTestType.RemoveAll();
 	}
 
+	pPos = m_lBaseInfo.GetHeadPosition();
+
+	while(pPos && m_lBaseInfo.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		BasicData* temp = m_lBaseInfo.GetNext(pPos);
+		delete temp;
+		m_lBaseInfo.RemoveAt(pTemp);
+	}
 	if (m_lBaseInfo.GetSize()>0)
 	{
 		m_lBaseInfo.RemoveAll();
@@ -668,7 +678,7 @@ void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 	}
 }
 
-bool ConfigDMData::SearchTestInList(CString inTargetTest, CString inTargetFile , FileType& outData)
+bool ConfigDMData::SearchFileDataInList(CString inTargetTest, CString inTargetFile , FileType& outData)
 {
 	bool bResult = false;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
@@ -735,6 +745,39 @@ void ConfigDMData::GetBaseInfoList(CList<BasicData*>& outList)
 	{
 		BasicData* cTemp = m_lBaseInfo.GetNext(pPos);
 		outList.AddTail(cTemp);
+	}
+}
+
+void ConfigDMData::SetBaseInfoList(CList<BasicData*>& inList)
+{
+	POSITION pPos = m_lBaseInfo.GetHeadPosition();
+	POSITION pTemp = NULL;
+
+	while(pPos && m_lBaseInfo.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		BasicData* temp = m_lBaseInfo.GetNext(pPos);
+		delete temp;
+		m_lBaseInfo.RemoveAt(pTemp);
+	}
+	if (m_lBaseInfo.GetSize()>0)
+	{
+		m_lBaseInfo.RemoveAll();
+	}
+
+	if(inList.GetCount() > 0)
+	{
+		POSITION pPos = inList.GetHeadPosition();
+		POSITION pTemp = NULL;
+
+		while(pPos)
+		{
+			BasicData* cTemp = inList.GetNext(pPos);
+			BasicData* cNewData = new BasicData;
+			cNewData->setData(*cTemp);
+			m_lBaseInfo.AddTail(cNewData);
+		}
 	}
 }
 

@@ -248,23 +248,14 @@ void AddNewRef::LoadFileListInValue()
 
 	CString strPrj, strBuild, strConfig, strDOE;
 
-	//ConfigDMData* pAddConfig = new ConfigDMData;
-
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
-
-// 		pAddConfig->SetProject(strPrj);
-// 		pAddConfig->SetBuildNum(strBuild);
-// 		pAddConfig->SetConfigNum(strConfig);
-// 		pAddConfig->SetDOE(strDOE);
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		m_vConfigName.push_back(strComb);
 	}
-
-	//delete pAddConfig;
 }
 
 void AddNewRef::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
@@ -621,7 +612,6 @@ bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invDat
 					vResult.push_back(false);
 				}
 			}
-			
 		}
 
 		for (int i = 0; i < vResult.size() ; i++)

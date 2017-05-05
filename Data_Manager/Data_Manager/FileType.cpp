@@ -13,30 +13,30 @@ FileType::~FileType(void)
 void FileType::InitList()
 {
 	POSITION pTemp = NULL;
-	POSITION pPos = m_pDataListData.GetHeadPosition();
+	POSITION pPos = m_pDataList.GetHeadPosition();
 
-	while(pPos && m_pDataListData.GetSize() > 0)
+	while(pPos && m_pDataList.GetSize() > 0)
 	{
 		pTemp = pPos;
 		try
 		{
-			BasicData* temp = m_pDataListData.GetNext(pPos);
+			BasicData* temp = m_pDataList.GetNext(pPos);
 			delete temp;
-			m_pDataListData.RemoveAt(pTemp);
+			m_pDataList.RemoveAt(pTemp);
 		}
 		catch (CMemoryException* e)
 		{
 		}
 	}
 
-	if(m_pDataListData.GetSize() > 0)
-		m_pDataListData.RemoveAll();
+	if(m_pDataList.GetSize() > 0)
+		m_pDataList.RemoveAll();
 }
 
 
 void FileType::SetListCountZero()
 {
-	m_pDataListData.RemoveAll();
+	m_pDataList.RemoveAll();
 }
 
 
@@ -47,13 +47,13 @@ void FileType::SaveDataToFile( tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElem
 
 	cElement->LinkEndChild(Element);
 
-	POSITION pos = m_pDataListData.GetHeadPosition();
+	POSITION pos = m_pDataList.GetHeadPosition();
 	
 	BasicData* pData;
 
 	while(pos)
 	{
-		pData = m_pDataListData.GetNext(pos);
+		pData = m_pDataList.GetNext(pos);
 		pData->writeDataToFile(cXMLDoc, Element);
 	}
 }
@@ -107,7 +107,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 		{
 			if(cNewData->getItem() != "" || cNewData->getValue() != "" )
 			{
-				m_pDataListData.AddTail(cNewData);
+				m_pDataList.AddTail(cNewData);
 
 				cNewData = NULL;
 			}
@@ -130,15 +130,15 @@ bool FileType::AddNewData(BasicData* inData)
 {
 	bool bReulst = false;
 	POSITION pTemp = NULL;
-	POSITION pPos = m_pDataListData.GetHeadPosition();
+	POSITION pPos = m_pDataList.GetHeadPosition();
 	bool bSearchResult = false;
 	BasicData* temp = NULL;
 
-	while(pPos && m_pDataListData.GetSize() > 0)
+	while(pPos && m_pDataList.GetSize() > 0)
 	{
 		pTemp = pPos;
 		
-		temp = m_pDataListData.GetNext(pPos);
+		temp = m_pDataList.GetNext(pPos);
 		if(temp==inData)
 		{
 			bSearchResult = true;
@@ -147,7 +147,7 @@ bool FileType::AddNewData(BasicData* inData)
 	}
 	if(!bSearchResult)
 	{
-		m_pDataListData.AddTail(inData);
+		m_pDataList.AddTail(inData);
 		bReulst = true;
 	}
 	return bReulst;
@@ -202,7 +202,7 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 	}
 
 	if(bFlag)
-		m_pDataListData.AddTail(outData);
+		m_pDataList.AddTail(outData);
 }
 
 
@@ -210,11 +210,11 @@ void FileType::CopyDataInList(FileType& outData)
 {
 	outData.InitList();
 
-	POSITION pPos = m_pDataListData.GetHeadPosition();
+	POSITION pPos = m_pDataList.GetHeadPosition();
 
 	while(pPos)
 	{
-		BasicData* temp = m_pDataListData.GetNext(pPos);
+		BasicData* temp = m_pDataList.GetNext(pPos);
 		BasicData* cNewData = new BasicData;
 
 		cNewData->setData(*temp);
@@ -231,13 +231,13 @@ void FileType::CopyDataToList(CList<BasicData*>& outListData)
 {
 	outListData.RemoveAll();
 
-	if(!m_pDataListData.IsEmpty())
+	if(!m_pDataList.IsEmpty())
 	{
-		POSITION pPos = m_pDataListData.GetHeadPosition();
+		POSITION pPos = m_pDataList.GetHeadPosition();
 
 		while(pPos)
 		{
-			BasicData* temp = m_pDataListData.GetNext(pPos);
+			BasicData* temp = m_pDataList.GetNext(pPos);
 			BasicData* cNewData = new BasicData;
 
 			cNewData->setData(*temp);
@@ -250,11 +250,11 @@ void FileType::CopyDataToList(CList<BasicData*>& outListData)
 
 void FileType::ModifyData(BasicData* inTarget)
 {
-	POSITION pPos = m_pDataListData.GetHeadPosition();
+	POSITION pPos = m_pDataList.GetHeadPosition();
 
 	while(pPos)
 	{
-		BasicData* temp = m_pDataListData.GetNext(pPos);
+		BasicData* temp = m_pDataList.GetNext(pPos);
 
 		if (temp->getSection() == inTarget->getSection() && temp->getItem() == inTarget->getItem())
 		{

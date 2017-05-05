@@ -35,6 +35,7 @@ public:
 	void AddNewBaseInfo(BasicData& inData);
 	void InitBaseInfo();
 	void SetBaseInfoFromConfig(const CList<BasicData*>& outList);
+	bool CheckBaseInfoInAllData(std::vector<CString>& vDifferentTest);
 private:
 	CList<ConfigDMData*> m_listConfigs;
 	CList<ConfigDMData*> m_listSetting;

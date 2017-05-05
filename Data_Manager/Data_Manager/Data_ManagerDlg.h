@@ -75,7 +75,7 @@ public:
 	void InsertItems();
 	void SetCell(HWND hWnd1, CString value, int nRow, int nCol);
 	CString GetItemText(HWND hWnd, int nItem, int nSubItem) const;
-
+	bool CheckBaseInfoInAllData();
 private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;

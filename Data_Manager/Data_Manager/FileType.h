@@ -21,7 +21,7 @@ public:
 	void ModifyData(BasicData* inTarget);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
 private:
-	CList<BasicData*> m_pDataListData;
+	CList<BasicData*> m_pDataList;
 	CString m_strFileName;
 };
 

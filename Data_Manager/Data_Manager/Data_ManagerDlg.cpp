@@ -289,6 +289,10 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 			m_cNewSettingData->SetTestDirList(m_vDirList);
 			m_cNewSettingData->SetBaseFiles(temp);
 
+			CList<BasicData*> Templist;
+			m_cBasicData.CopyDataToList(Templist);
+			m_cNewSettingData->SetBaseInfoList(Templist);
+
 			AddNewConfig(m_cNewConfigData, m_cNewSettingData);
 
 			for(int i = 0; i<temp.size(); i++)
@@ -384,10 +388,11 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 		bool bResult;
 		
 		m_cValueData.GetBaseInfo(m_cBasicData);
-		//AddValueToBaseInfo(cBaseInfoTest);
+		
 		m_cNewSettingData->SetNewDataFlag(true);
 
 		AddToTree(m_cNewSettingData);
+		CheckBaseInfoInAllData();
 	}
 	else
 	{
@@ -566,12 +571,21 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 			m_strDOE != "")
 		{
 			BeginWaitCursor();
-			bool bResult = m_cValueData.SaveRefToFile(_T("temp"));
-			EndWaitCursor();
-			if(bResult)
-				MessageBox ("Complete Save the data to File",NULL,MB_OK);
+			CList<BasicData*> vTemp;
+			m_cBasicData.CopyDataToList(vTemp);
+			if (vTemp.GetCount() == 0)
+			{
+				AfxMessageBox("Setting the base info!",MB_OK);
+			}
 			else
-				MessageBox ("FAIL!! There is a something missing",NULL,MB_OK);
+			{
+				bool bResult = m_cValueData.SaveRefToFile(_T("temp"));
+				EndWaitCursor();
+				if(bResult)
+					MessageBox ("Complete Save the data to File",NULL,MB_OK);
+				else
+					MessageBox ("FAIL!! There is a something missing",NULL,MB_OK);
+			}
 		}
 		else
 			AfxMessageBox("FAIL!! There is no data to save", MB_OK);
@@ -1001,9 +1015,8 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 				strCombe = strDirName+":"+strTestName;
 			else
 				strCombe = strTestName;
-			m_cNewConfigData->SearchTestInList(strCombe.c_str(), strFileName.c_str(), m_cFileData);
-			m_cNewSettingData->SearchTestInList(strCombe.c_str(), strFileName.c_str(), *cSetting);
-
+			m_cNewConfigData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), m_cFileData);
+			m_cNewSettingData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), *cSetting);
 
 			AddToListControl(strFileName.c_str(), m_cFileData, *cSetting);
 
@@ -1198,7 +1211,7 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 			CString strTemp = strTarget.c_str();
 			strTemp = strTemp+".ini";
 
-			m_cNewConfigData->SearchTestInList(inData,strTemp,*pFile) ;
+			m_cNewConfigData->SearchFileDataInList(inData,strTemp,*pFile) ;
 
 			pFile->CopyDataToList(lBaseValueItems);
 		}
@@ -1208,7 +1221,8 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		while(pValuePos)
 		{
 			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
-			if (tempValue->getSection()== temp->getSection() && tempValue->getItem()==temp->getItem())
+			if (tempValue->getSection()== temp->getSection() && 
+				tempValue->getItem() == temp->getItem())
 			{
 				CString strTemp = "";
 				strTemp = temp->getValue();
@@ -1243,7 +1257,7 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		CString strTemp1, strTemp2;
 
 		strOri = temp->getValue();
-		if(AfxExtractSubString(strTemp1,	strOri, 0, '/'))
+		if(AfxExtractSubString(strTemp1, strOri, 0, '/'))
 			strValue = LPSTR(LPCTSTR(strTemp1));
 		if(AfxExtractSubString(strTemp2, strOri, 1, '/'))
 			strDescrip = LPSTR(LPCTSTR(strTemp2));
@@ -1252,6 +1266,7 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		nIndex++;
 	}
 
+	delete pFile;
 	EndWaitCursor();
 }
 
@@ -1362,7 +1377,6 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	*pResult = 0;
 }
-
 
 
 void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
@@ -1518,3 +1532,25 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 }
 
 
+bool CData_ManagerDlg::CheckBaseInfoInAllData()
+{
+	std::vector<CString> vDifferentTest;
+
+	bool bResult = m_cValueData.CheckBaseInfoInAllData(vDifferentTest);
+
+	CString strErrorMessage = "";
+
+	for (int i = 0; i < vDifferentTest.size(); i++)
+	{
+		CString temp = strErrorMessage;
+
+		strErrorMessage.Format("%s\n%s", temp, vDifferentTest[i]);
+	}
+
+	if (strErrorMessage != "")
+	{
+		AfxMessageBox(strErrorMessage,MB_OK);
+	}
+
+	return bResult;
+}

@@ -23,7 +23,7 @@ public:
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 	void ModifyData(CString inTargetFileName, BasicData* inTarget);
 private:
-	CList<FileType*> m_pFIleListFile;
+	CList<FileType*> m_pFIleList;
 	CString m_strTestName;
 };
 

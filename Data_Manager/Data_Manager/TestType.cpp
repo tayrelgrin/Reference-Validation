@@ -4,7 +4,7 @@
 
 TestType::TestType(void)
 {
-	m_pFIleListFile.RemoveAll();
+	m_pFIleList.RemoveAll();
 }
 
 
@@ -16,17 +16,17 @@ TestType::~TestType(void)
 void TestType::InitList()
 {
 	POSITION pTemp = NULL;
-	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleList.GetHeadPosition();
 
-	while(pPos && m_pFIleListFile.GetSize()>0)
+	while(pPos && m_pFIleList.GetSize()>0)
 	{
 		pTemp = pPos;
 
 		try
 		{
-			FileType* temp = m_pFIleListFile.GetNext(pPos);
+			FileType* temp = m_pFIleList.GetNext(pPos);
 			delete temp;
-			m_pFIleListFile.RemoveAt(pTemp);
+			m_pFIleList.RemoveAt(pTemp);
 		}
 		catch (CMemoryException* e)
 		{
@@ -34,8 +34,8 @@ void TestType::InitList()
 		}
 	}
 
-	if( m_pFIleListFile.GetSize()>0)
-		m_pFIleListFile.RemoveAll();
+	if( m_pFIleList.GetSize()>0)
+		m_pFIleList.RemoveAll();
 }
 
 void TestType::SetTestName(CString inData)
@@ -53,12 +53,12 @@ void TestType::AddNewFile(CString inStrFileName)
 	FileType* newFile = new FileType;
 	
 	newFile->SetFileName(inStrFileName);
-	m_pFIleListFile.AddTail(newFile);
+	m_pFIleList.AddTail(newFile);
 }
 
 void TestType::AddNewFile(FileType* inData)
 {
-	m_pFIleListFile.AddTail(inData);
+	m_pFIleList.AddTail(inData);
 }
 
 void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int inNInput)
@@ -82,13 +82,13 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 			{
 				if(cNewFile->GetFileName().Find(invBasicFile[j]) != -1)
 				{
-					m_pFIleListFile.AddTail(cNewFile);
+					m_pFIleList.AddTail(cNewFile);
 					break;
 				}
 			}
 		}
 		else
-			m_pFIleListFile.AddTail(cNewFile);		
+			m_pFIleList.AddTail(cNewFile);		
 	}
 
 	vFilePath.clear();
@@ -102,7 +102,6 @@ void TestType::GetFilePathInDir(static CString inPath, std::vector<CString>& out
 	CString tpath;
 	BOOL bWorking;
 
-	
 	tpath.Format(inPath +"\\*.*");
 
 	bWorking = cFinder.FindFile(tpath);
@@ -141,11 +140,11 @@ void TestType::SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEleme
 
 		cElement->LinkEndChild(Element);
 
-		POSITION pos = m_pFIleListFile.GetHeadPosition();
+		POSITION pos = m_pFIleList.GetHeadPosition();
 
 		while(pos)
 		{
-			FileType* pData = m_pFIleListFile.GetNext(pos);
+			FileType* pData = m_pFIleList.GetNext(pos);
 			if (invBasicFile.size() > 0)
 			{
 				for(int i = 0; i<invBasicFile.size(); i++)
@@ -211,7 +210,7 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 				pNewTest = new FileType;
 				
 				LoadDataFromXML(pElent,(CString)pNode->Value(), pNewTest);
-				m_pFIleListFile.AddTail(pNewTest);
+				m_pFIleList.AddTail(pNewTest);
 			}
 		}
 	}
@@ -220,11 +219,11 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 
 void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNames)
 {
-	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
 	while(pPos)
 	{
-		FileType* temp = m_pFIleListFile.GetNext(pPos);
+		FileType* temp = m_pFIleList.GetNext(pPos);
 		strFileName = temp->GetFileName();
 		strFileName = inTestName + ":" + strFileName;
 
@@ -234,13 +233,13 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 
 bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 {
-	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
 	bool bResult=false;
 
 	while(pPos)
 	{
-		FileType* temp = m_pFIleListFile.GetNext(pPos);
+		FileType* temp = m_pFIleList.GetNext(pPos);
 		strFileName = temp->GetFileName();
 
 		if (strFileName.Find(inStrTargetFile) != -1)
@@ -256,13 +255,13 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 
 void TestType::ModifyData(CString inTargetFileName, BasicData* inTarget)
 {
-	POSITION pPos = m_pFIleListFile.GetHeadPosition();
+	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
 	bool bResult=false;
 
 	while(pPos)
 	{
-		FileType* temp = m_pFIleListFile.GetNext(pPos);
+		FileType* temp = m_pFIleList.GetNext(pPos);
 		strFileName = temp->GetFileName();
 
 		if (strFileName.Find(inTargetFileName) != -1)

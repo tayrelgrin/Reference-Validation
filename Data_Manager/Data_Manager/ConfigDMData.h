@@ -40,12 +40,12 @@ public:
 	CString GetEXEDirectoryPath();
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
-	void InitListAndVectors();
-	
+	void InitListAndVectors();	
 	void GetFileNames(std::vector<CString>& outvData);
-	bool SearchTestInList(CString inTargetTest, CString inTargetFile, FileType& outData);
+	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	TestType* SearchTest(TestType& inoutTarget, bool& bResult);
 	void GetBaseInfoList(CList<BasicData*>& outList);
+	void SetBaseInfoList(CList<BasicData*>& outList);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

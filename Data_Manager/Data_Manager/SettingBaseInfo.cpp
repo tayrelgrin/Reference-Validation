@@ -103,7 +103,7 @@ BOOL SettingBaseInfo::OnInitDialog()
 void SettingBaseInfo::AddFileNameToComboBox(CComboBox& incTarget)
 {
 	incTarget.InsertString(0, "ItemVersion");
-	incTarget.InsertString(1, "Reference");
+	//incTarget.InsertString(1, "Reference");
 }
 
 

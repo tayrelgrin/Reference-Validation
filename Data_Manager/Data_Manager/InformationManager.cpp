@@ -468,3 +468,108 @@ void InformationManager::ModifyBaseInfoData(CString inTargetTestName, CString in
 		}
 	}
 }
+
+bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferentTest)
+{
+	bool bResult;
+	FileType cTempFile;
+	BasicData* cBaseInfoItem;
+	BasicData* cTempItem;
+	BasicData* cBaseInfoValue;
+	std::vector<CString> vTestName;
+	ConfigDMData* temp;
+	POSITION pPos;
+	POSITION pBase;
+	POSITION pValue;
+	CList<BasicData*> BaseInfoItemContentsList;
+	CList<BasicData*> listTemp;
+	CList<BasicData*> BaseInfoItemValueList;
+	std::vector<CString> vBaseInfoValues;
+	CString strPreFileName = "";
+	CString strFileName = "";
+	pPos = m_listSetting.GetHeadPosition();
+	temp = m_listSetting.GetNext(pPos);
+	temp->GetBaseInfoList(BaseInfoItemContentsList);
+
+	if(BaseInfoItemContentsList.GetCount() != m_listBaseInfo.GetCount())
+	{
+		temp->SetBaseInfoList(m_listBaseInfo);
+		temp->GetBaseInfoList(BaseInfoItemContentsList);
+	}
+	pPos = m_listConfigs.GetHeadPosition();
+	temp = m_listConfigs.GetNext(pPos);
+	temp->GetTestList(vTestName);
+// 	BaseInfoItemContentsList.RemoveAll();
+// 	temp->GetBaseInfoList(BaseInfoItemContentsList);
+
+	pBase = m_listBaseInfo.GetHeadPosition();
+
+	for (int j = 0; j<m_listBaseInfo.GetCount(); j++)
+	{
+		cBaseInfoItem = m_listBaseInfo.GetNext(pBase);
+		strFileName = cBaseInfoItem->getValue();
+		if (strPreFileName != strFileName)
+		{
+			temp->SearchFileDataInList(vTestName[0], strFileName, cTempFile);
+			cTempFile.CopyDataToList(listTemp);
+			strPreFileName = strFileName;
+		}
+
+		pPos = listTemp.GetHeadPosition();
+
+		for (int k=0; k< listTemp.GetCount(); k++)
+		{
+			cTempItem = listTemp.GetNext(pPos);
+
+			if(cTempItem->getSection() == cBaseInfoItem->getSection() &&
+				cTempItem->getItem() && cBaseInfoItem->getItem())
+			{
+				if (j==0)
+				{
+					BaseInfoItemValueList.AddTail(cTempItem);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i<vTestName.size(); i++)
+	{
+		strPreFileName = "";
+		pBase = BaseInfoItemContentsList.GetHeadPosition();
+		pValue = BaseInfoItemValueList.GetHeadPosition();
+
+		for (int j = 0; j<BaseInfoItemContentsList.GetCount(); j++)
+		{
+			cBaseInfoItem = BaseInfoItemContentsList.GetNext(pBase);
+			cBaseInfoValue = BaseInfoItemValueList.GetNext(pValue);
+
+			strFileName = cBaseInfoItem->getValue();
+
+			if (strPreFileName != strFileName)
+			{
+				temp->SearchFileDataInList(vTestName[i], strFileName, cTempFile);
+				cTempFile.CopyDataToList(listTemp);
+				strPreFileName = strFileName;
+			}
+
+			pPos = listTemp.GetHeadPosition();
+
+			for (int k=0; k < listTemp.GetCount(); k++)
+			{
+				cTempItem = listTemp.GetNext(pPos);
+
+				if(cTempItem->getSection() == cBaseInfoValue->getSection() &&
+					cTempItem->getItem() == cBaseInfoValue->getItem())
+				{
+					if (cTempItem->getValue() != cBaseInfoValue->getValue())
+					{
+						CString strDifferent = vTestName[i] + "\\" + cTempItem->getItem();
+						vDifferentTest.push_back(strDifferent);
+					}
+				}
+			}
+		}
+	}
+
+	return 0;
+}
