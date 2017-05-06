@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(BaseItem, CDialogEx)
 	ON_NOTIFY(NM_CLICK, IDC_TREE_BI, &BaseItem::OnNMClickTreeBi)
 	ON_BN_CLICKED(IDC_BUTTON_ADDITEMBI, &BaseItem::OnBnClickedButtonAdditembi)
 	ON_BN_CLICKED(IDC_BUTTON_BILS, &BaseItem::OnBnClickedButtonBils)
+	ON_BN_CLICKED(IDC_BUTTON_DELETEITEMBI, &BaseItem::OnBnClickedButtonDeleteitembi)
 END_MESSAGE_MAP()
 
 
@@ -308,6 +309,8 @@ void BaseItem::AddBaseInfoItemToList()
 {
 	CString strFile, strSection, strItem;
 
+	m_pData->InitBaseInfo();
+
 	for(int i = 0; i < m_ListCtrl_BaseItem.GetItemCount(); i++)
 	{
 		BasicData* cNewData = new BasicData;
@@ -321,5 +324,20 @@ void BaseItem::AddBaseInfoItemToList()
 		cNewData->setValue(strFile);
 
 		m_pData->AddNewBaseInfo(*cNewData);
+	}
+}
+
+void BaseItem::OnBnClickedButtonDeleteitembi()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	POSITION pos = m_ListCtrl_BaseItem.GetFirstSelectedItemPosition();
+
+	while (pos != NULL)
+	{
+		int nItem = m_ListCtrl_BaseItem.GetNextSelectedItem(pos);
+		m_ListCtrl_BaseItem.DeleteItem(nItem);
+		pos = m_ListCtrl_BaseItem.GetFirstSelectedItemPosition();
+		m_bModifyFlag = true;
 	}
 }

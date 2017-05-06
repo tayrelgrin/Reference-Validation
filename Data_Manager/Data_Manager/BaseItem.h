@@ -40,4 +40,5 @@ public:
 	afx_msg void OnBnClickedButtonBils();
 	bool m_bModifyFlag;
 	void AddBaseInfoItemToList();
+	afx_msg void OnBnClickedButtonDeleteitembi();
 };

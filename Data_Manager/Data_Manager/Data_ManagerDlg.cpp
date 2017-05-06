@@ -99,7 +99,6 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST1, &CData_ManagerDlg::OnLvnColumnclickList1)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CData_ManagerDlg::OnNMDblclkList1)
-	ON_EN_KILLFOCUS(IDC_EDIT1, &CData_ManagerDlg::OnEnKillfocusEdit1)
 ON_WM_SYSCHAR()
 END_MESSAGE_MAP()
 
@@ -137,8 +136,10 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
+	m_cFileData = new FileType;
+	m_cBasicData = new FileType;
+
 /*	AfxSetAllocStop(98269);*/
-	m_bModify = false;
 	m_bIsAllCheck = false;
 	InitMainList();
 	MakeDataDirectory();
@@ -264,8 +265,8 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 		m_vTestList.clear();
 		m_vDirList.clear();
-		m_cBasicData.InitList();
-		m_cFileData.InitList();
+		m_cBasicData->InitList();
+		m_cFileData->InitList();
 
 		std::vector<CString> temp;
 		temp.clear();
@@ -293,7 +294,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 			m_cNewSettingData->SetBaseFiles(temp);
 
 			CList<BasicData*> Templist;
-			m_cBasicData.CopyDataToList(Templist);
+			m_cBasicData->CopyDataToList(Templist);
 			m_cNewSettingData->SetBaseInfoList(Templist);
 
 			AddNewConfig(m_cNewConfigData, m_cNewSettingData);
@@ -303,6 +304,18 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 				temp.erase(temp.begin()+i);
 			}
 			temp.clear();
+
+			POSITION pTemp = NULL;
+			POSITION pPos = Templist.GetHeadPosition();
+
+			while(pPos && Templist.GetSize() > 0)
+			{
+				pTemp = pPos;
+				
+				BasicData* temp = Templist.GetNext(pPos);
+				delete temp;
+				Templist.RemoveAt(pTemp);
+			}
 
 			CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
 			std::vector<CString> vTemp;
@@ -388,10 +401,13 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 		hNode = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
 		CString strTest = m_treeMainTest.GetItemText(hNode);
 		cBaseInfoTest.SetTestName(strTest);
-		bool bResult;
 		
-		m_cValueData.GetBaseInfo(m_cBasicData);
-		
+		m_cValueData.GetBaseInfo(*m_cBasicData);
+
+		CList<BasicData*> Templist;
+		m_cBasicData->CopyDataToList(Templist);
+		m_cNewSettingData->InitBaseInfoList();
+		m_cNewSettingData->SetBaseInfoList(Templist);
 		m_cNewSettingData->SetNewDataFlag(true);
 
 		AddToTree(m_cNewSettingData);
@@ -407,18 +423,30 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 void CData_ManagerDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	m_vTestList.clear();
-	m_vDirList.clear();
-	
- 	m_cValueData.InitAllData();
-	if(m_bNewData==false)
-  	{
-		m_cNewConfigData->InitListAndVectors();
-  		m_cNewSettingData->InitListAndVectors();
+	bool bWorking = true;
+	if(m_bNewData )
+	{
+		if(AfxMessageBox("Close SW without Save?", MB_OKCANCEL) == true)
+		{
+			bWorking = true;
+		}
+		else
+			bWorking = false;
 	}
+	if(bWorking)
+	{
+		m_vTestList.clear();
+		m_vDirList.clear();
 
-	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
+		m_cValueData.InitAllData();
+			
+		m_cNewConfigData->InitListAndVectors();
+		m_cNewSettingData->InitListAndVectors();
+	
+		delete m_cFileData;
+		//delete m_cBasicData;
+		::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
+	}
 }
 
 
@@ -575,7 +603,7 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 		{
 			BeginWaitCursor();
 			CList<BasicData*> vTemp;
-			m_cBasicData.CopyDataToList(vTemp);
+			m_cBasicData->CopyDataToList(vTemp);
 			if (vTemp.GetCount() == 0)
 			{
 				AfxMessageBox("Setting the base info!",MB_OK);
@@ -605,7 +633,6 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	CString compare;
 	m_vAllFileList.clear();
 	inpData->GetFileNames(m_vAllFileList);
-
 
 	HTREEITEM h_BASEINFO = m_treeMainTest.InsertItem(_T("Base Info"), TVI_ROOT, TVI_LAST);
 	HTREEITEM h_Root;
@@ -724,8 +751,6 @@ void CData_ManagerDlg::AddRefinfoToListBox()
 //////////////////////////////////////////////////////////////////////////
 void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 {
-	//m_lbProject.ResetContent();
-
 	bool bCompareResult = true;
 	CString strTemp;
 	for(int i = 0; i<m_lbProject.GetCount(); i++)
@@ -959,7 +984,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 		m_treeMainTest.DeleteAllItems();
 		m_vAllFileList.clear();
-		m_cBasicData.SetListCountZero();
+		m_cBasicData->SetListCountZero();
 
 		int nIndex = m_lbDOE.GetCurSel();
 		m_lbDOE.GetText(nIndex, m_strDOE);
@@ -1057,8 +1082,8 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 		hNode = m_treeMainTest.GetNextItem(hNode, TVGN_NEXT);
 		//cBaseInfoTest.SetTestName(m_treeMainTest.GetItemText(hNode));
 		
-		m_cBasicData.SetListCountZero();
-		m_cValueData.GetBaseInfo(m_cBasicData);
+		m_cBasicData->SetListCountZero();
+		m_cValueData.GetBaseInfo(*m_cBasicData);
 		//cBaseInfoTest.AddNewFile(&m_cBasicData);
 
 		AddBaseInfoToListControl(m_treeMainTest.GetItemText(hNode));
@@ -1073,10 +1098,10 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 				strCombe = strDirName+":"+strTestName;
 			else
 				strCombe = strTestName;
-			m_cNewConfigData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), m_cFileData);
+			m_cNewConfigData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), *m_cFileData);
 			m_cNewSettingData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), *cSetting);
 
-			AddToListControl(strFileName.c_str(), m_cFileData, *cSetting);
+			AddToListControl(strFileName.c_str(), *m_cFileData, *cSetting);
 
 			delete cSetting;
 		}
@@ -1236,7 +1261,7 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 	FileType* pFile = new FileType;
 	std::vector<CString> vFileNames;
 
-	m_cBasicData.CopyDataToList(lBaseItems);
+	m_cBasicData->CopyDataToList(lBaseItems);
 
 	std::string strTarget = _T("");
 	std::string strPreItem = _T("");
@@ -1457,8 +1482,10 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 			for( int i=0 ; i<nCnt ; i++ )
 				m_ListCtrlMain.SetCheck( i );
 			m_bIsAllCheck = TRUE;
+			
 			//SetHeaderCheck( TRUE );
 		}
+		m_bNewData = true;
 	}
 
 	*pResult = 0;
@@ -1647,27 +1674,6 @@ bool CData_ManagerDlg::CheckBaseInfoInAllData()
 	}
 
 	return bResult;
-}
-
-
-
-
-void CData_ManagerDlg::OnEnKillfocusEdit1()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
-	if(m_hFocus != (HWND)0)  
-	{
-		HWND hFocus = ::GetFocus();
-
-		// Edit 가 Focus를 잃으면.  
-		if(m_hFocus != hFocus)
-		{
-			OnOK();
-		}
-	}
-	//return CListCtrl::PreTranslateMessage(pMsg);  
-
 }
 
 

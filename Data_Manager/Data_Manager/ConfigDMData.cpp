@@ -5,10 +5,6 @@
 ConfigDMData::ConfigDMData(void)
 {
 	m_bNewData = false;
-
-// 	m_pBaseData = new TestType;
-// 	m_pBaseData->SetTestName(_T("BaseInfo"));
-	m_pListTestType.RemoveAll();
 }
 
 
@@ -753,19 +749,6 @@ void ConfigDMData::SetBaseInfoList(CList<BasicData*>& inList)
 	POSITION pPos = m_lBaseInfo.GetHeadPosition();
 	POSITION pTemp = NULL;
 
-	while(pPos && m_lBaseInfo.GetSize()>0)
-	{
-		pTemp = pPos;
-
-		BasicData* temp = m_lBaseInfo.GetNext(pPos);
-		delete temp;
-		m_lBaseInfo.RemoveAt(pTemp);
-	}
-	if (m_lBaseInfo.GetSize()>0)
-	{
-		m_lBaseInfo.RemoveAll();
-	}
-
 	if(inList.GetCount() > 0)
 	{
 		POSITION pPos = inList.GetHeadPosition();
@@ -780,6 +763,15 @@ void ConfigDMData::SetBaseInfoList(CList<BasicData*>& inList)
 		}
 	}
 }
+
+void ConfigDMData::InitBaseInfoList()
+{
+	POSITION pPos = m_lBaseInfo.GetHeadPosition();
+	POSITION pTemp = NULL;
+
+	m_lBaseInfo.RemoveAll();
+}
+
 
 void ConfigDMData::ModifyData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget)
 {

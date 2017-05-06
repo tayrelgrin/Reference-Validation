@@ -160,5 +160,13 @@ void SettingBaseInfo::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 void SettingBaseInfo::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
+	if(m_TabBaseInfo.m_bModifyFlag || m_TabFileList.m_bModifyFlag)
+	{
+		if(AfxMessageBox("Exit without saving?",MB_OKCANCEL) == true)
+		{
+			::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
+		}
+	}
+	else
+		::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 }

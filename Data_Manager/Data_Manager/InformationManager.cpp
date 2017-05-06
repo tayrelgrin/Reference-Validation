@@ -15,8 +15,8 @@ InformationManager::~InformationManager(void)
 
 void InformationManager::InitAllData()
 {
-	POSITION pPos = m_listConfigs.GetHeadPosition();
-	POSITION ptemp = NULL;
+// 	POSITION pPos = m_listConfigs.GetHeadPosition();
+// 	POSITION ptemp = NULL;
 
 // 	while(pPos)
 // 	{
@@ -398,7 +398,7 @@ TestType* InformationManager::SearchSettingData(TestType& inoutTarget, bool& bRe
 
 void InformationManager::GetBaseInfo(FileType& inFileData)
 {
-/*	inFileData.InitList();*/
+	inFileData.InitList();
 
 	POSITION pPos = m_listBaseInfo.GetHeadPosition();
 	POSITION ptemp = NULL;
@@ -522,12 +522,9 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 			cTempItem = listTemp.GetNext(pPos);
 
 			if(cTempItem->getSection() == cBaseInfoItem->getSection() &&
-				cTempItem->getItem() && cBaseInfoItem->getItem())
+				cTempItem->getItem() == cBaseInfoItem->getItem())
 			{
-				if (j==0)
-				{
-					BaseInfoItemValueList.AddTail(cTempItem);
-				}
+				BaseInfoItemValueList.AddTail(cTempItem);
 			}
 		}
 	}

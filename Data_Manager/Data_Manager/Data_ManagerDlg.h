@@ -87,8 +87,8 @@ private:
 	ConfigDMData* m_cNewConfigData;
 	ConfigDMData* m_cNewSettingData;
 	InformationManager m_cValueData;
-	FileType m_cFileData;
-	FileType m_cBasicData;
+	FileType* m_cFileData;
+	FileType* m_cBasicData;
 	CString m_strRootPath;
 	CString m_strPrj;
 	CString m_strBuildNum;
@@ -97,7 +97,6 @@ private:
 	bool m_bNewData;
 	int m_nItem;
 	int	m_nSubItem;	
-	bool m_bModify;	// Data Modify Flag 
 	bool m_bPreDataUsed;
 	bool m_bIsAllCheck; 
 	
@@ -117,6 +116,4 @@ public:
 	afx_msg void OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult);
-	
-	afx_msg void OnEnKillfocusEdit1();
 };

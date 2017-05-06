@@ -46,6 +46,7 @@ public:
 	TestType* SearchTest(TestType& inoutTarget, bool& bResult);
 	void GetBaseInfoList(CList<BasicData*>& outList);
 	void SetBaseInfoList(CList<BasicData*>& outList);
+	void InitBaseInfoList();
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;
