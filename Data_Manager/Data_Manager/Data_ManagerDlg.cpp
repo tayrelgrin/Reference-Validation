@@ -99,6 +99,8 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LIST1, &CData_ManagerDlg::OnLvnColumnclickList1)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CData_ManagerDlg::OnNMDblclkList1)
+	ON_EN_KILLFOCUS(IDC_EDIT1, &CData_ManagerDlg::OnEnKillfocusEdit1)
+ON_WM_SYSCHAR()
 END_MESSAGE_MAP()
 
 
@@ -136,7 +138,8 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 /*	AfxSetAllocStop(98269);*/
-
+	m_bModify = false;
+	m_bIsAllCheck = false;
 	InitMainList();
 	MakeDataDirectory();
 
@@ -776,35 +779,48 @@ void CData_ManagerDlg::AddDOEToListBox(CString inDOE)
 void CData_ManagerDlg::OnLbnSelchangeListPrj()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	
-	m_lbConfig.ResetContent();
-	m_lbBuild.ResetContent();
-	m_lbDOE.ResetContent();
-	m_treeMainTest.DeleteAllItems();
-	m_strDOE = "";
+	bool bDo = true;
 
-	int nIndex = m_lbProject.GetCurSel();
-	m_lbProject.GetText(nIndex, m_strPrj);
-
-	std::vector<CString> vFileList;
-	FindStringInVector(m_vConfigName, m_strPrj, vFileList);
-	CString strTemp;
-	bool bCompareResult = true;
-
-	for (int i=0; i<vFileList.size(); i++)
+	if(m_bNewData)
 	{
-		bCompareResult = true;
-		AfxExtractSubString(strTemp, vFileList[i], 1, '_');
-		
-		for (int j = 0; j< m_lbBuild.GetCount(); j++)
+		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
-			CString strTarget;
-			m_lbBuild.GetText(j, strTarget);
-			if(strTarget == strTemp)
-				bCompareResult = false;
+			bDo = true;
 		}
-		if(bCompareResult)	// 중복 확인 
-			m_lbBuild.AddString(strTemp);
+		else 
+			bDo = false;
+	}
+	if(bDo)
+	{
+		m_lbConfig.ResetContent();
+		m_lbBuild.ResetContent();
+		m_lbDOE.ResetContent();
+		m_treeMainTest.DeleteAllItems();
+		m_strDOE = "";
+
+		int nIndex = m_lbProject.GetCurSel();
+		m_lbProject.GetText(nIndex, m_strPrj);
+
+		std::vector<CString> vFileList;
+		FindStringInVector(m_vConfigName, m_strPrj, vFileList);
+		CString strTemp;
+		bool bCompareResult = true;
+
+		for (int i=0; i<vFileList.size(); i++)
+		{
+			bCompareResult = true;
+			AfxExtractSubString(strTemp, vFileList[i], 1, '_');
+		
+			for (int j = 0; j< m_lbBuild.GetCount(); j++)
+			{
+				CString strTarget;
+				m_lbBuild.GetText(j, strTarget);
+				if(strTarget == strTemp)
+					bCompareResult = false;
+			}
+			if(bCompareResult)	// 중복 확인 
+				m_lbBuild.AddString(strTemp);
+		}
 	}
 }
 
@@ -824,35 +840,49 @@ void CData_ManagerDlg::FindStringInVector(std::vector<CString> invData, CString 
 void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_lbConfig.ResetContent();
-	m_lbDOE.ResetContent();
-	m_treeMainTest.DeleteAllItems();
-	m_strDOE = "";
+	bool bDo = true;
 
-	int nIndex = m_lbBuild.GetCurSel();
-	m_lbBuild.GetText(nIndex, m_strBuildNum);
-
-	CString strTargetName = m_strPrj + '_' + m_strBuildNum;
-	CString strTemp;
-	std::vector<CString> vFileList;
-	bool bCompareResult = true;
-
-	FindStringInVector(m_vConfigName, strTargetName, vFileList);
-
-	for (int i=0; i<vFileList.size(); i++)
+	if(m_bNewData)
 	{
-		bCompareResult = true;
-		AfxExtractSubString(strTemp, vFileList[i], 2, '_');
-
-		for (int j = 0; j< m_lbConfig.GetCount(); j++)
+		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
-			CString strTarget;
-			m_lbConfig.GetText(j, strTarget);
-			if(strTarget == strTemp)
-				bCompareResult = false;
+			bDo = true;
 		}
-		if(bCompareResult)	// 중복 확인 
-			m_lbConfig.AddString(strTemp);
+		else 
+			bDo = false;
+	}
+	if(bDo)
+	{
+		m_lbConfig.ResetContent();
+		m_lbDOE.ResetContent();
+		m_treeMainTest.DeleteAllItems();
+		m_strDOE = "";
+
+		int nIndex = m_lbBuild.GetCurSel();
+		m_lbBuild.GetText(nIndex, m_strBuildNum);
+
+		CString strTargetName = m_strPrj + '_' + m_strBuildNum;
+		CString strTemp;
+		std::vector<CString> vFileList;
+		bool bCompareResult = true;
+
+		FindStringInVector(m_vConfigName, strTargetName, vFileList);
+
+		for (int i=0; i<vFileList.size(); i++)
+		{
+			bCompareResult = true;
+			AfxExtractSubString(strTemp, vFileList[i], 2, '_');
+
+			for (int j = 0; j< m_lbConfig.GetCount(); j++)
+			{
+				CString strTarget;
+				m_lbConfig.GetText(j, strTarget);
+				if(strTarget == strTemp)
+					bCompareResult = false;
+			}
+			if(bCompareResult)	// 중복 확인 
+				m_lbConfig.AddString(strTemp);
+		}
 	}
 }
 
@@ -860,35 +890,50 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_lbDOE.ResetContent();
-	m_treeMainTest.DeleteAllItems();
-	m_strDOE = "";
 
+	bool bDo = true;
 
-	int nIndex = m_lbConfig.GetCurSel();
-	m_lbConfig.GetText(nIndex, m_strConfigNum);
-
-	CString strTargetName = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
-	CString strTemp;
-	std::vector<CString> vFileList;
-	bool bCompareResult = true;
-
-	FindStringInVector(m_vConfigName, strTargetName, vFileList);
-
-	for (int i=0; i<vFileList.size(); i++)
+	if(m_bNewData)
 	{
-		bCompareResult = true;
-		AfxExtractSubString(strTemp, vFileList[i], 3, '_');
-
-		for (int j = 0; j< m_lbDOE.GetCount(); j++)
+		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
-			CString strTarget;
-			m_lbDOE.GetText(j, strTarget);
-			if(strTarget == strTemp)
-				bCompareResult = false;
+			bDo = true;
 		}
-		if(bCompareResult)	// 중복 확인
-			m_lbDOE.AddString(strTemp);		
+		else 
+			bDo = false;
+	}
+	if(bDo)
+	{
+		m_lbDOE.ResetContent();
+		m_treeMainTest.DeleteAllItems();
+		m_strDOE = "";
+
+
+		int nIndex = m_lbConfig.GetCurSel();
+		m_lbConfig.GetText(nIndex, m_strConfigNum);
+
+		CString strTargetName = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
+		CString strTemp;
+		std::vector<CString> vFileList;
+		bool bCompareResult = true;
+
+		FindStringInVector(m_vConfigName, strTargetName, vFileList);
+
+		for (int i=0; i<vFileList.size(); i++)
+		{
+			bCompareResult = true;
+			AfxExtractSubString(strTemp, vFileList[i], 3, '_');
+
+			for (int j = 0; j< m_lbDOE.GetCount(); j++)
+			{
+				CString strTarget;
+				m_lbDOE.GetText(j, strTarget);
+				if(strTarget == strTemp)
+					bCompareResult = false;
+			}
+			if(bCompareResult)	// 중복 확인
+				m_lbDOE.AddString(strTemp);		
+		}
 	}
 }
 
@@ -896,56 +941,69 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 void CData_ManagerDlg::OnLbnSelchangeListDoe()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	bool bDo = true;
 
-	ConfigDMData* pConfig = m_cNewConfigData;
-	ConfigDMData* pSetting = m_cNewSettingData;
-	
-	m_treeMainTest.DeleteAllItems();
-	m_vAllFileList.clear();
-	m_cBasicData.SetListCountZero();
+	if(m_bNewData)
+	{
+		if(MB_OK == AfxMessageBox("There are some modification, Do you want to Reload?", MB_OKCANCEL))
+		{
+			bDo = true;
+		}
+		else 
+			bDo = false;
+	}
+	if(bDo)
+	{
+		ConfigDMData* pConfig = m_cNewConfigData;
+		ConfigDMData* pSetting = m_cNewSettingData;
 
-	int nIndex = m_lbDOE.GetCurSel();
-	m_lbDOE.GetText(nIndex, m_strDOE);
-	BeginWaitCursor();
+		m_treeMainTest.DeleteAllItems();
+		m_vAllFileList.clear();
+		m_cBasicData.SetListCountZero();
 
-	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
-	CString strTemp;
-	std::vector<CString> vFileList;
+		int nIndex = m_lbDOE.GetCurSel();
+		m_lbDOE.GetText(nIndex, m_strDOE);
+		BeginWaitCursor();
 
-	FindStringInVector(m_vConfigName, strTarget, vFileList);
+		CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
+		CString strTemp;
+		std::vector<CString> vFileList;
 
-	// File Read 
-	CString strEXEDirectory, strValuePath, strSettingPath;
+		FindStringInVector(m_vConfigName, strTarget, vFileList);
 
-	strEXEDirectory = pConfig->GetEXEDirectoryPath();
+		// File Read 
+		CString strEXEDirectory, strValuePath, strSettingPath;
 
-	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
-	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
+		strEXEDirectory = pConfig->GetEXEDirectoryPath();
 
-	pConfig->LoadDataFiles(strValuePath);
-	pConfig->SetProject(m_strPrj);
-	pConfig->SetBuildNum(m_strBuildNum);
-	pConfig->SetConfigNum(m_strConfigNum);
-	pConfig->SetDOE(m_strDOE);
+		strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+		strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
 
-	pSetting->LoadDataFiles(strSettingPath);
-	pSetting->SetProject(m_strPrj);
-	pSetting->SetBuildNum(m_strBuildNum);
-	pSetting->SetConfigNum(m_strConfigNum);
-	pSetting->SetDOE(m_strDOE);
+		pConfig->LoadDataFiles(strValuePath);
+		pConfig->SetProject(m_strPrj);
+		pConfig->SetBuildNum(m_strBuildNum);
+		pConfig->SetConfigNum(m_strConfigNum);
+		pConfig->SetDOE(m_strDOE);
 
-	CList<BasicData*> cTemp;
+		pSetting->LoadDataFiles(strSettingPath);
+		pSetting->SetProject(m_strPrj);
+		pSetting->SetBuildNum(m_strBuildNum);
+		pSetting->SetConfigNum(m_strConfigNum);
+		pSetting->SetDOE(m_strDOE);
 
-	pSetting->GetBaseInfoList(cTemp);
+		CList<BasicData*> cTemp;
 
-	m_cValueData.SetBaseInfoFromConfig(cTemp);
+		pSetting->GetBaseInfoList(cTemp);
 
-	m_cValueData.AddNewConfigData(pConfig);
-	m_cValueData.AddNewSettingData(pSetting);
+		m_cValueData.SetBaseInfoFromConfig(cTemp);
 
-	// treeview에 뿌려주기
-	AddToTree(pSetting);
-	EndWaitCursor();
+		m_cValueData.AddNewConfigData(pConfig);
+		m_cValueData.AddNewSettingData(pSetting);
+
+		// treeview에 뿌려주기
+		AddToTree(pSetting);
+		EndWaitCursor();
+	}
 }
 
 
@@ -1295,23 +1353,51 @@ CString CData_ManagerDlg::GetItemText(HWND hWnd, int m_nItem, int nSubItem) cons
 void CData_ManagerDlg::OnOK()
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	
 	CWnd* pwndCtrl = GetFocus();
-	// get the control ID which is presently having the focus
+
+	// 	get the control ID which is presently having the focus
 	int ctrl_ID = pwndCtrl->GetDlgCtrlID();
 	CString strNewData;
-	switch (ctrl_ID)
-	{	//if the control is the EditBox	
-	case IDC_EDIT1:
-		//get the text from the EditBox
-		GetDlgItemText(IDC_EDIT1, strNewData);
-		//set the value in the listContorl with the specified Item & SubItem values
+// 	
+// 		switch (ctrl_ID)
+// 		{	//if the control is the EditBox	
+// 		case IDC_EDIT1:
+// 		case IDC_LIST1:
+// 			//get the text from the EditBox
+// 			GetDlgItemText(IDC_EDIT1, strNewData);
+// 			//set the value in the listContorl with the specified Item & SubItem values
+// 			SetCell(::GetDlgItem (m_hWnd,IDC_LIST1), strNewData, m_nItem, m_nSubItem);
+// 			::SendDlgItemMessage(m_hWnd,IDC_EDIT1,WM_KILLFOCUS,0,0);
+// 			::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
+// 			break;
+// 		default:
+// 			break;
+// 		}
+
+	if(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1) == pwndCtrl->GetSafeHwnd() ||  
+		::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1) == m_hFocus)
+	{  
+		// EditCtrl로 부터 Text를 얻어온다.  
+		CString cStrText;  
+		::GetWindowText(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), LPSTR(LPCTSTR(cStrText)), 255);  
+		 
+
+		// 얻어온 텍스트를 ListCtrl 에 적용시킨다  
 		SetCell(::GetDlgItem (m_hWnd,IDC_LIST1), strNewData, m_nItem, m_nSubItem);
-		::SendDlgItemMessage(m_hWnd,IDC_EDIT1,WM_KILLFOCUS,0,0);
-		::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
-		break;     
-	default:
-		break;
-	}
+ 
+
+		// EditCtrl의 Focus를 죽인다.  
+		::SendMessage(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), WM_KILLFOCUS, 0, 0);  
+		::ShowWindow(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), SW_HIDE);  
+		::SetFocus(pwndCtrl->GetSafeHwnd());  
+
+		// ListCtrl의 SelectionMark를 지정한다.  
+		//SetSelectionMark(m_nItem);
+	}  
+
+	m_hFocus = (HWND)0;
+
 }
 
 
@@ -1359,20 +1445,20 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 	int nCnt = m_ListCtrlMain.GetItemCount();
 	if( pNMLV->iSubItem == 0 )
 	{
-// 		if( m_bIsAllCheck )
-// 		{
-// 			for( int i=0 ; i<nCnt ; i++ )
-// 				m_ListCtrlMain.SetCheck( i, FALSE );
-// 			m_bIsAllCheck = FALSE;
-// 			SetHeaderCheck( FALSE );
-// 		}
-// 		else
-// 		{
-// 			for( int i=0 ; i<nCnt ; i++ )
-// 				m_ListCtrlMain.SetCheck( i );
-// 			m_bIsAllCheck = TRUE;
-// 			SetHeaderCheck( TRUE );
-// 		}
+		if( m_bIsAllCheck )
+		{
+			for( int i=0 ; i<nCnt ; i++ )
+				m_ListCtrlMain.SetCheck( i, FALSE );
+			m_bIsAllCheck = FALSE;
+			//SetHeaderCheck( FALSE );
+		}
+		else
+		{
+			for( int i=0 ; i<nCnt ; i++ )
+				m_ListCtrlMain.SetCheck( i );
+			m_bIsAllCheck = TRUE;
+			//SetHeaderCheck( TRUE );
+		}
 	}
 
 	*pResult = 0;
@@ -1486,6 +1572,8 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	m_nItem = temp->iItem;
 	//get the column number
 	m_nSubItem = temp->iSubItem;
+
+	// 선택된 지점이 올바르지 않을시...  
 	if(m_nSubItem == 0 || m_nSubItem == -1 || m_nItem == -1)
 		return ;
 
@@ -1504,6 +1592,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	//Get the Rectangle of the Dialog
 	::GetWindowRect(m_hWnd,&rtDlg);
 
+	// Dialog에 위치한 ListCtrl의 left & top 위치를 구한다.
 	int nThisLeft  = rtListCtrl.left - rtDlg.left;
 	int nThisTop = rtListCtrl.top - rtDlg.top;
 
@@ -1515,6 +1604,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 		rtSubItem.right - rtSubItem.left - 3,
 		rtSubItem.bottom - rtSubItem.top -1,
 		NULL);
+
 	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
 	::SetFocus(::GetDlgItem(m_hWnd,IDC_EDIT1));
 
@@ -1525,8 +1615,12 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	::SetWindowText(::GetDlgItem(m_hWnd,IDC_EDIT1),strData);
 	m_EditInListCtrl.SetSel(strData.GetLength());
 
-	// m_cPreDataStack.push() 객체로? 추가, 위치 정보 추가
+	int nSel = strData.GetLength();
+	::SendMessage(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), EM_SETSEL, LOWORD(nSel), HIWORD(nSel)); 
 
+	// Focus를 잃었을 경우 ListCtrl에 적용시키기 위해 저장  
+	m_hFocus = ::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1);  
+	Invalidate();  
 
 	*pResult = 0;
 }
@@ -1554,3 +1648,26 @@ bool CData_ManagerDlg::CheckBaseInfoInAllData()
 
 	return bResult;
 }
+
+
+
+
+void CData_ManagerDlg::OnEnKillfocusEdit1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	if(m_hFocus != (HWND)0)  
+	{
+		HWND hFocus = ::GetFocus();
+
+		// Edit 가 Focus를 잃으면.  
+		if(m_hFocus != hFocus)
+		{
+			OnOK();
+		}
+	}
+	//return CListCtrl::PreTranslateMessage(pMsg);  
+
+}
+
+

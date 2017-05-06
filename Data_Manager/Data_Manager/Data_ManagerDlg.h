@@ -37,7 +37,7 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
-	
+	HWND m_hFocus;
 public:
 	CBitmapButton m_cButton_New;
 	CBitmapButton m_cButton_LoadSetting;
@@ -99,6 +99,7 @@ private:
 	int	m_nSubItem;	
 	bool m_bModify;	// Data Modify Flag 
 	bool m_bPreDataUsed;
+	bool m_bIsAllCheck; 
 	
 public:
 	CListBox m_lbProject;
@@ -116,4 +117,6 @@ public:
 	afx_msg void OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult);
+	
+	afx_msg void OnEnKillfocusEdit1();
 };
