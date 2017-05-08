@@ -62,6 +62,8 @@ BOOL SettingBaseInfo::OnInitDialog()
 // 	m_Tab.InsertItem(2,_T("Register"));
 // 	m_Tab.InsertItem(3,_T("File List"));
  	
+	m_bModifyFlag = false;
+
 	CRect rect;
 
 	m_Tab.GetClientRect(&rect);
@@ -116,12 +118,14 @@ void SettingBaseInfo::OnBnClickedButtonSave()
 	{
 		m_TabBaseInfo.AddBaseInfoItemToList();
 		m_TabBaseInfo.m_bModifyFlag = false;
+		m_bModifyFlag = true;
 	}
 	if (m_TabFileList.m_bModifyFlag)
 	{
 		m_TabFileList.SaveFileListInListctrlToList();
 		m_vSettingFileList = m_TabFileList.m_vSettingFileList;
 		m_TabFileList.m_bModifyFlag = false;
+		m_bModifyFlag = true;
 	}
 }
 

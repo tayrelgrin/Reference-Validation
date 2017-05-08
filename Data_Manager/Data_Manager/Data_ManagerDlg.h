@@ -98,6 +98,7 @@ private:
 	bool m_bModify;
 	int m_nItem;
 	int	m_nSubItem;	
+	bool m_bNotFirst;
 	bool m_bPreDataUsed;
 	bool m_bIsAllCheck; 
 	

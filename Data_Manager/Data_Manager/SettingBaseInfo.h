@@ -36,7 +36,7 @@ public:
 	CBitmapButton m_cButton_EXIT;
 	virtual BOOL OnInitDialog();
 	afx_msg void OnBnClickedButtonSave();
-	
+	bool m_bModifyFlag;
 	BaseItem m_TabBaseInfo;
 	CheckingFileList m_TabFileList;
 	InformationManager* m_pData;

@@ -154,6 +154,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	Button_Imaging();
 
+	m_bNotFirst = false;
 	m_bNewData = false;
 	m_bModify = false;
 	m_cNewConfigData	= new ConfigDMData();
@@ -253,125 +254,151 @@ HCURSOR CData_ManagerDlg::OnQueryDragIcon()
 void CData_ManagerDlg::OnBnClickedButtonNew()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
+	bool bWorking = true;
 	if(m_cAddNewRefDlg.GetSafeHwnd()!=NULL)
 	{
 		m_cAddNewRefDlg.DestroyWindow();
 	}
-
-	if(IDOK == m_cAddNewRefDlg.DoModal())
+	if (m_bNewData)
 	{
-		BeginWaitCursor();
-		m_cNewConfigData->InitListAndVectors();
-		m_cNewSettingData->InitListAndVectors();
+		if(AfxMessageBox("There is some Working Data, Continue To make new one without saving?", MB_OKCANCEL))
+			bWorking = true;
+		else
+			bWorking = false;
 
-		m_vTestList.clear();
-		m_vDirList.clear();
-		m_cBasicData->InitList();
-		m_cFileData->InitList();
-
-		std::vector<CString> temp;
-		temp.clear();
-
-		m_strPrj		= m_cAddNewRefDlg.GetProject();
-		m_strBuildNum	= m_cAddNewRefDlg.GetBuild();
-		m_strConfigNum	= m_cAddNewRefDlg.GetConfig();
-		m_strDOE		= m_cAddNewRefDlg.GetDOE();
-		m_bPreDataUsed  = m_cAddNewRefDlg.GetPreDataUsed();
-		m_strRootPath   = m_cAddNewRefDlg.GetDirRootPath();
-
-		m_cAddNewRefDlg.GetDirList(m_vDirList);
-
-		if(!m_bPreDataUsed)
+	}
+	if(bWorking)
+	{
+		if(IDOK == m_cAddNewRefDlg.DoModal())
 		{
-			m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
-			m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
-			m_cNewConfigData->SetTestList(m_vTestList);
-			m_cNewConfigData->SetTestDirList(m_vDirList);
-			m_cNewConfigData->SetBaseFiles(temp);
-			m_cNewConfigData->GetFilePathInDir(temp, m_vDirList);
+			BeginWaitCursor();
 
-			m_cNewSettingData->SetTestList(m_vTestList);
-			m_cNewSettingData->SetTestDirList(m_vDirList);
-			m_cNewSettingData->SetBaseFiles(temp);
-
-			CList<BasicData*> Templist;
-			m_cBasicData->CopyDataToList(Templist);
-			m_cNewSettingData->SetBaseInfoList(Templist);
-
-			AddNewConfig(m_cNewConfigData, m_cNewSettingData);
-
-			for(int i = 0; i<temp.size(); i++)
+			if (m_bNewData)
 			{
-				temp.erase(temp.begin()+i);
+				m_cNewConfigData->InitListAndVectors();
+				m_cNewSettingData->InitListAndVectors();
 			}
+
+			if(m_bNotFirst)
+			{
+				m_cNewConfigData = new ConfigDMData;
+				m_cNewSettingData = new ConfigDMData;
+			}
+
+			m_vTestList.clear();
+			m_vDirList.clear();
+			m_cBasicData->InitList();
+			m_cFileData->InitList();
+
+			std::vector<CString> temp;
 			temp.clear();
 
-			POSITION pTemp = NULL;
-			POSITION pPos = Templist.GetHeadPosition();
+			m_strPrj		= m_cAddNewRefDlg.GetProject();
+			m_strBuildNum	= m_cAddNewRefDlg.GetBuild();
+			m_strConfigNum	= m_cAddNewRefDlg.GetConfig();
+			m_strDOE		= m_cAddNewRefDlg.GetDOE();
+			m_bPreDataUsed  = m_cAddNewRefDlg.GetPreDataUsed();
+			m_strRootPath   = m_cAddNewRefDlg.GetDirRootPath();
 
-			while(pPos && Templist.GetSize() > 0)
+			m_cAddNewRefDlg.GetDirList(m_vDirList);
+
+			if(!m_bPreDataUsed)
 			{
-				pTemp = pPos;
-				
-				BasicData* temp = Templist.GetNext(pPos);
-				delete temp;
-				Templist.RemoveAt(pTemp);
+				m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
+				m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
+				m_cNewConfigData->SetTestList(m_vTestList);
+				m_cNewConfigData->SetTestDirList(m_vDirList);
+				m_cNewConfigData->SetBaseFiles(temp);
+				m_cNewConfigData->GetFilePathInDir(temp, m_vDirList);
+
+				m_cNewSettingData->SetTestList(m_vTestList);
+				m_cNewSettingData->SetTestDirList(m_vDirList);
+				m_cNewSettingData->SetBaseFiles(temp);
+
+				CList<BasicData*> Templist;
+				m_cBasicData->CopyDataToList(Templist);
+				m_cNewSettingData->SetBaseInfoList(Templist);
+
+				AddNewConfig(m_cNewConfigData, m_cNewSettingData);
+
+				for(int i = 0; i<temp.size(); i++)
+				{
+					temp.erase(temp.begin()+i);
+				}
+				temp.clear();
+
+				POSITION pTemp = NULL;
+				POSITION pPos = Templist.GetHeadPosition();
+
+				while(pPos && Templist.GetSize() > 0)
+				{
+					pTemp = pPos;
+
+					BasicData* temp = Templist.GetNext(pPos);
+					delete temp;
+					Templist.RemoveAt(pTemp);
+				}
+
+				CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
+				std::vector<CString> vTemp;
+
+				FindStringInVector(m_vConfigName, strComb, vTemp);
+
+				if (vTemp.size()==0)
+				{
+					m_vConfigName.push_back(strComb);
+				}
+
+				vTemp.clear();
+			}
+			else
+			{
+				if(m_bNotFirst)
+				{
+					m_cNewConfigData = new ConfigDMData;
+					m_cNewSettingData = new ConfigDMData;
+				}
+
+				CString strPrePrj		= m_cAddNewRefDlg.GetPreProject();
+				CString strPreBuildNum	= m_cAddNewRefDlg.GetPreBuild();
+				CString strPreConfigNum	= m_cAddNewRefDlg.GetPreConfig();
+				CString strPreDOE		= m_cAddNewRefDlg.GetPreDOE();
+
+				CString strTarget = strPrePrj + '_' + strPreBuildNum + '_' + strPreConfigNum + '_' + strPreDOE;
+				CString strTemp;
+				std::vector<CString> vFileList;
+
+				FindStringInVector(m_vConfigName, strTarget, vFileList);
+
+				// File Read 
+				CString strEXEDirectory, strValuePath, strSettingPath;
+
+				strEXEDirectory = m_cNewConfigData->GetEXEDirectoryPath();
+
+				strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
+				strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
+
+				m_cNewConfigData->LoadDataFiles(strValuePath);
+				m_cNewSettingData->LoadDataFiles(strSettingPath);
 			}
 
-			CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
-			std::vector<CString> vTemp;
+			AddToTree(m_cNewSettingData);
 
-			FindStringInVector(m_vConfigName, strComb, vTemp);
+			if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
+				AddProjectToListBox(m_strPrj);
 
-			if (vTemp.size()==0)
-			{
-				m_vConfigName.push_back(strComb);
-			}
+			if(m_lbBuild.FindStringExact(-1, m_strBuildNum) == -1)
+				AddBuildToListBox(m_strBuildNum);
 
-			vTemp.clear();
+			if(m_lbConfig.FindStringExact(-1, m_strConfigNum) == -1)
+				AddConfigToListBox(m_strConfigNum);
+
+			if(m_lbDOE.FindStringExact(-1, m_strDOE) == -1)
+				AddDOEToListBox(m_strDOE);
+			m_bNewData = true;
+			EndWaitCursor();
 		}
-		else
-		{
-			CString strPrePrj		= m_cAddNewRefDlg.GetPreProject();
-			CString strPreBuildNum	= m_cAddNewRefDlg.GetPreBuild();
-			CString strPreConfigNum	= m_cAddNewRefDlg.GetPreConfig();
-			CString strPreDOE		= m_cAddNewRefDlg.GetPreDOE();
-
-			CString strTarget = strPrePrj + '_' + strPreBuildNum + '_' + strPreConfigNum + '_' + strPreDOE;
-			CString strTemp;
-			std::vector<CString> vFileList;
-
-			FindStringInVector(m_vConfigName, strTarget, vFileList);
-
-			// File Read 
-			CString strEXEDirectory, strValuePath, strSettingPath;
-
-			strEXEDirectory = m_cNewConfigData->GetEXEDirectoryPath();
-
-			strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", m_strPrj, "\\", m_strBuildNum,"-", m_strConfigNum, "-", m_strDOE,".xml");
-			strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", m_strPrj, "-", m_strBuildNum, "-", m_strConfigNum, "-", m_strDOE,".xml");
-
-			m_cNewConfigData->LoadDataFiles(strValuePath);
-			m_cNewSettingData->LoadDataFiles(strSettingPath);
-		}
-
-		AddToTree(m_cNewSettingData);
-
-		if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
-			AddProjectToListBox(m_strPrj);
-
-		if(m_lbBuild.FindStringExact(-1, m_strBuildNum) == -1)
-			AddBuildToListBox(m_strBuildNum);
-
-		if(m_lbConfig.FindStringExact(-1, m_strConfigNum) == -1)
-			AddConfigToListBox(m_strConfigNum);
-
-		if(m_lbDOE.FindStringExact(-1, m_strDOE) == -1)
-			AddDOEToListBox(m_strDOE);
-		m_bNewData = true;
-		EndWaitCursor();
-	}
+	}	
 }
 
 
@@ -398,20 +425,24 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 
 		m_vAllFileList = m_cSettingDlg.m_vSettingFileList;
 
-		HTREEITEM hNode;
-		TestType cBaseInfoTest;
-		hNode = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
-		CString strTest = m_treeMainTest.GetItemText(hNode);
-		cBaseInfoTest.SetTestName(strTest);
-		
-		m_cValueData.GetBaseInfo(*m_cBasicData);
+		bool bModify = m_cSettingDlg.m_bModifyFlag;
 
-		CList<BasicData*> Templist;
-		m_cBasicData->CopyDataToList(Templist);
-		m_cNewSettingData->InitBaseInfoList();
-		m_cNewSettingData->SetBaseInfoList(Templist);
-		m_cNewSettingData->SetNewDataFlag(true);
+		if (bModify)
+		{
+			HTREEITEM hNode;
+			TestType cBaseInfoTest;
+			hNode = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
+			CString strTest = m_treeMainTest.GetItemText(hNode);
+			cBaseInfoTest.SetTestName(strTest);
 
+			m_cValueData.GetBaseInfo(*m_cBasicData);
+
+			CList<BasicData*> Templist;
+			m_cBasicData->CopyDataToList(Templist);
+			m_cNewSettingData->InitBaseInfoList();
+			m_cNewSettingData->SetBaseInfoList(Templist);
+			m_cNewSettingData->SetNewDataFlag(true);
+		}
 		AddToTree(m_cNewSettingData);
 		CheckBaseInfoInAllData();
 	}
@@ -442,8 +473,12 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 
 		m_cValueData.InitAllData();
 			
-		m_cNewConfigData->InitListAndVectors();
-		m_cNewSettingData->InitListAndVectors();
+		if(m_bNewData)
+		{
+			m_cNewConfigData->InitListAndVectors();
+			m_cNewSettingData->InitListAndVectors();
+		}
+
 	
 		delete m_cFileData;
 		//delete m_cBasicData;
@@ -587,6 +622,8 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 
 	pConfig->LoadDataFiles(strValuePath);
 	pSetting->LoadDataFiles(strSettingPath);
+
+	AddToTree(pSetting);
 
 	EndWaitCursor();
 }
@@ -1034,6 +1071,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 		// treeview에 뿌려주기
 		AddToTree(pSetting);
 		EndWaitCursor();
+		m_bNotFirst = true;
 	}
 }
 
@@ -1063,7 +1101,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
 	m_ListCtrlMain.DeleteAllItems();
-
+	Sleep(100);
 	HTREEITEM hNode;
 	std::string strFileName, strTestName, strDirName, strCombe;
 

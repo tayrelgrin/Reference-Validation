@@ -15,38 +15,38 @@ InformationManager::~InformationManager(void)
 
 void InformationManager::InitAllData()
 {
-// 	POSITION pPos = m_listConfigs.GetHeadPosition();
-// 	POSITION ptemp = NULL;
+	POSITION pPos = m_listConfigs.GetHeadPosition();
+	POSITION ptemp = NULL;
 
-// 	while(pPos)
-// 	{
-// 		ptemp = pPos;
-// 		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
-// 		try
-// 		{
-// 			delete pData;
-// 			m_listConfigs.RemoveAt(ptemp);
-// 		}
-// 		catch (CMemoryException* e)
-// 		{
-// 		}
-// 	}
-// 
-// 	pPos = m_listSetting.GetHeadPosition();
-// 	while(pPos)
-// 	{
-// 		ptemp = pPos;
-// 		ConfigDMData* pData = m_listSetting.GetNext(pPos);
-// 		
-// 		try
-// 		{
-// 			delete pData;
-// 			m_listSetting.RemoveAt(ptemp);
-// 		}
-// 		catch (CMemoryException* e)
-// 		{
-// 		}
-// 	}
+	while(pPos)
+	{
+		ptemp = pPos;
+		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
+		try
+		{
+			delete pData;
+			m_listConfigs.RemoveAt(ptemp);
+		}
+		catch (CMemoryException* e)
+		{
+		}
+	}
+
+	pPos = m_listSetting.GetHeadPosition();
+	while(pPos)
+	{
+		ptemp = pPos;
+		ConfigDMData* pData = m_listSetting.GetNext(pPos);
+		
+		try
+		{
+			delete pData;
+			m_listSetting.RemoveAt(ptemp);
+		}
+		catch (CMemoryException* e)
+		{
+		}
+	}
 
 	m_listSetting.RemoveAll();
 	m_listConfigs.RemoveAll();
