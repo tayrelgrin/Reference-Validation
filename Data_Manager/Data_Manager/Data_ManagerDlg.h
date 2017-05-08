@@ -95,6 +95,7 @@ private:
 	CString m_strConfigNum;
 	CString m_strDOE;
 	bool m_bNewData;
+	bool m_bModify;
 	int m_nItem;
 	int	m_nSubItem;	
 	bool m_bPreDataUsed;

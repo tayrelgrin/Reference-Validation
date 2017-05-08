@@ -154,6 +154,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	Button_Imaging();
 
 	m_bNewData = false;
+	m_bModify = false;
 	m_cNewConfigData	= new ConfigDMData();
 	m_cNewSettingData	= new ConfigDMData();
 
@@ -424,7 +425,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	bool bWorking = true;
-	if(m_bNewData )
+	if(m_bNewData || m_bModify)
 	{
 		if(AfxMessageBox("Close SW without Save?", MB_OKCANCEL) == true)
 		{
@@ -806,7 +807,7 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	bool bDo = true;
 
-	if(m_bNewData)
+	if(m_bNewData || m_bModify)
 	{
 		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
@@ -867,7 +868,7 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	bool bDo = true;
 
-	if(m_bNewData)
+	if(m_bNewData || m_bModify)
 	{
 		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
@@ -918,7 +919,7 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 
 	bool bDo = true;
 
-	if(m_bNewData)
+	if(m_bNewData || m_bModify)
 	{
 		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
@@ -968,7 +969,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	bool bDo = true;
 
-	if(m_bNewData)
+	if(m_bNewData || m_bModify)
 	{
 		if(MB_OK == AfxMessageBox("There are some modification, Do you want to Reload?", MB_OKCANCEL))
 		{
@@ -1095,7 +1096,12 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			FileType* cSetting = new FileType;
 			if(strDirName!="")
-				strCombe = strDirName+":"+strTestName;
+			{
+				if(m_bNewData)
+					strCombe = strDirName+"\\"+strTestName;
+				else
+					strCombe = strDirName+":"+strTestName;
+			}
 			else
 				strCombe = strTestName;
 			m_cNewConfigData->SearchFileDataInList(strCombe.c_str(), strFileName.c_str(), *m_cFileData);
@@ -1485,7 +1491,7 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 			
 			//SetHeaderCheck( TRUE );
 		}
-		m_bNewData = true;
+		m_bModify = true;
 	}
 
 	*pResult = 0;
@@ -1580,7 +1586,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 				delete cModifyTarget;
 
 				bFlag = false;
-				m_bNewData = true;	// file save 를 위한 flag 변경
+				m_bModify = true;	// file save 를 위한 flag 변경
 			}
 		}
 	}
