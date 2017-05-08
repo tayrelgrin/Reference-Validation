@@ -100,6 +100,7 @@ BEGIN_MESSAGE_MAP(CData_ManagerDlg, CDialogEx)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_LIST1, &CData_ManagerDlg::OnLvnItemchangedList1)
 	ON_NOTIFY(NM_DBLCLK, IDC_LIST1, &CData_ManagerDlg::OnNMDblclkList1)
 ON_WM_SYSCHAR()
+ON_EN_KILLFOCUS(IDC_EDIT1, &CData_ManagerDlg::OnEnKillfocusEdit1)
 END_MESSAGE_MAP()
 
 
@@ -614,7 +615,11 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 				bool bResult = m_cValueData.SaveRefToFile(_T("temp"));
 				EndWaitCursor();
 				if(bResult)
+				{
 					MessageBox ("Complete Save the data to File",NULL,MB_OK);
+					m_bNewData = false;
+					m_bModify  = false;
+				}
 				else
 					MessageBox ("FAIL!! There is a something missing",NULL,MB_OK);
 			}
@@ -1081,11 +1086,9 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 		//TestType cBaseInfoTest;
 		hNode = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);
 		hNode = m_treeMainTest.GetNextItem(hNode, TVGN_NEXT);
-		//cBaseInfoTest.SetTestName(m_treeMainTest.GetItemText(hNode));
 		
 		m_cBasicData->SetListCountZero();
 		m_cValueData.GetBaseInfo(*m_cBasicData);
-		//cBaseInfoTest.AddNewFile(&m_cBasicData);
 
 		AddBaseInfoToListControl(m_treeMainTest.GetItemText(hNode));
 		
@@ -1464,6 +1467,24 @@ BOOL CData_ManagerDlg::PreTranslateMessage(MSG* pMsg)
 	//block esc closing
 	if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE) return TRUE;
 
+	if(pMsg->message == WM_KEYDOWN){
+		if(pMsg->wParam == VK_RETURN){
+			if(pMsg->hwnd == GetDlgItem(IDC_EDIT1)->GetSafeHwnd())
+			{
+				CString str;
+				GetDlgItemText(IDC_EDIT1, str);
+				m_ListCtrlMain.SetItemText(m_nItem, m_nSubItem, str);
+
+				GetDlgItem(IDC_EDIT1)->SetWindowPos(NULL, 0, 0, 0, 0, SWP_HIDEWINDOW );
+			}
+			return TRUE;
+		}
+		if(pMsg->wParam == VK_ESCAPE)
+		{
+			return TRUE;
+		}
+	}
+
 	return CDialogEx::PreTranslateMessage(pMsg);
 }
 
@@ -1566,7 +1587,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 					{
 						m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
 
-						hItem = m_treeMainTest.GetNextItem(hItem, TVGN_NEXT);						
+						hItem = m_treeMainTest.GetNextItem(hItem, TVGN_NEXT);
 						strTest = m_treeMainTest.GetItemText(hItem);
 
 						HTREEITEM hChild = m_treeMainTest.GetNextItem(hItem, TVGN_CHILD);
@@ -1683,3 +1704,57 @@ bool CData_ManagerDlg::CheckBaseInfoInAllData()
 }
 
 
+
+
+void CData_ManagerDlg::OnEnKillfocusEdit1()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	CString str;
+	GetDlgItemText(IDC_EDIT1, str);
+	m_ListCtrlMain.SetItemText(m_nItem, m_nSubItem, str);
+
+	GetDlgItem(IDC_EDIT1)->SetWindowPos(NULL, 0, 0, 0, 0, SWP_HIDEWINDOW );
+
+	BasicData* cModifyData = new BasicData;
+
+	CString strDir, strTest, strFile, strSection, strValue, strItem, strDescrip;
+
+	HTREEITEM hItem;
+
+	hItem = m_treeMainTest.GetNextItem(NULL, TVGN_CARET); // 현재 선택된 아이템의 핸들을 가져온다.
+	strFile = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+
+
+	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	strTest = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+
+
+	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위의 상위 아이템을 가져온다.
+	strDir = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
+
+	if (strDir.GetLength()>100)
+	{
+		strDir = "";
+	}
+
+	strFile		= m_ListCtrlMain.GetItemText(m_nItem,1);
+	strSection	= m_ListCtrlMain.GetItemText(m_nItem,2);
+	strItem		= m_ListCtrlMain.GetItemText(m_nItem,3);
+	strValue	= m_ListCtrlMain.GetItemText(m_nItem,4);
+	strDescrip	= m_ListCtrlMain.GetItemText(m_nItem,5);
+	
+	cModifyData->setItem(strItem);
+	cModifyData->setSection(strSection);
+	if (strDescrip!="")
+	{
+		strValue = strValue + strDescrip;
+	}
+	cModifyData->setValue(strValue);
+	
+	m_cNewConfigData->ModifyData(strTest, strFile, cModifyData);
+
+	delete cModifyData;
+
+	m_bModify = true;
+}

@@ -117,4 +117,5 @@ public:
 	afx_msg void OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnEnKillfocusEdit1();
 };

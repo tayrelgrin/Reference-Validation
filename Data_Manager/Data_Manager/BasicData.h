@@ -18,7 +18,6 @@ public:
 	void setItem(CString inData);
 	void setSection(CString inData);
 	void setValue(CString inData);
-	void setFileName(CString inData);
 	CString getItem();
 	CString getSection();
 	CString getValue();
