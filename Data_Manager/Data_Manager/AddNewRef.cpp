@@ -78,6 +78,8 @@ BOOL AddNewRef::OnInitDialog()
 	m_cComboPrj.AddString("");
 	m_cComboPrj.SetCurSel(0);
 
+	m_editCtrl.OnChangeLayout();
+
 	bPreDataUsed = false;
 	GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
 
