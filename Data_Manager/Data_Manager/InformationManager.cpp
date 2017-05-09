@@ -22,14 +22,9 @@ void InformationManager::InitAllData()
 	{
 		ptemp = pPos;
 		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
-		try
-		{
-			delete pData;
-			m_listConfigs.RemoveAt(ptemp);
-		}
-		catch (CMemoryException* e)
-		{
-		}
+
+		delete pData;
+		m_listConfigs.RemoveAt(ptemp);
 	}
 
 	pPos = m_listSetting.GetHeadPosition();
@@ -37,15 +32,9 @@ void InformationManager::InitAllData()
 	{
 		ptemp = pPos;
 		ConfigDMData* pData = m_listSetting.GetNext(pPos);
-		
-		try
-		{
-			delete pData;
-			m_listSetting.RemoveAt(ptemp);
-		}
-		catch (CMemoryException* e)
-		{
-		}
+
+		delete pData;
+		m_listSetting.RemoveAt(ptemp);
 	}
 
 	m_listSetting.RemoveAll();
@@ -104,7 +93,6 @@ bool InformationManager::SaveRefToFile(CString inFilePath)
 {
 	ConfigDMData* pTemp;
 	bool bResult = false;
-	
 
 	if(m_listConfigs.GetCount() > 0)
 	{
@@ -148,6 +136,7 @@ void InformationManager::LoadBaseFileList()
 
 	CString strEXEPath = path;
 	CString strFilepath;
+	strFilepath.Format("");
 
 	int nIndex = strEXEPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
 
@@ -157,7 +146,6 @@ void InformationManager::LoadBaseFileList()
 
 	tinyxml2::XMLDocument cDoc;
 
-	
 	if(tinyxml2::XML_SUCCESS == cDoc.LoadFile( LPSTR(LPCTSTR(strFilepath))))
 	{
 		tinyxml2::XMLNode* pNode;
@@ -193,8 +181,8 @@ void InformationManager::LoadBaseFileList()
 
 		pElem = cDoc.NewElement("BaseFile");
 	
-		
 		CString strTemp;
+		strTemp.Format("");
 		for (int i = 0; i<m_vBasicFile.size(); i++)
 		{
 			pElem2 = cDoc.NewElement("File");
@@ -214,6 +202,7 @@ void InformationManager::LoadXMLFileListInValue()
 	ConfigDMData cTempConfig;
 
 	CString strEXEDirectory;
+	strEXEDirectory.Format("");
 
 	m_vConfigName.clear();
 
@@ -234,20 +223,11 @@ void InformationManager::LoadXMLFileListInValue()
 
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
-		//ConfigDMData* pAddConfig = new ConfigDMData;
-
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
-
-// 		pAddConfig->SetProject(strPrj);
-// 		pAddConfig->SetBuildNum(strBuild);
-// 		pAddConfig->SetConfigNum(strConfig);
-// 		pAddConfig->SetDOE(strDOE);
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
 		m_vConfigName.push_back(strComb);
-
-		//delete pAddConfig;
 	}
 }
 
@@ -256,6 +236,7 @@ void InformationManager::LoadXMLFileListInSetting()
 	ConfigDMData cTempConfig;
 
 	CString strEXEDirectory;
+	strEXEDirectory.Format("");
 
 	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
 
@@ -274,20 +255,9 @@ void InformationManager::LoadXMLFileListInSetting()
 
 	for (int i = 0; i < vStrFilePath.size(); i++)
 	{
-		//ConfigDMData* pAddConfig = new ConfigDMData;
-
 		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
 
-// 		pAddConfig->SetProject(strPrj);
-// 		pAddConfig->SetBuildNum(strBuild);
-// 		pAddConfig->SetConfigNum(strConfig);
-// 		pAddConfig->SetDOE(strDOE);
-
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
-
-		//m_vConfigName.push_back(strComb);
-
-		//delete pAddConfig;
 	}
 }
 
@@ -323,6 +293,11 @@ void InformationManager::LoadXMLSettingFileList(CString inData)
 
 	CString strPrj, strBuild, strConfig, strDOE;
 
+	strPrj.Format("");
+	strBuild.Format("");
+	strConfig.Format("");
+	strDOE.Format("");
+
 	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
 
 	pAddConfig->SetProject(strPrj);
@@ -331,8 +306,6 @@ void InformationManager::LoadXMLSettingFileList(CString inData)
 	pAddConfig->SetDOE(strDOE);
 
 	CString strComb = strPrj+'_'+strBuild+'_'+strConfig+'_'+strDOE;
-
-	//m_vConfigName.push_back(strComb);
 
 	pAddConfig->GetBaseInfoList(m_listBaseInfo);
 
@@ -485,8 +458,10 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 	CList<BasicData*> listTemp;
 	CList<BasicData*> BaseInfoItemValueList;
 	std::vector<CString> vBaseInfoValues;
-	CString strPreFileName = "";
-	CString strFileName = "";
+	CString strPreFileName;
+	strPreFileName.Format("");
+	CString strFileName;
+	strFileName.Format("");
 	pPos = m_listSetting.GetHeadPosition();
 	temp = m_listSetting.GetNext(pPos);
 	temp->GetBaseInfoList(BaseInfoItemContentsList);
@@ -499,8 +474,6 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 	pPos = m_listConfigs.GetHeadPosition();
 	temp = m_listConfigs.GetNext(pPos);
 	temp->GetTestList(vTestName);
-// 	BaseInfoItemContentsList.RemoveAll();
-// 	temp->GetBaseInfoList(BaseInfoItemContentsList);
 
 	pBase = m_listBaseInfo.GetHeadPosition();
 
@@ -508,6 +481,13 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 	{
 		cBaseInfoItem = m_listBaseInfo.GetNext(pBase);
 		strFileName = cBaseInfoItem->getValue();
+		if(strFileName.Find('/') != -1)
+		{
+			CString strTemp;
+			strTemp.Format("");
+			AfxExtractSubString(strTemp, strFileName, 0,'/');
+			strFileName = strTemp;
+		}
 		if (strPreFileName != strFileName)
 		{
 			temp->SearchFileDataInList(vTestName[0], strFileName, cTempFile);

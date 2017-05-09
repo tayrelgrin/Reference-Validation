@@ -18,19 +18,11 @@ void FileType::InitList()
 	while(pPos && m_pDataList.GetSize() > 0)
 	{
 		pTemp = pPos;
-		try
-		{
-			BasicData* temp = m_pDataList.GetNext(pPos);
-			delete temp;
-			m_pDataList.RemoveAt(pTemp);
-		}
-		catch (CMemoryException* e)
-		{
-		}
-	}
 
-	if(m_pDataList.GetSize() > 0)
-		m_pDataList.RemoveAll();
+		BasicData* temp = m_pDataList.GetNext(pPos);
+		delete temp;
+		m_pDataList.RemoveAt(pTemp);
+	}
 }
 
 
@@ -75,6 +67,10 @@ void FileType::AddNewData(CString inData, int inNInput)
 
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
+		strSection.Format("");
+		strItem.Format("");
+		strValue.Format("");
+
 		CString strTemp = vtemp[i];
 		if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{
@@ -158,6 +154,7 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 {
 	CStdioFile sourceFile;
 	CString strLine;
+	strLine.Format("");
 
 	if(!sourceFile.Open(inPath, CFile::modeRead, NULL)){   
 		return;
@@ -167,6 +164,10 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 		BOOL bIsNotEOL = sourceFile.ReadString(strLine);
 		if(strLine!="")	// 공란 제거
 			outData.push_back(strLine);
+		if (strLine.GetLength()>127)
+		{
+			bIsNotEOL = FALSE;
+		}
 		if(!bIsNotEOL) break;
 	}
 

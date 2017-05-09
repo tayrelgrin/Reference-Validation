@@ -127,6 +127,7 @@ void SettingBaseInfo::OnBnClickedButtonSave()
 		m_TabFileList.m_bModifyFlag = false;
 		m_bModifyFlag = true;
 	}
+	AfxMessageBox("Save Complete", MB_OK);
 }
 
 

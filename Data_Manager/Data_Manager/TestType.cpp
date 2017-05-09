@@ -102,6 +102,9 @@ void TestType::GetFilePathInDir(static CString inPath, std::vector<CString>& out
 	CString tpath;
 	BOOL bWorking;
 
+	fileName.Format("");
+	tpath.Format("");
+
 	tpath.Format(inPath +"\\*.*");
 
 	bWorking = cFinder.FindFile(tpath);
@@ -221,6 +224,7 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
+	strFileName.Format("");
 	while(pPos)
 	{
 		FileType* temp = m_pFIleList.GetNext(pPos);
@@ -235,6 +239,7 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
+	strFileName.Format("");
 	bool bResult=false;
 
 	while(pPos)
@@ -257,6 +262,7 @@ void TestType::ModifyData(CString inTargetFileName, BasicData* inTarget)
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
+	strFileName.Format("");
 	bool bResult=false;
 
 	while(pPos)

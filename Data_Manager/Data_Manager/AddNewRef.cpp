@@ -131,7 +131,7 @@ void AddNewRef::OnEnChangeMfceditbrowse1()
 
 	if(!CheckRefEffective(m_strDirRootPath, m_vStrDir))
 	{
-		AfxMessageBox("The Reference has some problem, Check it Please!", MB_OK);
+		AfxMessageBox("The Reference has some problem, Check it Please!\\ Details are in ListLog(TBD)", MB_OK);
 		GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
 	}
 	else
@@ -540,6 +540,7 @@ bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invDat
 	int nFindIndex;
 	CString strRegister;
 	CString strRefFile;
+	CString strError = "";
 
 	std::vector<bool> vResult;
 
@@ -573,8 +574,8 @@ bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invDat
 				{
 					strFileName = cFinder.GetFileName();
 
-					if( strFileName == _T(".") || 
-						strFileName == _T("..")|| 
+					if( strFileName == _T(".") ||
+						strFileName == _T("..")||
 						strFileName == _T("Thumbs.db") ) continue;
 
 					if (strFileName == strRefFile)
@@ -618,6 +619,7 @@ bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invDat
 		{
 			if(vResult[i] == false)
 			{
+
 				bResult = false;
 				break;
 			}

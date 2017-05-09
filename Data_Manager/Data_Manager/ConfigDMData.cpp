@@ -34,10 +34,6 @@ void ConfigDMData::InitListAndVectors()
 		delete temp;
 		m_pListTestType.RemoveAt(pTemp);
 	}
-	if (m_pListTestType.GetSize()>0)
-	{
-		m_pListTestType.RemoveAll();
-	}
 
 	pPos = m_lBaseInfo.GetHeadPosition();
 
@@ -49,15 +45,15 @@ void ConfigDMData::InitListAndVectors()
 		delete temp;
 		m_lBaseInfo.RemoveAt(pTemp);
 	}
-	if (m_lBaseInfo.GetSize()>0)
-	{
-		m_lBaseInfo.RemoveAll();
-	}	
 }
 
 void ConfigDMData::RefNameParsing(static CString instrData)
 {
 	CString strProject, strConfig, strDOE, strTest;
+	strProject.Format("");
+	strConfig.Format("");
+	strDOE.Format("");
+	strTest.Format("");
 
 	AfxExtractSubString(strProject, instrData, 0, '_');
 	AfxExtractSubString(strConfig,  instrData, 4, '_');
@@ -74,6 +70,9 @@ void ConfigDMData::GetDirList(CString instrPath, std::vector<CString>& inVDirLis
 	BOOL bWorking = finder.FindFile();
 	CString DirName;
 	CString fileName;
+
+	DirName.Format("");
+	fileName.Format("");
 
 	while (bWorking)
 	{
@@ -103,6 +102,8 @@ void ConfigDMData::GetConfigInfoFromVector(std::vector<CString> invData, CString
 	inRootPath+="\\";
 
 	CString temp;
+
+	temp.Format("");
 
 	for(int i = 0; i<(signed)invData.size(); i++)
 	{
@@ -190,13 +191,17 @@ void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData,
 {
 	for (INT i= 0 ; i<invData.size(); i++)
 	{
-		CString temp = invData[i];
-		CString temp2 = _T("");
+		CString temp;
+		CString temp1;
+		CString temp2;
+		temp.Format("");
+		temp1.Format("%s", invData[i]);
+		temp2.Format("");
 
-		if(temp.Find('\\') == -1)
+		if(temp1.Find('\\') == -1)
 		{
-			AfxExtractSubString(temp,		invData[i], 5, '_');
-			AfxExtractSubString(temp2,		invData[i], 8, '_');
+			AfxExtractSubString(temp,		temp1, 5, '_');
+			AfxExtractSubString(temp2,		temp1, 8, '_');
 			if (temp2 != "")
 			{
 				temp = temp2 +":"+ temp;
@@ -204,8 +209,8 @@ void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData,
 		}
 		else
 		{
-			AfxExtractSubString(temp2,		invData[i], 0, '\\');
-			AfxExtractSubString(temp,		invData[i], 1, '\\');
+			AfxExtractSubString(temp2,		temp1, 0, '\\');
+			AfxExtractSubString(temp,		temp1, 1, '\\');
 			AfxExtractSubString(temp,		temp, 5, '_');
 			temp = temp2 +"\\"+ temp;
 		}
@@ -218,6 +223,7 @@ void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData,
 void ConfigDMData::SetTestList(std::vector<CString> invData)
 {
 	CString temp;
+	temp.Format("");
 	for (int i = 0; i < invData.size(); i++)
 	{
 		temp = invData[i];
@@ -233,6 +239,7 @@ void ConfigDMData::SetTestList(std::vector<CString> invData)
 void ConfigDMData::SetTestDirList(std::vector<CString> invData)
 {
 	CString temp;
+	temp.Format("");
 	for (int i = 0; i < invData.size(); i++)
 	{
 		temp = invData[i];
@@ -249,6 +256,8 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 {
 	CString strTestName;
 	CString strIndex8th;
+	strIndex8th.Format("");
+	strTestName.Format("");
 	AddCommonBaseFile(inBaseFile);
 	for (int i = 0; i<m_vTestDirPath.size(); i++)
 	{
@@ -256,7 +265,8 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 		int nIndex = m_vTestDirPath[i].ReverseFind('\\');
 		CString strDir = m_vTestDirPath[i];
 		strDir = strDir.Mid(nIndex+1);
-		CString strIndex9th = _T("");
+		CString strIndex9th;
+		strIndex9th.Format("");
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
 		AfxExtractSubString(strIndex8th,strDir,7,'_');
@@ -287,6 +297,9 @@ void ConfigDMData::GetFilePathInDir(std::vector<CString> invPath, std::vector<CS
 
 	CString fileName;
 	CString tpath;
+
+	fileName.Format("");
+	tpath.Format("");
 
 	for (int i=0; i<invPath.size(); i++)
 	{
@@ -362,6 +375,9 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 
  	CString strFilePath;
 	CString strCTemp;
+
+	strFilePath.Format("");
+	strCTemp.Format("");
 
 	strCTemp.Format(_T("%s%s%s"),strEXEPath ,"\\Data\\Value\\" , m_strPrj);
 
@@ -516,6 +532,8 @@ void ConfigDMData::SetBaseFiles(std::vector<CString> invFileName)
 {
 	m_vBaseFiles.clear();
 	CString strTemp, strFileName;
+	strFileName.Format("");
+	strTemp.Format("");
 
 	for (int i=0; i<invFileName.size(); i++)
 	{
@@ -662,6 +680,7 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 {
 	CString strTemp;
+	strTemp.Format("");
 
 	POSITION pTemp = NULL;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
@@ -670,6 +689,10 @@ void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 	{
 		TestType* temp = m_pListTestType.GetNext(pPos);
 		strTemp = temp->GetTestName();
+		if (strTemp[0]=='\\')
+		{
+			//CString strTemp1 = strTemp.Replace('\\',"");
+		}
 		temp->GetFileNames(strTemp, outvData);
 	}
 }

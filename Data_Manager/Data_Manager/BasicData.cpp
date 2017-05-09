@@ -167,6 +167,7 @@ void BasicData::readDataFromFile(static CString inFilePath)
 	file.Open(inFilePath, CFile::modeRead | CFile::typeText);
 
 	CString temp;
+	temp.Format("");
 	file.ReadString(temp);
 
 	file.Close();

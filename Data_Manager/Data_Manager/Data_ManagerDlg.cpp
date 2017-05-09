@@ -259,13 +259,12 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 	{
 		m_cAddNewRefDlg.DestroyWindow();
 	}
-	if (m_bNewData)
+	if (m_bNewData || m_bModify)
 	{
 		if(AfxMessageBox("There is some Working Data, Continue To make new one without saving?", MB_OKCANCEL))
 			bWorking = true;
 		else
 			bWorking = false;
-
 	}
 	if(bWorking)
 	{
@@ -299,6 +298,16 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 			m_strDOE		= m_cAddNewRefDlg.GetDOE();
 			m_bPreDataUsed  = m_cAddNewRefDlg.GetPreDataUsed();
 			m_strRootPath   = m_cAddNewRefDlg.GetDirRootPath();
+
+			m_cNewConfigData->SetProject(m_strPrj);
+			m_cNewConfigData->SetBuildNum(m_strBuildNum);
+			m_cNewConfigData->SetConfigNum(m_strConfigNum);
+			m_cNewConfigData->SetDOE(m_strDOE);
+
+			m_cNewSettingData->SetProject(m_strPrj);
+			m_cNewSettingData->SetBuildNum(m_strBuildNum);
+			m_cNewSettingData->SetConfigNum(m_strConfigNum);
+			m_cNewSettingData->SetDOE(m_strDOE);
 
 			m_cAddNewRefDlg.GetDirList(m_vDirList);
 
@@ -505,7 +514,7 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 
 	dlg.m_ofn.lpstrInitialDir = strEXEDirectory;	// 초기 경로 지정
 	
-	if(IDOK == dlg.DoModal())
+	if(IDOK == dlg.DoModal() && m_strDOE != "")
 	{
 		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
@@ -518,8 +527,12 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 
 		pSetting->LoadDataFiles(strSettingPath);
 
-		EndWaitCursor();
-		
+		CList<BasicData*> cTemp;
+
+		pSetting->GetBaseInfoList(cTemp);
+
+		m_cValueData.SetBaseInfoFromConfig(cTemp);
+
 		int nIndex = strSettingPath.ReverseFind('\\');
 
 		strFileName = strSettingPath.Mid(nIndex+1);
@@ -532,6 +545,9 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 		strResult.Format("%s%s",strTemp, strConfig);
 		SetDlgItemText(IDC_STATIC_LOAD,strResult);
 		(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
+		m_bModify = true;
+
+		EndWaitCursor();
 	}	
 }
 
@@ -587,25 +603,24 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 	CString strDirName ="";
 	CString strFileName, strTestName;
 
+	BeginWaitCursor();
+
+	m_ListCtrlMain.DeleteAllItems();
+	m_treeMainTest.DeleteAllItems();
+
 	hItem = m_treeMainTest.GetNextItem(NULL, TVGN_CARET); // 현재 선택된 아이템의 핸들을 가져온다.
 	strFileName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
 	
-
 	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위 아이템을 가져온다.
 	strTestName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
 
-
 	hItem = m_treeMainTest.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위의 상위 아이템을 가져온다.
 	strDirName = m_treeMainTest.GetItemText(hItem); // 그 아이템의 이름을 얻어온다.
-	
 
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	ConfigDMData* pConfig = m_cNewConfigData;
 	ConfigDMData* pSetting = m_cNewSettingData;
-	m_treeMainTest.DeleteAllItems();
-
-	BeginWaitCursor(); 
-
+	
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
 	CString strTemp;
 	std::vector<CString> vFileList;
@@ -623,7 +638,14 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 	pConfig->LoadDataFiles(strValuePath);
 	pSetting->LoadDataFiles(strSettingPath);
 
+	CList<BasicData*> cTemp;
+
+	pSetting->GetBaseInfoList(cTemp);
+
+	m_cValueData.SetBaseInfoFromConfig(cTemp);
+
 	AddToTree(pSetting);
+	Sleep(1000);
 
 	EndWaitCursor();
 }
@@ -674,6 +696,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	std::vector<CString> vData;
 	CString strTemp, strTest, strFile;
 	CString compare;
+	
 	m_vAllFileList.clear();
 	inpData->GetFileNames(m_vAllFileList);
 
@@ -683,6 +706,11 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 	HTREEITEM h_2Child;
 	for(int i= 0 ; i < m_vAllFileList.size(); i++)
 	{
+		strTemp.Format("");
+		strTest.Format("");
+		strFile.Format("");
+		compare.Format("");
+
 		AfxExtractSubString(strTemp, m_vAllFileList[i], 2, ':');
 
 		if(m_vAllFileList[i].Find('\\') == -1 && strTemp=="")
@@ -851,9 +879,17 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 
 	if(m_bNewData || m_bModify)
 	{
-		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
+		if(1 == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
 			bDo = true;
+
+			if(m_bNewData)
+			{
+				m_cNewConfigData->InitListAndVectors();
+				m_cNewSettingData->InitListAndVectors();
+			}
+			m_bNewData = false;
+			m_bModify = false;
 		}
 		else 
 			bDo = false;
@@ -912,9 +948,16 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 
 	if(m_bNewData || m_bModify)
 	{
-		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
+		if(1 == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
 			bDo = true;
+			if(m_bNewData)
+			{
+				m_cNewConfigData->InitListAndVectors();
+				m_cNewSettingData->InitListAndVectors();
+			}
+			m_bNewData = false;
+			m_bModify = false;
 		}
 		else 
 			bDo = false;
@@ -963,9 +1006,16 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 
 	if(m_bNewData || m_bModify)
 	{
-		if(MB_OK == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
+		if(1 == AfxMessageBox("There are some modification, Do you want to escape without save?", MB_OKCANCEL))
 		{
 			bDo = true;
+			if(m_bNewData)
+			{
+				m_cNewConfigData->InitListAndVectors();
+				m_cNewSettingData->InitListAndVectors();
+			}
+			m_bNewData = false;
+			m_bModify = false;
 		}
 		else 
 			bDo = false;
@@ -1013,9 +1063,16 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 
 	if(m_bNewData || m_bModify)
 	{
-		if(MB_OK == AfxMessageBox("There are some modification, Do you want to Reload?", MB_OKCANCEL))
+		if(1 == AfxMessageBox("There are some modification, Do you want to Reload?", MB_OKCANCEL))
 		{
 			bDo = true;
+			if(m_bNewData)
+			{
+				m_cNewConfigData->InitListAndVectors();
+				m_cNewSettingData->InitListAndVectors();
+			}
+			m_bNewData = false;
+			m_bModify = false;
 		}
 		else 
 			bDo = false;
@@ -1072,6 +1129,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 		AddToTree(pSetting);
 		EndWaitCursor();
 		m_bNotFirst = true;
+		m_bModify = false;
 	}
 }
 
@@ -1101,7 +1159,7 @@ void CData_ManagerDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	*pResult = 0;
 	m_ListCtrlMain.DeleteAllItems();
-	Sleep(100);
+	Sleep(500);
 	HTREEITEM hNode;
 	std::string strFileName, strTestName, strDirName, strCombe;
 
@@ -1236,69 +1294,6 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 }
 
 
-// void CData_ManagerDlg::AddValueToBaseInfo(TestType& inData)
-// {
-// 	m_ListCtrlMain.DeleteAllItems(); 
-// 
-// 	CList<BasicData*> lBaseItems;
-// 	CList<BasicData*> lBaseValueItems;
-// 	FileType* pFile = new FileType;
-// 	std::vector<CString> vFileNames;
-// 
-// 	
-// 	m_cBasicData.CopyDataToList(lBaseItems);
-// 
-// 	std::string strTarget = _T("");
-// 	std::string strPreItem = _T("");
-// 
-// 	int nIndex = 0;
-// 	CString strSequence;
-// 	CString strOri, strValue, strDescrip;
-// 
-// 
-// 	POSITION pos = lBaseItems.GetHeadPosition();
-// 
-// 	while(pos)
-// 	{
-// 		BasicData* temp = lBaseItems.GetNext(pos);
-// 		strTarget = temp->getValue();
-// 		if(strTarget.compare(strPreItem) != 0)
-// 		{
-// 			strPreItem = strTarget;
-// 			CString strTemp = strTarget.c_str();
-// 			strTemp = strTemp+".ini";
-// 
-// 			m_cNewConfigData->SearchTestInList(inData.GetTestName(),strTemp,*pFile) ;
-// 
-// 			pFile->CopyDataToList(lBaseValueItems);
-// 		}
-// 
-// 		POSITION pValuePos = lBaseValueItems.GetHeadPosition();
-// 
-// 		while(pValuePos)
-// 		{
-// 			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
-// 			if (tempValue->getSection()== temp->getSection() && tempValue->getItem()==temp->getItem())
-// 			{
-// 				temp->setValue(tempValue->getValue());
-// 				break;
-// 			}
-// 		}
-// 	}
-// // 	m_cValueData.InitBaseInfo();
-// // 
-// // 	pos = lBaseItems.GetHeadPosition();
-// // 
-// // 	while (pos)
-// // 	{
-// // 		BasicData* temp = lBaseItems.GetNext(pos);
-// // 		m_cValueData.AddNewBaseInfo(*temp);
-// // 	}
-// // 	m_cBasicData.SetListCountZero();
-// // 	m_cValueData.GetBaseInfo(m_cBasicData);
-// }
-
-
 void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 {
 	m_ListCtrlMain.DeleteAllItems(); 
@@ -1431,21 +1426,7 @@ void CData_ManagerDlg::OnOK()
 	// 	get the control ID which is presently having the focus
 	int ctrl_ID = pwndCtrl->GetDlgCtrlID();
 	CString strNewData;
-// 	
-// 		switch (ctrl_ID)
-// 		{	//if the control is the EditBox	
-// 		case IDC_EDIT1:
-// 		case IDC_LIST1:
-// 			//get the text from the EditBox
-// 			GetDlgItemText(IDC_EDIT1, strNewData);
-// 			//set the value in the listContorl with the specified Item & SubItem values
-// 			SetCell(::GetDlgItem (m_hWnd,IDC_LIST1), strNewData, m_nItem, m_nSubItem);
-// 			::SendDlgItemMessage(m_hWnd,IDC_EDIT1,WM_KILLFOCUS,0,0);
-// 			::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_HIDE);
-// 			break;
-// 		default:
-// 			break;
-// 		}
+
 
 	if(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1) == pwndCtrl->GetSafeHwnd() ||  
 		::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1) == m_hFocus)
@@ -1454,22 +1435,16 @@ void CData_ManagerDlg::OnOK()
 		CString cStrText;  
 		::GetWindowText(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), LPSTR(LPCTSTR(cStrText)), 255);  
 		 
-
 		// 얻어온 텍스트를 ListCtrl 에 적용시킨다  
 		SetCell(::GetDlgItem (m_hWnd,IDC_LIST1), strNewData, m_nItem, m_nSubItem);
  
-
 		// EditCtrl의 Focus를 죽인다.  
 		::SendMessage(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), WM_KILLFOCUS, 0, 0);  
 		::ShowWindow(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), SW_HIDE);  
 		::SetFocus(pwndCtrl->GetSafeHwnd());  
 
-		// ListCtrl의 SelectionMark를 지정한다.  
-		//SetSelectionMark(m_nItem);
-	}  
-
+	}
 	m_hFocus = (HWND)0;
-
 }
 
 
@@ -1490,7 +1465,6 @@ void CData_ManagerDlg::SetCell(HWND hWnd1, CString value, int nRow, int nCol)
 	else
 		//Insert the value into List
 		ListView_InsertItem(hWnd1,&lvItem);
-
 }
 
 // This function inserts the default values into the listControl
@@ -1502,8 +1476,6 @@ void CData_ManagerDlg::InsertItems()
 BOOL CData_ManagerDlg::PreTranslateMessage(MSG* pMsg)
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
-	//block esc closing
-	if(pMsg->wParam == VK_RETURN || pMsg->wParam == VK_ESCAPE) return TRUE;
 
 	if(pMsg->message == WM_KEYDOWN){
 		if(pMsg->wParam == VK_RETURN){
@@ -1552,7 +1524,6 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 		m_bModify = true;
 	}
-
 	*pResult = 0;
 }
 
@@ -1637,7 +1608,6 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 							strTest = strTemp;
 						}
 					}
-					//m_cValueData.GetBaseInfo(m_cBasicData);
 				}
 				else
 					m_cValueData.ModifySettingData(strTestName, strFile, cModifyTarget);
@@ -1711,7 +1681,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	::SendMessage(::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1), EM_SETSEL, LOWORD(nSel), HIWORD(nSel)); 
 
 	// Focus를 잃었을 경우 ListCtrl에 적용시키기 위해 저장  
-	m_hFocus = ::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1);  
+	m_hFocus = ::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1);
 	Invalidate();  
 
 	*pResult = 0;
@@ -1790,6 +1760,15 @@ void CData_ManagerDlg::OnEnKillfocusEdit1()
 	}
 	cModifyData->setValue(strValue);
 	
+	if(strDir != "")
+	{
+		if (m_bNewData)
+			strTest = strDir + "\\"+strTest;	
+		else
+			strTest = strDir + ":"+strTest;
+
+	}
+
 	m_cNewConfigData->ModifyData(strTest, strFile, cModifyData);
 
 	delete cModifyData;
