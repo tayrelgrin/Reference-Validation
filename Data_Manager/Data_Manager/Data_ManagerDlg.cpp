@@ -278,7 +278,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 			m_cNewConfigData->InitListAndVectors();
 			m_cNewSettingData->InitListAndVectors();
-			m_cValueData.InitAllData();
+			m_cValueData.InitBaseInfo();
 
 			m_vTestList.clear();
 			m_vDirList.clear();

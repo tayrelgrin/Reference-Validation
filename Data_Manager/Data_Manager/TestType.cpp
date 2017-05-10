@@ -64,6 +64,7 @@ void TestType::AddNewFile(FileType* inData)
 void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int inNInput)
 {
 	std::vector<CString> vFilePath;
+	bool bInputResult = false;
 
 	GetFilePathInDir(inPath, vFilePath);
 
@@ -83,12 +84,20 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 				if(cNewFile->GetFileName().Find(invBasicFile[j]) != -1)
 				{
 					m_pFIleList.AddTail(cNewFile);
+					bInputResult = true;
 					break;
 				}
 			}
 		}
 		else
-			m_pFIleList.AddTail(cNewFile);		
+		{
+			m_pFIleList.AddTail(cNewFile);
+			bInputResult = true;
+		}
+		if (!bInputResult)
+		{
+			delete cNewFile;
+		}
 	}
 
 	vFilePath.clear();

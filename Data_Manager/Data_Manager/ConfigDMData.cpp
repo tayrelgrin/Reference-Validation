@@ -15,7 +15,6 @@ ConfigDMData::~ConfigDMData(void)
 
 void ConfigDMData::InitListAndVectors()
 {
-
 	if(!m_vTestDirPath.empty())
 		m_vTestDirPath.erase( m_vTestDirPath.begin(), m_vTestDirPath.end() );
 	if(!m_vTestName.empty())
