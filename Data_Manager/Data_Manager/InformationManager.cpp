@@ -18,24 +18,24 @@ void InformationManager::InitAllData()
 	POSITION pPos = m_listConfigs.GetHeadPosition();
 	POSITION ptemp = NULL;
 
-	while(pPos)
-	{
-		ptemp = pPos;
-		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
-
-		delete pData;
-		m_listConfigs.RemoveAt(ptemp);
-	}
-
-	pPos = m_listSetting.GetHeadPosition();
-	while(pPos)
-	{
-		ptemp = pPos;
-		ConfigDMData* pData = m_listSetting.GetNext(pPos);
-
-		delete pData;
-		m_listSetting.RemoveAt(ptemp);
-	}
+// 	while(pPos)
+// 	{
+// 		ptemp = pPos;
+// 		ConfigDMData* pData = m_listConfigs.GetNext(pPos);
+// 
+// 		delete pData;
+// 		m_listConfigs.RemoveAt(ptemp);
+// 	}
+// 
+// 	pPos = m_listSetting.GetHeadPosition();
+// 	while(pPos)
+// 	{
+// 		ptemp = pPos;
+// 		ConfigDMData* pData = m_listSetting.GetNext(pPos);
+// 
+// 		delete pData;
+// 		m_listSetting.RemoveAt(ptemp);
+// 	}
 
 	m_listSetting.RemoveAll();
 	m_listConfigs.RemoveAll();
