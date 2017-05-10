@@ -140,6 +140,7 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	m_cFileData = new FileType;
 	m_cBasicData = new FileType;
 
+	m_strBasicLoadTxt = "Load Reference Setting :";
 /*	AfxSetAllocStop(98269);*/
 	m_bIsAllCheck = false;
 	InitMainList();
@@ -159,7 +160,8 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	m_bModify = false;
 	m_cNewConfigData	= new ConfigDMData();
 	m_cNewSettingData	= new ConfigDMData();
-
+	m_cValueData.AddNewConfigData(m_cNewConfigData);
+	m_cValueData.AddNewSettingData(m_cNewSettingData);
 	//Set the style to listControl
 	ListView_SetExtendedListViewStyle(::GetDlgItem(m_hWnd,IDC_LIST1),LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES); 
 	
@@ -272,18 +274,17 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 		{
 			BeginWaitCursor();
 
+			LoadSettingTextChange(m_strBasicLoadTxt,false);
+
 			if (m_bNewData)
 			{
 				m_cNewConfigData->InitListAndVectors();
 				m_cNewSettingData->InitListAndVectors();
 			}
 
-			if(m_bNotFirst)
-			{
-				m_cNewConfigData = new ConfigDMData;
-				m_cNewSettingData = new ConfigDMData;
-			}
-
+			m_cValueData.InitAllData();
+			m_cNewConfigData = new ConfigDMData;
+			m_cNewSettingData = new ConfigDMData;
 			m_vTestList.clear();
 			m_vDirList.clear();
 			m_cBasicData->InitList();
@@ -324,29 +325,9 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 				m_cNewSettingData->SetTestDirList(m_vDirList);
 				m_cNewSettingData->SetBaseFiles(temp);
 
-				CList<BasicData*> Templist;
-				m_cBasicData->CopyDataToList(Templist);
-				m_cNewSettingData->SetBaseInfoList(Templist);
-
 				AddNewConfig(m_cNewConfigData, m_cNewSettingData);
 
-				for(int i = 0; i<temp.size(); i++)
-				{
-					temp.erase(temp.begin()+i);
-				}
 				temp.clear();
-
-				POSITION pTemp = NULL;
-				POSITION pPos = Templist.GetHeadPosition();
-
-				while(pPos && Templist.GetSize() > 0)
-				{
-					pTemp = pPos;
-
-					BasicData* temp = Templist.GetNext(pPos);
-					delete temp;
-					Templist.RemoveAt(pTemp);
-				}
 
 				CString strComb = m_strPrj+'_'+m_strBuildNum+'_'+m_strConfigNum+'_'+m_strDOE;
 				std::vector<CString> vTemp;
@@ -362,12 +343,6 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 			}
 			else
 			{
-				if(m_bNotFirst)
-				{
-					m_cNewConfigData = new ConfigDMData;
-					m_cNewSettingData = new ConfigDMData;
-				}
-
 				CString strPrePrj		= m_cAddNewRefDlg.GetPreProject();
 				CString strPreBuildNum	= m_cAddNewRefDlg.GetPreBuild();
 				CString strPreConfigNum	= m_cAddNewRefDlg.GetPreConfig();
@@ -451,6 +426,8 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 			m_cNewSettingData->InitBaseInfoList();
 			m_cNewSettingData->SetBaseInfoList(Templist);
 			m_cNewSettingData->SetNewDataFlag(true);
+
+			m_bModify = true;
 		}
 		AddToTree(m_cNewSettingData);
 		CheckBaseInfoInAllData();
@@ -468,7 +445,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 	bool bWorking = true;
 	if(m_bNewData || m_bModify)
 	{
-		if(AfxMessageBox("Close SW without Save?", MB_OKCANCEL) == true)
+		if(AfxMessageBox("Close SW without Save?", MB_OKCANCEL) == 1)
 		{
 			bWorking = true;
 		}
@@ -488,9 +465,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 			m_cNewSettingData->InitListAndVectors();
 		}
 
-	
 		delete m_cFileData;
-		//delete m_cBasicData;
 		::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 	}
 }
@@ -501,6 +476,7 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
 	ConfigDMData* pSetting = m_cNewSettingData;
+	ConfigDMData* pConfig   = m_cNewConfigData;
 
 	CString strEXEDirectory;
 
@@ -513,42 +489,112 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, szFilter);
 
 	dlg.m_ofn.lpstrInitialDir = strEXEDirectory;	// 초기 경로 지정
-	
-	if(IDOK == dlg.DoModal() && m_strDOE != "")
+	if( m_strDOE == "")
 	{
-		// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+		AfxMessageBox("Choose config first",MB_OK);
+	}
+	else
+	{
+		if(IDOK == dlg.DoModal())
+		{
+			BeginWaitCursor(); 
 
-		BeginWaitCursor(); 
+			CString strSettingPath;
+			strSettingPath.Format("%s",dlg.GetPathName());
+			CString strFileName, strConfig, strResult, strFileHead;
+			CString strPrj, strBuild, strConfigNum, strDOE;
+			strFileName.Format("");
+			strConfig.Format("");
+			strResult.Format("");
+			strFileHead.Format("");
 
-		CString strSettingPath = dlg.GetPathName();
-		CString strFileName, strConfig, strResult;
+			strPrj.Format("");
+			strBuild.Format("");
+			strConfigNum.Format("");
+			strDOE.Format("");
 
-		pSetting->InitListAndVectors();
+			// 읽어들일 파일이 현재와 같은지 확인
+			int nIndex = strSettingPath.ReverseFind('\\');
 
-		pSetting->LoadDataFiles(strSettingPath);
+			strFileName = strSettingPath.Mid(nIndex+1);
 
-		CList<BasicData*> cTemp;
+			AfxExtractSubString(strFileHead, strFileName,0,'-');
 
-		pSetting->GetBaseInfoList(cTemp);
+			if(strFileHead == "Setting")
+			{
+				AfxExtractSubString(strPrj,			strFileName,1,'-');
+				AfxExtractSubString(strBuild,		strFileName,2,'-');
+				AfxExtractSubString(strConfigNum,	strFileName,3,'-');
+				AfxExtractSubString(strDOE,			strFileName,4,'-');
 
-		m_cValueData.SetBaseInfoFromConfig(cTemp);
+				CString strTemp;
+				strTemp.Format("");
+				AfxExtractSubString(strTemp,			strDOE,0,'.');
+				strDOE = strTemp;
 
-		int nIndex = strSettingPath.ReverseFind('\\');
+				if(strPrj != m_strPrj ||
+					strBuild != m_strBuildNum || 
+					strConfigNum != m_strConfigNum || 
+					strDOE != m_strDOE)
+				{
+					pSetting->InitListAndVectors();
 
-		strFileName = strSettingPath.Mid(nIndex+1);
+					pSetting->LoadDataFiles(strSettingPath);
 
-		nIndex = strFileName.ReverseFind('.');
-		strConfig = strFileName.Left(nIndex);
+					// p에서 이름 파일 이름 가져와서 이름 바꾸기
+					ChangeSettingFileNameToConfigFileName(pConfig, pSetting);
 
-		CString strTemp;
-		GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
-		strResult.Format("%s%s",strTemp, strConfig);
-		SetDlgItemText(IDC_STATIC_LOAD,strResult);
-		(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(TRUE);
-		m_bModify = true;
+					pSetting->SetBuildNum(m_strBuildNum);
+					pSetting->SetProject(m_strPrj);
+					pSetting->SetConfigNum(m_strConfigNum);
+					pSetting->SetDOE(m_strDOE);
 
-		EndWaitCursor();
+					CList<BasicData*> cTemp;
+
+					pSetting->GetBaseInfoList(cTemp);
+
+					m_cValueData.SetBaseInfoFromConfig(cTemp);
+
+					cTemp.RemoveAll();
+					int nIndex = strSettingPath.ReverseFind('\\');
+
+					strFileName = strSettingPath.Mid(nIndex+1);
+
+					nIndex = strFileName.ReverseFind('.');
+					strConfig = strFileName.Left(nIndex);
+
+					CString strTemp;
+					GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
+					strResult.Format("%s%s",strTemp, strConfig);
+					LoadSettingTextChange(strResult,true);
+
+					m_bModify = true;
+
+					AddToTree(pSetting);
+
+					EndWaitCursor();
+				}
+				else
+				{
+					AfxMessageBox("You chose same config data\n Choose another one",MB_OK);
+				}
+				
+			}
+			else
+			{
+				AfxMessageBox("You chose Wrong file!",MB_OK);
+			}
+		}	
 	}	
+}
+
+void CData_ManagerDlg::LoadSettingTextChange(CString inNewString, bool inFlag)
+{
+	CString strTemp;
+	GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
+	
+	SetDlgItemText(IDC_STATIC_LOAD,inNewString);
+	(GetDlgItem(IDC_STATIC_LOAD))->ShowWindow(inFlag);
 }
 
 
@@ -695,7 +741,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 
 	std::vector<CString> vData;
 	CString strTemp, strTest, strFile;
-	CString compare;
+	CString compare, strTargetFile;
 	
 	m_vAllFileList.clear();
 	inpData->GetFileNames(m_vAllFileList);
@@ -710,6 +756,7 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 		strTest.Format("");
 		strFile.Format("");
 		compare.Format("");
+		strTargetFile.Format("");
 
 		AfxExtractSubString(strTemp, m_vAllFileList[i], 2, ':');
 
@@ -731,7 +778,8 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 		}
 		else
 		{
-			AfxExtractSubString(strTemp, m_vAllFileList[i], 0, '\\');
+			strTargetFile = m_vAllFileList[i];
+			AfxExtractSubString(strTemp, strTargetFile, 0, '\\');
 			AfxExtractSubString(strTemp,strTemp, 0, ':');
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)
@@ -740,14 +788,18 @@ void CData_ManagerDlg::AddToTree(ConfigDMData* inpData)
 			if(strTemp != compare)
 				h_Root = m_treeMainTest.InsertItem(strTemp, TVI_ROOT, TVI_LAST);
 
-			AfxExtractSubString(strTemp, m_vAllFileList[i], 1, '\\');
+			AfxExtractSubString(strTemp, strTargetFile, 1, '\\');
+			if(strTemp == m_strBasicLoadTxt)	// CString의 저주
+			{
+				strTemp.Format("");
+			}
 			AfxExtractSubString(strTest, strTemp, 0, ':');
 			AfxExtractSubString(strFile, strTemp, 1, ':');
 
 			if(strTemp == "")	// 확인하자
 			{
-				AfxExtractSubString(strTest, m_vAllFileList[i], 1, ':');
-				AfxExtractSubString(strFile, m_vAllFileList[i], 2, ':');
+				AfxExtractSubString(strTest, strTargetFile, 1, ':');
+				AfxExtractSubString(strFile, strTargetFile, 2, ':');
 			}
 
 			if(m_treeMainTest.GetCount() > 0 && i != 0)	
@@ -824,6 +876,8 @@ void CData_ManagerDlg::AddProjectToListBox(CString inPrj)
 {
 	bool bCompareResult = true;
 	CString strTemp;
+	strTemp.Format("");
+
 	for(int i = 0; i<m_lbProject.GetCount(); i++)
 	{
 		m_lbProject.GetText(i, strTemp);
@@ -896,11 +950,13 @@ void CData_ManagerDlg::OnLbnSelchangeListPrj()
 	}
 	if(bDo)
 	{
+		LoadSettingTextChange(m_strBasicLoadTxt,false);
 		m_lbConfig.ResetContent();
 		m_lbBuild.ResetContent();
 		m_lbDOE.ResetContent();
 		m_treeMainTest.DeleteAllItems();
 		m_strDOE = "";
+		m_ListCtrlMain.DeleteAllItems();
 
 		int nIndex = m_lbProject.GetCurSel();
 		m_lbProject.GetText(nIndex, m_strPrj);
@@ -964,10 +1020,12 @@ void CData_ManagerDlg::OnLbnSelchangeListBuildnum()
 	}
 	if(bDo)
 	{
+		LoadSettingTextChange(m_strBasicLoadTxt,false);
 		m_lbConfig.ResetContent();
 		m_lbDOE.ResetContent();
 		m_treeMainTest.DeleteAllItems();
 		m_strDOE = "";
+		m_ListCtrlMain.DeleteAllItems();
 
 		int nIndex = m_lbBuild.GetCurSel();
 		m_lbBuild.GetText(nIndex, m_strBuildNum);
@@ -1022,13 +1080,15 @@ void CData_ManagerDlg::OnLbnSelchangeListConfignum()
 	}
 	if(bDo)
 	{
+		LoadSettingTextChange(m_strBasicLoadTxt,false);
 		m_lbDOE.ResetContent();
 		m_treeMainTest.DeleteAllItems();
+		m_ListCtrlMain.DeleteAllItems();
 		m_strDOE = "";
-
 
 		int nIndex = m_lbConfig.GetCurSel();
 		m_lbConfig.GetText(nIndex, m_strConfigNum);
+		m_ListCtrlMain.DeleteAllItems();
 
 		CString strTargetName = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum;
 		CString strTemp;
@@ -1079,6 +1139,7 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 	}
 	if(bDo)
 	{
+		LoadSettingTextChange(m_strBasicLoadTxt,false);
 		ConfigDMData* pConfig = m_cNewConfigData;
 		ConfigDMData* pSetting = m_cNewSettingData;
 
@@ -1121,9 +1182,6 @@ void CData_ManagerDlg::OnLbnSelchangeListDoe()
 		pSetting->GetBaseInfoList(cTemp);
 
 		m_cValueData.SetBaseInfoFromConfig(cTemp);
-
-		m_cValueData.AddNewConfigData(pConfig);
-		m_cValueData.AddNewSettingData(pSetting);
 
 		// treeview에 뿌려주기
 		AddToTree(pSetting);
@@ -1229,6 +1287,13 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 	CString strOri, strValue, strDescrip;
 	CString strSection, strItem;
 
+	strSection.Format("");
+	strSequence.Format("");
+	strOri.Format("");
+	strValue.Format("");
+	strDescrip.Format("");
+	strItem.Format("");
+
 	BeginWaitCursor();
 	while(pos)
 	{
@@ -1240,6 +1305,15 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 		strOri	= temp->getValue();
 		AfxExtractSubString(strValue,	strOri, 0, '/');
 		AfxExtractSubString(strDescrip, strOri, 1, '/');
+
+		if (strValue==m_strBasicLoadTxt)
+		{
+			strValue.Format("");
+		}
+		if (strDescrip==m_strBasicLoadTxt)
+		{
+			strDescrip.Format("");
+		}
 
 		m_ListCtrlMain.InsertItem(nIndex, strSequence);
 		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
@@ -1565,7 +1639,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 			else if((pNMLV->uNewState & 0x2000) && (pNMLV->uOldState & 0x1000))
 			{
-				nCheckValue = 1;	// check 
+				nCheckValue = 1; // check 
 				bFlag = true;
 			}
 
@@ -1584,6 +1658,12 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 				selectedItem = m_treeMainTest.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
 				CString strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
+
+				if (strTestName.Find(".ini") >-1)
+				{
+					selectedItem = m_treeMainTest.GetNextItem(selectedItem, TVGN_PARENT);		// 현재 선택된 아이템의 핸들을 가져온다.
+					strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
+				}
 
 				if(strTestName == "Base Info")
 				{
@@ -1655,14 +1735,14 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 	::GetWindowRect(m_hWnd,&rtDlg);
 
 	// Dialog에 위치한 ListCtrl의 left & top 위치를 구한다.
-	int nThisLeft  = rtListCtrl.left - rtDlg.left;
-	int nThisTop = rtListCtrl.top - rtDlg.top;
+	int nThisLeft = rtListCtrl.left - rtDlg.left;
+	int nThisTop  = rtListCtrl.top  - rtDlg.top;
 
 	if(m_nItem != -1)
 		::SetWindowPos(	::GetDlgItem(m_hWnd,IDC_EDIT1),
 		HWND_TOP,
-		rtSubItem.left+nThisLeft ,
-		rtSubItem.top +nThisTop-30,
+		rtSubItem.left + nThisLeft ,
+		rtSubItem.top + nThisTop-30,
 		rtSubItem.right - rtSubItem.left - 3,
 		rtSubItem.bottom - rtSubItem.top -1,
 		NULL);
@@ -1682,7 +1762,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 	// Focus를 잃었을 경우 ListCtrl에 적용시키기 위해 저장  
 	m_hFocus = ::GetDlgItem(GetParent()->GetSafeHwnd(), IDC_EDIT1);
-	Invalidate();  
+	Invalidate();
 
 	*pResult = 0;
 }
@@ -1710,8 +1790,6 @@ bool CData_ManagerDlg::CheckBaseInfoInAllData()
 
 	return bResult;
 }
-
-
 
 
 void CData_ManagerDlg::OnEnKillfocusEdit1()
@@ -1774,4 +1852,96 @@ void CData_ManagerDlg::OnEnKillfocusEdit1()
 	delete cModifyData;
 
 	m_bModify = true;
+}
+
+
+void CData_ManagerDlg::ChangeSettingFileNameToConfigFileName(ConfigDMData* inpConfig, ConfigDMData* outpSetting)
+{
+	std::vector<CString> vSettingBaseFileList;	// File Name 받을 변수
+	std::vector<CString> vConfigBaseFileList;	// File Name 받을 변수
+	std::vector<CString> vConfigRegisterFileList;	// File Name 에서 Register File을 추출해 받을 변수
+	std::vector<CString> vSettingRegisterFileList;	// File Name 에서 Register File을 추출해 받을 변수
+
+	inpConfig->GetFileNames(vConfigBaseFileList);
+	outpSetting->GetFileNames(vSettingBaseFileList);
+
+	CString strConfigFile, strSettingFile;
+	strConfigFile.Format("");
+	strSettingFile.Format("");
+
+	int nIndex = -1;
+
+	for (int i =0; i< vConfigBaseFileList.size(); i++)
+	{
+		strConfigFile = vConfigBaseFileList[i];
+		nIndex = strConfigFile.Find("_Register");
+		if(nIndex >-1)
+		{
+			vConfigRegisterFileList.push_back(strConfigFile);
+		}
+	}
+
+	for (int i =0; i< vSettingBaseFileList.size(); i++)
+	{
+		strSettingFile = vSettingBaseFileList[i];
+		nIndex = strSettingFile.Find("_Register");
+		if(nIndex >-1)
+		{
+			vSettingRegisterFileList.push_back(strSettingFile);
+		}
+	}
+
+	CString strTest, strFileName, strETC, strSettingTest, strSettingFileName, strSettingETC;
+	CString strReferenceName, strSettingReferenceName;
+	strTest.Format("");
+	strFileName.Format("");
+	strETC.Format("");
+	strSettingTest.Format("");
+	strSettingFileName.Format("");
+	strSettingETC.Format("");
+	strReferenceName.Format("");
+	strSettingReferenceName.Format("");
+
+	for (int i =0; i< vConfigRegisterFileList.size(); i++)
+	{
+		AfxExtractSubString(strTest,	 vConfigRegisterFileList[i],0,':');
+		AfxExtractSubString(strFileName, vConfigRegisterFileList[i],1,':');
+		AfxExtractSubString(strETC,		 vConfigRegisterFileList[i],2,':');
+
+		
+		if(strETC != "")
+		{
+			 CString strTemp = strTest;
+			 strTest = strFileName;
+			 strFileName = strETC;
+			 strETC = strTemp;
+		}
+		strReferenceName = strFileName;
+		strReferenceName.Replace("_Register","");
+
+		for (int j =0; j< vSettingRegisterFileList.size(); j++)
+		{
+			AfxExtractSubString(strSettingTest,		vSettingRegisterFileList[j],0,':');
+			AfxExtractSubString(strSettingFileName, vSettingRegisterFileList[j],1,':');
+			AfxExtractSubString(strSettingETC,		vSettingRegisterFileList[j],2,':');
+
+			if(strSettingETC != "")
+			{
+				CString strTemp = strSettingTest;
+				strSettingTest = strSettingFileName;
+				strSettingFileName = strSettingETC;
+				strSettingETC = strTemp;
+			}
+
+			strSettingReferenceName = strSettingFileName;
+			strSettingReferenceName.Replace("_Register","");
+
+			if(strTest == strSettingTest && strETC == strSettingETC)
+			{
+				outpSetting->ChangeFileName(strTest,strFileName,strSettingFileName);
+				outpSetting->ChangeFileName(strTest,strReferenceName,strSettingReferenceName);
+				break;
+			}
+		}
+	}
 }

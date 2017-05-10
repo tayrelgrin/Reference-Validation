@@ -22,6 +22,7 @@ public:
 	void GetFileNames(CString inTestName, std::vector<CString>& outvFileNames);
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 	void ModifyData(CString inTargetFileName, BasicData* inTarget);
+	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
 private:
 	CList<FileType*> m_pFIleList;
 	CString m_strTestName;

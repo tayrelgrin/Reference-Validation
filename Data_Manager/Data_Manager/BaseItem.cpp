@@ -148,7 +148,6 @@ void BaseItem::OnCbnSelchangeCombo1()
 	cTarget->SearchFileInList(strFileName,cFile);
 	CList<BasicData*> FileListData;
 	cFile.CopyDataToList(FileListData);
-
 	
 	HTREEITEM h_Root;
 	HTREEITEM h_Child;
@@ -156,7 +155,7 @@ void BaseItem::OnCbnSelchangeCombo1()
 	POSITION pPos = FileListData.GetHeadPosition();
 	std::string strSection;
 	std::string strItem;
-	std::string compare = "";
+	std::string strCompare = "";
 
 	while(pPos)
 	{
@@ -166,9 +165,9 @@ void BaseItem::OnCbnSelchangeCombo1()
 		strItem		= temp->getItem();
 
 		if(m_TreeCtrl_BaseFile.GetCount() >= 1)
-			compare = m_TreeCtrl_BaseFile.GetItemText(h_Root);	// Search in Root level in tree
+			strCompare = m_TreeCtrl_BaseFile.GetItemText(h_Root);	// Search in Root level in tree
 
-		if(strSection.compare(compare) != 0)
+		if(strSection.compare(strCompare) != 0)
 			h_Root = m_TreeCtrl_BaseFile.InsertItem(strSection.c_str(), TVI_ROOT, TVI_LAST);
 		h_Child = m_TreeCtrl_BaseFile.InsertItem(strItem.c_str(), h_Root, NULL);
 	}

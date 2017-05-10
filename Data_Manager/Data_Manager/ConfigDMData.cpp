@@ -813,3 +813,22 @@ void ConfigDMData::ModifyData(CString inTargetTestName, CString inTargetFileName
 		}
 	}
 }
+
+
+void ConfigDMData::ChangeFileName(CString inTestName, CString inNewFileName, CString inTargetFileName)
+{
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+	POSITION pTemp = NULL;
+
+	while(pPos)
+	{
+		pTemp = pPos;
+		TestType* cTemp = m_pListTestType.GetNext(pPos);
+		if(cTemp->GetTestName() == inTestName)
+		{
+			cTemp->ChangeFileName(inTargetFileName, inNewFileName);
+			SetNewDataFlag(true);
+			break;
+		}
+	}
+}

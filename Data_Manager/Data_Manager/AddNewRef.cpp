@@ -133,7 +133,7 @@ void AddNewRef::OnEnChangeMfceditbrowse1()
 
 	if(!CheckRefEffective(m_strDirRootPath, m_vStrDir))
 	{
-		AfxMessageBox("The Reference has some problem, Check it Please!\\ Details are in ListLog(TBD)", MB_OK);
+		AfxMessageBox("The Reference has some problem, Check it Please!\n Details are in ListLog(TBD)", MB_OK);
 		GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
 	}
 	else

@@ -278,3 +278,22 @@ void TestType::ModifyData(CString inTargetFileName, BasicData* inTarget)
 	}
 
 }
+
+void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
+{
+	POSITION pPos = m_pFIleList.GetHeadPosition();
+	CString strFileName;
+	strFileName.Format("");
+	bool bResult=false;
+
+	while(pPos)
+	{
+		FileType* temp = m_pFIleList.GetNext(pPos);
+		strFileName = temp->GetFileName();
+
+		if (strFileName.Find(inTargetFileName) != -1)
+		{
+			temp->SetFileName(inNewFileName);			
+		}
+	}
+}

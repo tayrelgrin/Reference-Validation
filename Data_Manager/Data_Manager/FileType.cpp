@@ -64,13 +64,12 @@ void FileType::AddNewData(CString inData, int inNInput)
 	bool bFlag = false;
 	INIFileReadByLine(inData, vtemp);
 	BasicData* cNewData = NULL;
+	strSection.Format("");
+	strItem.Format("");
+	strValue.Format("");
 
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
-		strSection.Format("");
-		strItem.Format("");
-		strValue.Format("");
-
 		CString strTemp = vtemp[i];
 		if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{

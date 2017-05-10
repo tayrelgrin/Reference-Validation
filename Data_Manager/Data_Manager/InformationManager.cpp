@@ -39,6 +39,7 @@ void InformationManager::InitAllData()
 
 	m_listSetting.RemoveAll();
 	m_listConfigs.RemoveAll();
+	m_listBaseInfo.RemoveAll();
 }
 
 void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
@@ -356,7 +357,7 @@ void InformationManager::GetConfigNameList(std::vector<CString>& outvData)
 TestType* InformationManager::SearchSettingData(TestType& inoutTarget, bool& bResult)
 {
 	bResult = false;
-	POSITION pPos = m_listSetting.GetHeadPosition();
+	POSITION pPos = m_listSetting.GetTailPosition();
 	POSITION ptemp = NULL;
 	TestType* temp = &inoutTarget;
 	while(pPos)

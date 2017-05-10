@@ -76,6 +76,8 @@ public:
 	void SetCell(HWND hWnd1, CString value, int nRow, int nCol);
 	CString GetItemText(HWND hWnd, int nItem, int nSubItem) const;
 	bool CheckBaseInfoInAllData();
+	void ChangeSettingFileNameToConfigFileName(ConfigDMData* inpConfig, ConfigDMData* outpSetting);
+	void LoadSettingTextChange(CString inNewString, bool inFlag);
 private:
 	std::vector<CString> m_vDirList;
 	std::vector<CString> m_vTestList;
@@ -101,7 +103,7 @@ private:
 	bool m_bNotFirst;
 	bool m_bPreDataUsed;
 	bool m_bIsAllCheck; 
-	
+	CString m_strBasicLoadTxt;
 public:
 	CListBox m_lbProject;
 	CListBox m_lbBuild;
