@@ -609,13 +609,13 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					BasicData* outData = new BasicData;
 					for (pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute(); pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
 					{
-						CString strTemp = (CString)pAttr->Name();
+						CString strTempValue = (CString)pAttr->Name();
 
-						if("Section" == strTemp)
+						if("Section" == strTempValue)
 							outData->setSection((CString)pAttr->Value());
-						else if("Item" == strTemp)
+						else if("Item" == strTempValue)
 							outData->setItem((CString)pAttr->Value());
-						else if("Value" == strTemp)
+						else if("Value" == strTempValue)
 						{
 							outData->setValue((CString)pAttr->Value());
 							/*bFlag = true;*/
@@ -634,14 +634,14 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					TestType* cNewTest = new TestType;
 
 					cNewTest->SetTestName((CString)pElent->Value());
-					CString strTemp = pElent->Value();
+					CString strTempValue = pElent->Value();
 
-					m_vTestName.push_back(strTemp);
+					m_vTestName.push_back(strTempValue);
 
 					cNewTest->LoadDataFromXML(pNode);
 					std::vector<CString> vTemp;
 
-					cNewTest->GetFileNames(strTemp,vTemp);
+					cNewTest->GetFileNames(strTempValue,vTemp);
 					
 					for (int i = 0; i<vTemp.size(); i++)
 					{
@@ -720,7 +720,7 @@ TestType* ConfigDMData::SearchTest(TestType& inoutTarget, bool& bResult)
 	bResult = false;
 	POSITION pPos = m_pListTestType.GetHeadPosition();
 
-	TestType* temp;
+	TestType* temp = NULL;
 
 	while(pPos)
 	{
@@ -768,13 +768,13 @@ void ConfigDMData::GetBaseInfoList(CList<BasicData*>& outList)
 
 void ConfigDMData::SetBaseInfoList(CList<BasicData*>& inList)
 {
-	POSITION pPos = m_lBaseInfo.GetHeadPosition();
+	POSITION pPos = inList.GetHeadPosition();
 	POSITION pTemp = NULL;
 
 	if(inList.GetCount() > 0)
 	{
-		POSITION pPos = inList.GetHeadPosition();
-		POSITION pTemp = NULL;
+		pPos = inList.GetHeadPosition();
+		pTemp = NULL;
 
 		while(pPos)
 		{

@@ -73,7 +73,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 		CString strTemp = vtemp[i];
 		if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{
-			if (cNewData==NULL)
+			if(cNewData==NULL)
 				cNewData = new BasicData();
 			strSection = strTemp;
 			cNewData->setSection(strTemp);
@@ -98,12 +98,12 @@ void FileType::AddNewData(CString inData, int inNInput)
 			
 			bFlag = false;
 		}
+
 		if(bFlag == false)
 		{
 			if(cNewData->getItem() != "" || cNewData->getValue() != "" )
 			{
 				m_pDataList.AddTail(cNewData);
-
 				cNewData = NULL;
 			}
 			else

@@ -47,6 +47,7 @@ void BasicData::setItem(CString inData)
 //////////////////////////////////////////////////////////////////////////
 void BasicData::setSection(CString inData)
 {
+	inData = inData.Trim();
 	m_strSection = inData;
 }
 

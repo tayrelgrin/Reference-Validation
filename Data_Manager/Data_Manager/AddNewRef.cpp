@@ -98,6 +98,7 @@ void AddNewRef::OnBnClickedRadioRef()
 	m_cComboConfig.EnableWindow(FALSE);
 	m_cComboDOE.EnableWindow(FALSE);
 	m_editCtrl.EnableWindow(TRUE);
+	GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(FALSE);
 
 	bPreDataUsed = false;
 }
@@ -112,6 +113,7 @@ void AddNewRef::OnBnClickedRadioUsedata()
 	m_cComboConfig.EnableWindow(TRUE);
 	m_cComboDOE.EnableWindow(TRUE);
 	m_editCtrl.EnableWindow(FALSE);
+	GetDlgItem(IDC_BUTTON_ADDOK)->EnableWindow(TRUE);
 
 	bPreDataUsed = true;
 }
@@ -380,9 +382,9 @@ void AddNewRef::OnCbnSetfocusCombo2()
 
 		for (int j = 0; j< m_cComboConfig.GetCount(); j++)
 		{
-			CString strTarget;
-			m_cComboConfig.GetLBText(j, strTarget);
-			if(strTarget == strTemp)
+			CString strTargetConfig;
+			m_cComboConfig.GetLBText(j, strTargetConfig);
+			if(strTargetConfig == strTemp)
 				bCompareResult = false;
 		}
 		if(bCompareResult)	// 중복 확인 
@@ -426,9 +428,9 @@ void AddNewRef::OnCbnSetfocusCombo3()
 
 		for (int j = 0; j< m_cComboDOE.GetCount(); j++)
 		{
-			CString strTarget;
-			m_cComboDOE.GetLBText(j, strTarget);
-			if(strTarget == strTemp)
+			CString strTargetConfig;
+			m_cComboDOE.GetLBText(j, strTargetConfig);
+			if(strTargetConfig == strTemp)
 				bCompareResult = false;
 		}
 		if(bCompareResult)	// 중복 확인 

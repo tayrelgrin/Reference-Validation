@@ -550,12 +550,12 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 					m_cValueData.SetBaseInfoFromConfig(cTemp);
 
 					cTemp.RemoveAll();
-					int nIndex = strSettingPath.ReverseFind('\\');
+					int nIndexTemp = strSettingPath.ReverseFind('\\');
 
-					strFileName = strSettingPath.Mid(nIndex+1);
+					strFileName = strSettingPath.Mid(nIndexTemp+1);
 
-					nIndex = strFileName.ReverseFind('.');
-					strConfig = strFileName.Left(nIndex);
+					nIndexTemp = strFileName.ReverseFind('.');
+					strConfig = strFileName.Left(nIndexTemp);
 
 					CString strTemp;
 					GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
@@ -1393,9 +1393,9 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 
 		if(strTarget.find('/') != -1)
 		{
-			CString temp;
-			AfxExtractSubString(temp, strTarget.c_str(), 0,'/');
-			strTarget = temp;
+			CString strTemp;
+			AfxExtractSubString(strTemp, strTarget.c_str(), 0,'/');
+			strTarget = strTemp;
 		}
 
 		if(strTarget.compare(strPreItem) != 0)	// 아이템 체인지
