@@ -205,8 +205,13 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 		m_pDataList.AddTail(outData);
 }
 
-
-void FileType::CopyDataInList(FileType& outData)
+//////////////////////////////////////////////////////////////////////////
+// Name     : CopyDataInList
+// Function : Copy this object to outData
+// pre		: none
+// return	: none
+//////////////////////////////////////////////////////////////////////////
+void FileType::CopyData(FileType& outData)
 {
 	outData.InitList();
 
@@ -226,7 +231,12 @@ void FileType::CopyDataInList(FileType& outData)
 	}
 }
 
-
+//////////////////////////////////////////////////////////////////////////
+// Name     : CopyDataToList
+// Function : Copy this object list to outListData
+// pre		: none
+// return	: none
+//////////////////////////////////////////////////////////////////////////
 void FileType::CopyDataToList(CList<BasicData*>& outListData)
 {
 	outListData.RemoveAll();
@@ -247,7 +257,12 @@ void FileType::CopyDataToList(CList<BasicData*>& outListData)
 	}	
 }
 
-
+//////////////////////////////////////////////////////////////////////////
+// Name     : ModifyData
+// Function : Search data and Modify it in m_pDataList
+// pre		: Data in m_pDataList
+// return	: none
+//////////////////////////////////////////////////////////////////////////
 void FileType::ModifyData(BasicData* inTarget)
 {
 	POSITION pPos = m_pDataList.GetHeadPosition();

@@ -69,26 +69,6 @@ void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
 	vTest.clear();
 }
 
-void InformationManager::DeleteConfigData(ConfigDMData* inTargetData)
-{
-	POSITION pDelete;
-	//pDelete = m_listConfigs.Find(inTargetData); index 로 삭제하게 해야할듯
-
-//	m_listConfigs.RemoveAt(pDelete);
-	// add file delete
-}
-
-void InformationManager::DeleteConfigData(CString instrPrj, CString instrBuild, CString instrConfig, CString instrDOE)
-{
-	POSITION pDelete;
-	ConfigDMData cTargetData;
-
-	cTargetData.SetProject(instrPrj);
-	cTargetData.SetBuildNum(instrBuild);
-	cTargetData.SetConfigNum(instrConfig);
-	cTargetData.SetDOE(instrDOE);
-}
-
 
 bool InformationManager::SaveRefToFile(CString inFilePath)
 {

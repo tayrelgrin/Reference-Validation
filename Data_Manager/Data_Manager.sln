@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Data_Manager", "Data_Manager\Data_Manager.vcxproj", "{278A5409-328E-4B70-A673-1D7E0FA32623}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Data_Validation", "..\Data_Validation\Data_Validation.vcxproj", "{EFB4987D-07C4-4F2B-9B9A-E94CB0A24E14}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -13,6 +15,10 @@ Global
 		{278A5409-328E-4B70-A673-1D7E0FA32623}.Debug|Win32.Build.0 = Debug|Win32
 		{278A5409-328E-4B70-A673-1D7E0FA32623}.Release|Win32.ActiveCfg = Release|Win32
 		{278A5409-328E-4B70-A673-1D7E0FA32623}.Release|Win32.Build.0 = Release|Win32
+		{EFB4987D-07C4-4F2B-9B9A-E94CB0A24E14}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EFB4987D-07C4-4F2B-9B9A-E94CB0A24E14}.Debug|Win32.Build.0 = Debug|Win32
+		{EFB4987D-07C4-4F2B-9B9A-E94CB0A24E14}.Release|Win32.ActiveCfg = Release|Win32
+		{EFB4987D-07C4-4F2B-9B9A-E94CB0A24E14}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

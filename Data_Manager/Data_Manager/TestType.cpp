@@ -258,7 +258,7 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 
 		if (strFileName.Find(inStrTargetFile) != -1)
 		{
-			temp->CopyDataInList(outData);
+			temp->CopyData(outData);
 			bResult = true;
 			break;
 		}
