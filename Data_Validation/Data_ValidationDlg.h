@@ -3,7 +3,9 @@
 //
 
 #pragma once
-
+#include "afxwin.h"
+#include "afxcmn.h"
+#include "LogInDlg.h"
 
 // CData_ValidationDlg 대화 상자
 class CData_ValidationDlg : public CDialogEx
@@ -29,4 +31,18 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButtonStart();
+	afx_msg void OnBnClickedButtonStop();
+	CButton m_ButtonStart;
+	CButton m_ButtonStop;
+	CListCtrl m_ListCtrl_Main;
+	afx_msg void OnBnClickedButtonRefSelect();
+
+private:
+	CString m_strOutPath;
+	LogInDlg m_LogInDlg;
+public:
+	CTabCtrl m_TabCtrl_Main;
+	afx_msg void OnBnClickedButtonLogin();
 };

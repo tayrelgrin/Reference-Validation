@@ -57,12 +57,20 @@ CData_ValidationDlg::CData_ValidationDlg(CWnd* pParent /*=NULL*/)
 void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_BUTTON_START, m_ButtonStart);
+	DDX_Control(pDX, IDC_BUTTON_STOP, m_ButtonStop);
+	DDX_Control(pDX, IDC_LIST_MAIN, m_ListCtrl_Main);
+	DDX_Control(pDX, IDC_TAB1, m_TabCtrl_Main);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
+	ON_BN_CLICKED(IDC_BUTTON_START, &CData_ValidationDlg::OnBnClickedButtonStart)
+	ON_BN_CLICKED(IDC_BUTTON_STOP, &CData_ValidationDlg::OnBnClickedButtonStop)
+	ON_BN_CLICKED(IDC_BUTTON_REF_SELECT, &CData_ValidationDlg::OnBnClickedButtonRefSelect)
+	ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CData_ValidationDlg::OnBnClickedButtonLogin)
 END_MESSAGE_MAP()
 
 
@@ -100,6 +108,16 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	ShowWindow(SW_MINIMIZE);
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
+
+	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 90,  -1);
+	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 100, -1);
+	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 120, -1);
+	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 200, -1);
+
+	m_TabCtrl_Main.InsertItem(1,_T("List Log"));
+	m_TabCtrl_Main.InsertItem(2,_T("Fail Item"));
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -153,3 +171,70 @@ HCURSOR CData_ValidationDlg::OnQueryDragIcon()
 	return static_cast<HCURSOR>(m_hIcon);
 }
 
+
+
+void CData_ValidationDlg::OnBnClickedButtonStart()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_ButtonStop.EnableWindow(TRUE);
+	m_ButtonStop.ShowWindow(TRUE);
+	m_ButtonStart.EnableWindow(FALSE);
+	m_ButtonStart.ShowWindow(FALSE);
+
+
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonStop()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	m_ButtonStop.EnableWindow(FALSE);
+	m_ButtonStop.ShowWindow(FALSE);
+	m_ButtonStart.EnableWindow(TRUE);
+	m_ButtonStart.ShowWindow(TRUE);
+
+
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonRefSelect()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	ITEMIDLIST      *pidlBrowse;
+	char   Pathname[MAX_PATH];
+	BROWSEINFO     BrInfo;
+
+	BrInfo.hwndOwner = GetSafeHwnd();
+	BrInfo.pidlRoot = NULL;
+
+	memset( &BrInfo, 0, sizeof(BrInfo) );
+	BrInfo.pszDisplayName =(LPTSTR)Pathname;
+	BrInfo.lpszTitle = _T("Choose Reference Directory to Validate.");
+	BrInfo.ulFlags = BIF_RETURNONLYFSDIRS;
+
+	// 폴더 선택 다이얼로그 띄우기
+	pidlBrowse = SHBrowseForFolder(&BrInfo);
+	if( pidlBrowse != NULL)
+	{
+		// 패스를 얻어옴
+		BOOL bSuccess = ::SHGetPathFromIDList(pidlBrowse, (LPTSTR)Pathname);
+		if ( bSuccess )
+		{
+			// 읽어와서 할 내용 추가
+			// file, directory check
+		}
+		else
+		{
+			MessageBox(_T("Wrong Folder."), _T("lol"), MB_OKCANCEL|MB_ICONASTERISK ); 
+		}
+	}
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonLogin()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	m_LogInDlg.DoModal();
+}

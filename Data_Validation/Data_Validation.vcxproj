@@ -19,7 +19,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
     <UseOfMfc>Dynamic</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -99,15 +99,37 @@
     <None Include="res\Data_Validation.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Data_Manager\Data_Manager\BasicData.h" />
+    <ClInclude Include="..\Data_Manager\Data_Manager\FileType.h" />
+    <ClInclude Include="..\Data_Manager\Data_Manager\TestType.h" />
+    <ClInclude Include="..\Data_Manager\Data_Manager\tinyxml2.h" />
+    <ClInclude Include="ConfigType.h" />
+    <ClInclude Include="Config_Select_Dlg.h" />
+    <ClInclude Include="DataController.h" />
     <ClInclude Include="Data_Validation.h" />
     <ClInclude Include="Data_ValidationDlg.h" />
+    <ClInclude Include="DifferentItem.h" />
+    <ClInclude Include="FailItem.h" />
+    <ClInclude Include="ListLogTab.h" />
+    <ClInclude Include="LogInDlg.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Data_Manager\Data_Manager\BasicData.cpp" />
+    <ClCompile Include="..\Data_Manager\Data_Manager\FileType.cpp" />
+    <ClCompile Include="..\Data_Manager\Data_Manager\TestType.cpp" />
+    <ClCompile Include="..\Data_Manager\Data_Manager\tinyxml2.cpp" />
+    <ClCompile Include="ConfigType.cpp" />
+    <ClCompile Include="Config_Select_Dlg.cpp" />
+    <ClCompile Include="DataController.cpp" />
     <ClCompile Include="Data_Validation.cpp" />
     <ClCompile Include="Data_ValidationDlg.cpp" />
+    <ClCompile Include="DifferentItem.cpp" />
+    <ClCompile Include="FailItem.cpp" />
+    <ClCompile Include="ListLogTab.cpp" />
+    <ClCompile Include="LogInDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -119,4 +141,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="Data_Validation.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
