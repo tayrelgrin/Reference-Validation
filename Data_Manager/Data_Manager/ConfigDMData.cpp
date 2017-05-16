@@ -166,11 +166,6 @@ bool ConfigDMData::operator ==(const ConfigDMData& inData)
 	return bResult;
 }
 
-CString ConfigDMData::GetBuildNum()
-{
-	return m_strBuildNum;
-}
-
 
 void ConfigDMData::GetTestDirFromVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
 {

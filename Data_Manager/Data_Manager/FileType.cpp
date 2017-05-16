@@ -163,7 +163,7 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 		BOOL bIsNotEOL = sourceFile.ReadString(strLine);
 		if(strLine!="")	// 공란 제거
 			outData.push_back(strLine);
-		if (strLine.GetLength()>127)
+		if (strLine.GetLength() > 127)
 		{
 			bIsNotEOL = FALSE;
 		}
@@ -173,13 +173,24 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 	sourceFile.Close();
 }
 
-
+//////////////////////////////////////////////////////////////////////////
+// Name     : GetFileName
+// Function : Return File Name
+// pre		: None
+// return	: CString m_strFileName
+//////////////////////////////////////////////////////////////////////////
 CString FileType::GetFileName()
 {
 	return m_strFileName;
 }
 
 
+//////////////////////////////////////////////////////////////////////////
+// Name     : LoadDataFromXML
+// Function : Load Basic item info from XML structure
+// pre		: Loaded xml file
+// return	: none
+//////////////////////////////////////////////////////////////////////////
 void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 {
 	tinyxml2::XMLAttribute* pAttr;

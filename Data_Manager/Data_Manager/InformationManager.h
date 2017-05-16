@@ -22,10 +22,6 @@ public:
 	void LoadBaseFileList();
 	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
 	void GetConfigNameList(std::vector<CString>& outvData);
-	void AddToPrj(CString inData);
-	void AddToBuild(CString inData);
-	void AddToConfig(CString inData);
-	void AddToDOE(CString inData);
 	void AddSettingFileList(CString inData);
 	void InitAllData();
 	TestType* SearchSettingData(TestType& inoutTarget, bool& bResult);

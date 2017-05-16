@@ -21,7 +21,6 @@ public:
 	void SetDOE(CString inData);
 	void ModifyData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget);
 	bool operator==(const ConfigDMData& inData);
-	CString GetBuildNum();
 	void GetDirPathList(std::vector<CString>& outvData);
 	void GetTestNameFromDirVector(static std::vector<CString> invData, std::vector<CString>& outvData);
 	void SetTestList(std::vector<CString> invData);
@@ -40,7 +39,7 @@ public:
 	CString GetEXEDirectoryPath();
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
-	void InitListAndVectors();	
+	void InitListAndVectors();
 	void GetFileNames(std::vector<CString>& outvData);
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	TestType* SearchTest(TestType& inoutTarget, bool& bResult);
