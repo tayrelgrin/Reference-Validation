@@ -13,8 +13,8 @@ public:
 	void LoadXMLSettingFileList(CString inData);
 	void LoadSettingFromFile();
 	void InitAllData();
-	bool CheckBaseInfoInAllData(std::vector<CString>& vDifferentTest);
-
+	bool CheckBaseInfoInAllData(CString instrPath,std::vector<CString>& vTestDirPath);
+	void GetDirList(CString instrPath, std::vector<CString>& outDirVector,  std::vector<CString>& outFileVector);
 private:
 	std::vector<CString> m_vConfigName;
 	CList<ConfigType*> m_pListConfig;

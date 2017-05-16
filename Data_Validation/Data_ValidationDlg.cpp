@@ -105,8 +105,6 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// 큰 아이콘을 설정합니다.
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
-	ShowWindow(SW_MINIMIZE);
-
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
@@ -181,7 +179,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 	m_ButtonStart.EnableWindow(FALSE);
 	m_ButtonStart.ShowWindow(FALSE);
 
-
+	
 }
 
 
@@ -205,6 +203,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	char   Pathname[MAX_PATH];
 	BROWSEINFO     BrInfo;
 
+
 	BrInfo.hwndOwner = GetSafeHwnd();
 	BrInfo.pidlRoot = NULL;
 
@@ -221,12 +220,19 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 		BOOL bSuccess = ::SHGetPathFromIDList(pidlBrowse, (LPTSTR)Pathname);
 		if ( bSuccess )
 		{
-			// 읽어와서 할 내용 추가
 			// file, directory check
+			m_TotalData.GetDirList(Pathname,m_vDirVector, m_vFileVector);
+			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData(Pathname, m_vDirVector);
+			if(bCheckResult == false)
+			{
+				AfxMessageBox("Reference Checking Fail!", MB_OK);
+				m_vFileVector.clear();
+				m_vDirVector.clear();
+			}
 		}
 		else
 		{
-			MessageBox(_T("Wrong Folder."), _T("lol"), MB_OKCANCEL|MB_ICONASTERISK ); 
+			MessageBox(_T("Wrong Folder."), _T("lol"), MB_OKCANCEL|MB_ICONASTERISK );
 		}
 	}
 }
@@ -238,3 +244,4 @@ void CData_ValidationDlg::OnBnClickedButtonLogin()
 
 	m_LogInDlg.DoModal();
 }
+

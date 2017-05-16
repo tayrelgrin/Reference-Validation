@@ -6,6 +6,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 #include "LogInDlg.h"
+#include "DataController.h"
 
 // CData_ValidationDlg 대화 상자
 class CData_ValidationDlg : public CDialogEx
@@ -42,6 +43,9 @@ public:
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;
+	DataController m_TotalData;
+	std::vector<CString> m_vFileVector;
+	std::vector<CString> m_vDirVector;
 public:
 	CTabCtrl m_TabCtrl_Main;
 	afx_msg void OnBnClickedButtonLogin();
