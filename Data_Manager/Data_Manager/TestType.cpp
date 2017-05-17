@@ -191,10 +191,8 @@ void TestType::SaveBaseInfoToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLE
 		while(pos)
 		{
 			BasicData* pData = inData.GetNext(pos);
-
-			
+		
 			break;
-
 		}
 	}	
 }

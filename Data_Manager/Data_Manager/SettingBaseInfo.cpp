@@ -97,6 +97,8 @@ BOOL SettingBaseInfo::OnInitDialog()
 	m_TabFileList.Create(IDD_DIALOG_FILELIST, &m_Tab);
 	m_TabFileList.SetWindowPos(NULL, 5, 25, rect.Width()-10, rect.Height()-30, SWP_NOZORDER);
 
+	//////////////////////////////////////////////////////////////////////////
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }

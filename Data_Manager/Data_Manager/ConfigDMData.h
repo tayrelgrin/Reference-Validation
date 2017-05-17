@@ -13,7 +13,7 @@ public:
 	~ConfigDMData(void);
 	void RefNameParsing(static CString instrData);
 	void GetDirList(CString instrPath, std::vector<CString>& inVDirList,std::vector<CString>& inVFileList);
-	void GetTestDirFromVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath);
+	void RemoveRootPathInVector(std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath);
 	void GetConfigInfoFromVector(std::vector<CString> invData, CString inRootPath, CString& outPrj, CString& outBuild, CString& outConfig, CString& outDOE);
 	void SetProject(CString inData);
 	void SetBuildNum(CString inData);

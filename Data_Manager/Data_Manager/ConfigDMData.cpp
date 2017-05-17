@@ -167,7 +167,7 @@ bool ConfigDMData::operator ==(const ConfigDMData& inData)
 }
 
 
-void ConfigDMData::GetTestDirFromVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
+void ConfigDMData::RemoveRootPathInVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
 {
 	inRootPath+="\\";
 	
@@ -211,7 +211,6 @@ void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData,
 		if(temp!="")
 			outvData.push_back(temp);
 	}
-	
 }
 
 void ConfigDMData::SetTestList(std::vector<CString> invData)

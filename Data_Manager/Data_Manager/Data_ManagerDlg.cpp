@@ -309,7 +309,7 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 			if(!m_bPreDataUsed)
 			{
-				m_cNewConfigData->GetTestDirFromVector(m_vDirList, temp, m_strRootPath);
+				m_cNewConfigData->RemoveRootPathInVector(m_vDirList, temp, m_strRootPath);
 				m_cNewConfigData->GetTestNameFromDirVector(temp, m_vTestList);
 				m_cNewConfigData->SetTestList(m_vTestList);
 				m_cNewConfigData->SetTestDirList(m_vDirList);
