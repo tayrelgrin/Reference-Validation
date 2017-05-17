@@ -7,6 +7,9 @@
 #include "afxcmn.h"
 #include "LogInDlg.h"
 #include "DataController.h"
+#include "ListLogTab.h"
+#include "FailItem.h"
+#include "Config_Select_Dlg.h"
 
 // CData_ValidationDlg 대화 상자
 class CData_ValidationDlg : public CDialogEx
@@ -35,18 +38,33 @@ protected:
 public:
 	afx_msg void OnBnClickedButtonStart();
 	afx_msg void OnBnClickedButtonStop();
-	CButton m_ButtonStart;
-	CButton m_ButtonStop;
-	CListCtrl m_ListCtrl_Main;
 	afx_msg void OnBnClickedButtonRefSelect();
-
+	afx_msg void OnBnClickedButtonLogin();
+	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMRClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedButtonDelete();
+public:
+	void AddConfigAndTestToListControl(CString inConfig ,std::vector<CString> vTestName);
+	void AddToTreeRefName(CString inData);
+	void AddVectorData(std::vector<CString> inData, std::vector<CString>& outTarget);	
+	BOOL CheckExistDataInTree(CString strRefName);	
+	void CreateProgressBar(int nIndex, int nSubIndex);
+	
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;
+	ListLogTab m_ListLogDlg;
+	FailItem m_FailItemDlg;
 	DataController m_TotalData;
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;
+	CWnd* m_pwndShow;
+	Config_Select_Dlg m_ConfigSelectDlg;
+
 public:
 	CTabCtrl m_TabCtrl_Main;
-	afx_msg void OnBnClickedButtonLogin();
+	CButton m_ButtonStart;
+	CButton m_ButtonStop;
+	CListCtrl m_ListCtrl_Main;
+	CTreeCtrl m_TreeMain;
 };

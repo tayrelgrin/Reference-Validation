@@ -22,7 +22,7 @@ public:
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitBaseInfoList();
-
+	
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

@@ -26,90 +26,105 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 	int nFindIndex;
 	CString strRegister;
 	CString strRefFile;
-	CString strError = "";
+	CString strError;
+	CString strListLog;
+
+	strFileName.Format("");
+	strDirName.Format("");
+	strDirPath.Format("");
+	strRegister.Format("");
+	strRefFile.Format("");
+	strError.Format("");
+	strListLog.Format("");
 
 	std::vector<bool> vResult;
 
 	nDirCount = vTestDirPath.size();
-
-	if (nDirCount > 3)
+	
+	for (int i = 0; i < nDirCount; i++)
 	{
-		for (int i = 0; i < nDirCount; i++)
+		CString strTemp = vTestDirPath[i];
+		SetCurrentDirectory(strTemp);
+
+		BOOL bSearching = cFinder.FindFile();
+		nFindIndex = strTemp.ReverseFind('\\');
+		strDirName = strTemp.Mid(nFindIndex+1);
+		bool bRefFile = false;
+		bool bRegister = false;
+		bool bSpec = false;		
+		bool bDirectory = false;
+
+		strRefFile	= strDirName + ".ini";
+		strRegister = strDirName + "_Register.ini";
+		nFileCount = 0;
+
+		while(bSearching)
 		{
-			CString strTemp = vTestDirPath[i];
-			SetCurrentDirectory(strTemp);
+			bSearching = cFinder.FindNextFile();
+			strFileName = cFinder.GetFileName();
 
-			BOOL bSearching = cFinder.FindFile();
-			nFindIndex = strTemp.ReverseFind('\\');
-			strDirName = strTemp.Mid(nFindIndex+1);
-			bool bRefFile = false;
-			bool bRegister = false;
-			bool bSpec = false;		
-			bool bDirectory = false;
-
-			strRefFile	= strDirName + ".ini";
-			strRegister = strDirName + "_Register.ini";
-			nFileCount = 0;
-
-			while(bSearching)
+			if(cFinder.IsArchived())
 			{
-				bSearching = cFinder.FindNextFile();
 				strFileName = cFinder.GetFileName();
 
-				if(cFinder.IsArchived())
+				if( strFileName == _T(".") ||
+					strFileName == _T("..")||
+					strFileName == _T("Thumbs.db") ) continue;
+
+				if (strFileName == strRefFile)
 				{
-					strFileName = cFinder.GetFileName();
-
-					if( strFileName == _T(".") ||
-						strFileName == _T("..")||
-						strFileName == _T("Thumbs.db") ) continue;
-
-					if (strFileName == strRefFile)
-					{
-						bRefFile = true;
-					}
-					else if(strFileName == strRegister)
-					{
-						bRegister = true;
-					}
-					else if(strFileName == "Spec.ini")
-					{
-						bSpec = true;
-					}
-
-					if (bRegister && bRefFile && bSpec)
-					{
-						break;
-					}
-					nFileCount++;
+					bRefFile = true;					
+					strListLog.Format("%s%s",strRefFile, ": OK");
+					//m_ListLogDlg.AddListLog(strListLog);
 				}
-				else if (cFinder.IsDirectory() && !cFinder.IsDots())	// no-spec and REL
+				else if(strFileName == strRegister)
 				{
-					bDirectory = true;
+					strListLog.Format("%s%s",strRegister, ": OK");
+					//m_ListLogDlg.AddListLog(strListLog);
+					bRegister = true;
 				}
+				else if(strFileName == "Spec.ini")
+				{
+					strListLog.Format("%s%s",strFileName, ": OK");
+					//m_ListLogDlg.AddListLog(strListLog);
+					bSpec = true;
+				}
+
+				if (bRegister && bRefFile && bSpec)
+				{
+					break;
+				}
+				nFileCount++;
 			}
-			if (!bDirectory)
+			else if (cFinder.IsDirectory() && !cFinder.IsDots())	// no-spec and REL
 			{
-				if (bRegister && bRefFile && bSpec && (nFileCount >4) )
-				{
-					vResult.push_back(true);
-				}
-				else
-				{
-					vResult.push_back(false);
-				}
+				bDirectory = true;
 			}
 		}
-
-		for (int i = 0; i < vResult.size() ; i++)
+		if (!bDirectory)
 		{
-			if(vResult[i] == false)
+			if (bRegister && bRefFile && bSpec && (nFileCount >4) )
 			{
-				bResult = false;
-				break;
+				vResult.push_back(true);
 			}
-		}	
+			else
+			{
+				strListLog.Format("%s%s",strFileName, ": Fail");
+				//m_ListLogDlg.AddListLog(strListLog);
+				vResult.push_back(false);
+			}
+		}
 	}
+
+	for (int i = 0; i < vResult.size() ; i++)
+	{
+		if(vResult[i] == false)
+		{
+			bResult = false;
+			break;
+		}
+	}
+	
 	if(vResult.size()<3)
 		bResult = false;
 
@@ -151,4 +166,116 @@ void DataController::GetDirList(CString instrPath, std::vector<CString>& outDirV
 			outFileVector.push_back(fileName);
 		}
 	}
+}
+
+
+void DataController::LoadXMLFileListInValue()
+{
+	ConfigType cTempConfig;
+
+	CString strEXEDirectory;
+	strEXEDirectory.Format("");
+
+	m_vConfigName.clear();
+
+	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
+
+	strEXEDirectory += "\\Data\\Value";
+
+	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정.
+
+	CFileFind finder;
+
+	std::vector<CString> vStrFilePath;
+	std::vector<CString> vDummy;
+
+	GetDirList(strEXEDirectory,vDummy, vStrFilePath);
+
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	for (int i = 0; i < vStrFilePath.size(); i++)
+	{
+		ParsingBBCD(vStrFilePath[i], strPrj, strBuild, strConfig, strDOE);
+
+		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
+
+		m_vConfigName.push_back(strComb);
+	}
+}
+
+void DataController::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
+{
+	int nIndex = inStr.ReverseFind('\\');
+	CString strFileName = inStr.Mid((nIndex+1));
+	CString strTemp = inStr.Left(nIndex);
+
+	AfxExtractSubString(outStrBuild,	strFileName,0,'-');
+	AfxExtractSubString(outStrConfig,	strFileName,1,'-');
+	nIndex = strFileName.Find('-',0);
+	nIndex = strFileName.Find('-',nIndex+1);
+	outStrDOE = strFileName.Mid(nIndex+1);
+	AfxExtractSubString(outStrDOE,		outStrDOE,0,'.');
+
+	nIndex = strTemp.ReverseFind('\\');
+	outStrPrj = strTemp.Mid(nIndex+1);
+}
+
+void DataController::GetTestNameFromTestDirNameVector(static std::vector<CString> invData, std::vector<CString>& outvData)
+{
+	for (INT i= 0 ; i<invData.size(); i++)
+	{
+		CString temp;
+		CString temp1;
+		CString temp2;
+		temp.Format("");
+		temp1.Format("%s", invData[i]);
+		temp2.Format("");
+
+		if(temp1.Find('\\') == -1)
+		{
+			AfxExtractSubString(temp,		temp1, 5, '_');
+			AfxExtractSubString(temp2,		temp1, 8, '_');
+			if (temp2 != "")
+			{
+				temp = temp2 +":"+ temp;
+			}
+		}
+		else
+		{
+			AfxExtractSubString(temp2,		temp1, 0, '\\');
+			AfxExtractSubString(temp,		temp1, 1, '\\');
+			AfxExtractSubString(temp,		temp, 5, '_');
+			temp = temp2 +"\\"+ temp;
+		}
+		if(temp!="")
+			outvData.push_back(temp);
+	}
+}
+
+void DataController::RemoveRootPathInVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath)
+{
+	inRootPath+="\\";
+
+	for (INT i= 0 ; i<invData.size(); i++)
+	{
+		CString temp = invData[i];
+
+		temp.Replace(inRootPath,_T(""));
+
+		outvData.push_back(temp);
+	}
+}
+
+void DataController::GetConfigFromTestDirNameVector(std::vector<CString> invData, CString& strConfig)
+{
+	CString temp;
+	CString temp1;
+
+	temp.Format("");
+	temp1.Format("%s", invData[0]);
+
+
+	AfxExtractSubString(temp, temp1, 4, '_');
+	
+	strConfig = temp;
 }

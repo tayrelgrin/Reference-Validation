@@ -1,7 +1,5 @@
 
 // Data_ValidationDlg.cpp : 구현 파일
-//
-
 #include "stdafx.h"
 #include "Data_Validation.h"
 #include "Data_ValidationDlg.h"
@@ -61,6 +59,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_STOP, m_ButtonStop);
 	DDX_Control(pDX, IDC_LIST_MAIN, m_ListCtrl_Main);
 	DDX_Control(pDX, IDC_TAB1, m_TabCtrl_Main);
+	DDX_Control(pDX, IDC_TREE_MAIN, m_TreeMain);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -71,6 +70,9 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_STOP, &CData_ValidationDlg::OnBnClickedButtonStop)
 	ON_BN_CLICKED(IDC_BUTTON_REF_SELECT, &CData_ValidationDlg::OnBnClickedButtonRefSelect)
 	ON_BN_CLICKED(IDC_BUTTON_LOGIN, &CData_ValidationDlg::OnBnClickedButtonLogin)
+	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CData_ValidationDlg::OnTcnSelchangeTab1)
+	ON_NOTIFY(NM_RCLICK, IDC_TREE_MAIN, &CData_ValidationDlg::OnNMRClickTreeMain)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CData_ValidationDlg::OnBnClickedButtonDelete)
 END_MESSAGE_MAP()
 
 
@@ -106,7 +108,7 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
-
+	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
 
 	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 90,  -1);
@@ -116,6 +118,24 @@ BOOL CData_ValidationDlg::OnInitDialog()
 
 	m_TabCtrl_Main.InsertItem(1,_T("List Log"));
 	m_TabCtrl_Main.InsertItem(2,_T("Fail Item"));
+	//////////////////////////////////////////////////////////////////////////
+
+	CRect rect;
+
+	m_TabCtrl_Main.GetClientRect(&rect);
+
+	m_ListLogDlg.Create(IDD_DIALOG_LISTLOG, &m_TabCtrl_Main);
+	m_ListLogDlg.SetWindowPos(NULL, 0, 25, rect.Width()-30, rect.Height()-30, SWP_SHOWWINDOW | SWP_NOZORDER);
+
+	m_pwndShow = &m_ListLogDlg;
+
+	m_FailItemDlg.Create(IDD_DIALOG_FAILITEM, &m_TabCtrl_Main);
+	m_FailItemDlg.SetWindowPos(NULL, 0, 25, rect.Width()-30, rect.Height()-30, SWP_NOZORDER);
+
+	//////////////////////////////////////////////////////////////////////////
+
+	m_ListLogDlg.AddListLog("Load XML File List From Value Directory");
+	m_TotalData.LoadXMLFileListInValue();
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -179,7 +199,19 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 	m_ButtonStart.EnableWindow(FALSE);
 	m_ButtonStart.ShowWindow(FALSE);
 
-	
+	do
+	{
+		if(m_vDirVector.size() < 1)
+		{
+			AfxMessageBox("No Reference!\nChoose Reference ", MB_OK);
+			break;
+		}
+
+		if(m_ConfigSelectDlg.DoModal() == true)
+		{
+			m_ListLogDlg.AddListLog("Start Reference Validation");
+		}		
+	}while(false);	
 }
 
 
@@ -191,7 +223,10 @@ void CData_ValidationDlg::OnBnClickedButtonStop()
 	m_ButtonStart.EnableWindow(TRUE);
 	m_ButtonStart.ShowWindow(TRUE);
 
-
+	if (AfxMessageBox("Stop the validation?",MB_OKCANCEL)==1)
+	{
+		m_ListLogDlg.AddListLog("Stop Reference Validation");
+	}	
 }
 
 
@@ -203,9 +238,16 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	char   Pathname[MAX_PATH];
 	BROWSEINFO     BrInfo;
 
+	std::vector<CString> vTestDir;
+	std::vector<CString> vFileNames;
+
+	m_ListLogDlg.AddListLog("Pushed Select Ref Button");
 
 	BrInfo.hwndOwner = GetSafeHwnd();
 	BrInfo.pidlRoot = NULL;
+
+	vTestDir.clear();
+	vFileNames.clear();
 
 	memset( &BrInfo, 0, sizeof(BrInfo) );
 	BrInfo.pszDisplayName =(LPTSTR)Pathname;
@@ -221,17 +263,63 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 		if ( bSuccess )
 		{
 			// file, directory check
-			m_TotalData.GetDirList(Pathname,m_vDirVector, m_vFileVector);
-			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData(Pathname, m_vDirVector);
+			m_TotalData.GetDirList(Pathname,vTestDir, vFileNames);
+			m_ListLogDlg.AddListLog(Pathname);
+			m_ListLogDlg.AddListLog("Check Base Info In All Data");
+
+			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData(Pathname, vTestDir);
 			if(bCheckResult == false)
 			{
+				m_ListLogDlg.AddListLog("Reference Checking Fail!");
 				AfxMessageBox("Reference Checking Fail!", MB_OK);
-				m_vFileVector.clear();
-				m_vDirVector.clear();
+				vTestDir.clear();
+				vFileNames.clear();
+			}
+			else
+			{
+				m_ListLogDlg.AddListLog("Check Base Info In All Data : PASS");
+				CString strRefName, strTemp;
+				strRefName.Format("");
+				strTemp.Format("");
+				strTemp = Pathname;
+				int nIndex = strTemp.ReverseFind('\\');
+				strRefName = strTemp.Mid(nIndex+1);
+				
+				// check same item in tree
+				BOOL bCheckResult = CheckExistDataInTree(strRefName);
+				// Add To Tree
+				if(bCheckResult == FALSE)
+				{
+					AddToTreeRefName(strRefName);
+
+					// Add To member vector
+					AddVectorData(vTestDir, m_vDirVector);
+					AddVectorData(vFileNames, m_vFileVector);
+					m_ListLogDlg.AddListLog("Add to Member Vector");
+
+					// Extract Test Name From Dir Vector
+					std::vector<CString> vTestName;
+					std::vector<CString> vTempName;
+					CString strConfig;
+					strConfig.Format("");
+
+					m_TotalData.RemoveRootPathInVector( vTestDir,  vTempName,  Pathname);
+					m_ListLogDlg.AddListLog("Remove Root Path in Directory Vector");
+
+					m_TotalData.GetConfigFromTestDirNameVector(vTempName, strConfig);
+					m_ListLogDlg.AddListLog("Extract Config : " + strConfig);
+
+					m_TotalData.GetTestNameFromTestDirNameVector(vTempName, vTestName);
+					m_ListLogDlg.AddListLog("Extract Test Name From Directory Name");
+
+					// Add To ListControl
+					AddConfigAndTestToListControl(strConfig, vTestName);
+				}
 			}
 		}
 		else
 		{
+			m_ListLogDlg.AddListLog("Wrong Folder.");
 			MessageBox(_T("Wrong Folder."), _T("lol"), MB_OKCANCEL|MB_ICONASTERISK );
 		}
 	}
@@ -242,6 +330,117 @@ void CData_ValidationDlg::OnBnClickedButtonLogin()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
+	m_ListLogDlg.AddListLog("Log in");
 	m_LogInDlg.DoModal();
 }
 
+
+
+void CData_ValidationDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+
+	if (m_pwndShow != NULL)
+	{
+		m_pwndShow->ShowWindow(SW_HIDE);
+		m_pwndShow = NULL;
+	}
+
+	int nIndex = m_TabCtrl_Main.GetCurSel();
+
+	switch (nIndex)
+	{
+	case 0:
+		m_ListLogDlg.ShowWindow(SW_SHOW);
+		m_pwndShow = &m_ListLogDlg;
+		break;
+	case 1:
+		m_FailItemDlg.ShowWindow(SW_SHOW);
+		m_pwndShow = &m_FailItemDlg;
+		break;
+	}
+}
+
+
+void CData_ValidationDlg::AddToTreeRefName(CString inData)
+{
+	HTREEITEM h_BASEINFO = m_TreeMain.InsertItem(inData, TVI_ROOT, TVI_LAST);
+}
+
+
+void CData_ValidationDlg::AddVectorData(std::vector<CString> inData, std::vector<CString>& outTarget )
+{
+	CString strTemp;
+	strTemp.Format("");
+
+	for (int i = 0; i < inData.size(); i++)
+	{
+		strTemp = inData[i];
+		outTarget.push_back(strTemp);
+	}
+}
+
+void CData_ValidationDlg::OnNMRClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	*pResult = 0;
+
+	// 삭제 버튼 추가
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonDelete()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+}
+
+BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
+{
+	BOOL bResult = FALSE;
+
+	return bResult;
+}
+
+void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::vector<CString> vTestName)
+{
+	for (int i=0; i<vTestName.size(); i++)
+	{
+		m_ListCtrl_Main.InsertItem(i, "");
+		m_ListCtrl_Main.SetItem(i, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i],0,0,0,NULL );
+		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  "Ready",0,0,0,NULL);
+		//CreateProgressBar(i,3);
+	}
+}
+
+void CData_ValidationDlg::CreateProgressBar(int nIndex, int nSubIndex)
+{
+	CProgressCtrl* ProgEntry = new CProgressCtrl;
+	CRect ItemRect;
+
+	RECT rtListCtrl, rtDlg, rtSubItem;
+	HWND hwndBox = ::GetDlgItem(this->m_hWnd, IDC_LIST_MAIN);
+
+	//Get the Rectangle of the listControl
+	::GetWindowRect(hwndBox,&rtListCtrl);
+
+	//Get the Rectangle of the Dialog
+	::GetWindowRect(m_hWnd,&rtDlg);
+
+	// Dialog에 위치한 ListCtrl의 left & top 위치를 구한다.
+	int nThisLeft = rtListCtrl.left - rtDlg.left;
+	int nThisTop  = rtListCtrl.top  - rtDlg.top;
+
+	m_ListCtrl_Main.GetSubItemRect(nIndex, nSubIndex, LVIR_BOUNDS, ItemRect);
+
+	int left	= nThisLeft + ItemRect.left;
+	int right	= nThisLeft + ItemRect.right;
+	int top		= nThisTop  + ItemRect.top;
+	int bottom	= nThisTop  + ItemRect.bottom;
+
+	ProgEntry->Create(PBS_SMOOTH | WS_CHILD | WS_VISIBLE, CRect(left, top, right, bottom), this, 1);
+	ProgEntry->SetRange(0, 100);
+	ProgEntry->SetPos(0);
+
+}

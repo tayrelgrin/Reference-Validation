@@ -24,6 +24,7 @@ FailItem::~FailItem()
 void FailItem::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
+	DDX_Control(pDX, IDC_LIST_FAILITEM, m_ListCtrl_FailItem);
 }
 
 
@@ -32,3 +33,23 @@ END_MESSAGE_MAP()
 
 
 // FailItem 메시지 처리기입니다.
+
+
+BOOL FailItem::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	//////////////////////////////////////////////////////////////////////////
+	m_ListCtrl_FailItem.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
+
+	m_ListCtrl_FailItem.InsertColumn(0, _T(""),			LVCFMT_CENTER, 0,  -1);
+	m_ListCtrl_FailItem.InsertColumn(1, _T("Detail"),	LVCFMT_CENTER, 220, -1);
+	m_ListCtrl_FailItem.InsertColumn(2, _T("Path"),		LVCFMT_CENTER, 320, -1);
+	
+	////////////////////////////////////////////////////////////////////////// 
+
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}

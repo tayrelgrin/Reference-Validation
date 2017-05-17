@@ -33,3 +33,22 @@ END_MESSAGE_MAP()
 
 
 // ListLogTab 메시지 처리기입니다.
+
+
+BOOL ListLogTab::OnInitDialog()
+{
+	CDialogEx::OnInitDialog();
+
+	// TODO:  여기에 추가 초기화 작업을 추가합니다.
+	AddListLog("Validation SW Start");
+	return TRUE;  // return TRUE unless you set the focus to a control
+	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
+}
+
+void ListLogTab::AddListLog(CString inData)
+{
+	CTime cTimer = CTime::GetCurrentTime();
+	CString strListLog;
+	strListLog.Format("%02d.%02d, %02d:%02d:%02d, %s", cTimer.GetMonth(),cTimer.GetDay(), cTimer.GetHour(), cTimer.GetMinute(), cTimer.GetSecond(), inData);
+	m_listLogBox.AddString(strListLog);
+}
