@@ -211,8 +211,19 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{
+			// 마우스 wait start
+			BeginWaitCursor();
+			// m_ConfigSelectDlg에서 값들 가져오기
+			// 조건문 : 값들이 다 있을 경우 수행
+
 			m_ListLogDlg.AddListLog("Start Reference Validation");
-		}		
+
+			// Validation start
+			m_TotalData.Validation();
+
+			// 마우스 wait end
+			EndWaitCursor();
+		}
 	}while(false);	
 }
 
@@ -279,6 +290,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 			}
 			else
 			{
+				m_TotalData.AddRootPath(Pathname);
 				m_ListLogDlg.AddListLog("Check Base Info In All Data : PASS");
 				CString strRefName, strTemp;
 				strRefName.Format("");
@@ -309,13 +321,17 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 					m_ListLogDlg.AddListLog("Remove Root Path in Directory Vector");
 
 					m_TotalData.GetConfigFromTestDirNameVector(vTempName, strConfig);
-					m_ListLogDlg.AddListLog("Extract Config : " + strConfig);
+					m_ListLogDlg.AddListLog("Extract Config : " + strConfig );
 
 					m_TotalData.GetTestNameFromTestDirNameVector(vTempName, vTestName);
 					m_ListLogDlg.AddListLog("Extract Test Name From Directory Name");
 
 					// Add To ListControl
 					AddConfigAndTestToListControl(strConfig, vTestName);
+				}
+				else
+				{
+					AfxMessageBox("Already Same Config in Data ", MB_OK);
 				}
 			}
 		}
@@ -370,18 +386,6 @@ void CData_ValidationDlg::AddToTreeRefName(CString inData)
 	HTREEITEM h_BASEINFO = m_TreeMain.InsertItem(inData, TVI_ROOT, TVI_LAST);
 }
 
-
-void CData_ValidationDlg::AddVectorData(std::vector<CString> inData, std::vector<CString>& outTarget )
-{
-	CString strTemp;
-	strTemp.Format("");
-
-	for (int i = 0; i < inData.size(); i++)
-	{
-		strTemp = inData[i];
-		outTarget.push_back(strTemp);
-	}
-}
 
 void CData_ValidationDlg::OnNMRClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 {

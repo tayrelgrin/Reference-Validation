@@ -27,6 +27,9 @@ public:
 	void DeleteFilPath(CString inTarget);
 	void GetTestDirectoryPath(std::vector<CString>& outvData);
 	void GetFilePath(std::vector<CString>& outvData);
+	void AddNewConfigData(std::vector<CString> inData);
+	BOOL Validation();
+	void AddRootPath(CString inData);
 private:
 	std::vector<CString> m_vConfigName;
 	CList<ConfigType*> m_pListConfig;
@@ -36,4 +39,5 @@ private:
 	CList<DifferentItem*> m_pListDirrentItems;
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;
+	std::vector<CString> m_vRootDIr;
 };

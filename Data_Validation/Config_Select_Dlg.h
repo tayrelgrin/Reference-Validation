@@ -20,4 +20,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+
+private:
+	CString m_strProject;
+	CString m_strBuild;
+	CString m_strConfig;
+	CString m_strDOE;
 };

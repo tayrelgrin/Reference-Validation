@@ -284,14 +284,38 @@ void DataController::GetConfigFromTestDirNameVector(std::vector<CString> invData
 
 void DataController::ReadReference()
 {
-	ConfigType* m_pTargetRef = new ConfigType;
+	CString strDir, strRootPath;
+	strDir.Format("");
+	strRootPath.Format("");
 
-// 	m_pTargetRef->SetTestList(m_vTestList);
-// 	m_pTargetRef->SetTestDirList(m_vDirList);
-// 	m_pTargetRef->SetBaseFiles(temp);
-// 	m_pTargetRef->GetFilePathInDir(temp, m_vDirList);
-// 
-// 	AddNewConfig(m_cNewConfigData, m_cNewSettingData);
+	std::vector<CString> vConfig;
+
+	int nIndex = 0;
+	int nRootIndex = 0;
+
+	// m_vTestDir에서 컨피그 별로 분류
+	for (int i=0; i < m_vDirVector.size(); i++)
+	{
+		strRootPath = m_vRootDIr[nRootIndex];
+
+		if (m_vDirVector[i].Find(strRootPath) != -1)
+		{
+			vConfig.push_back(m_vDirVector[i]);
+		}
+		else
+		{
+			// config 별로 추가
+			AddNewConfigData(vConfig);
+			vConfig.clear();
+			strRootPath = m_vRootDIr[++nRootIndex];
+		}
+
+		if ( i == m_vDirVector.size() -1)
+		{
+			// config 별로 추가
+			AddNewConfigData(vConfig);
+		}
+	}
 }
 
 void DataController::AddTestDirectoryPath(std::vector<CString> invData)
@@ -355,4 +379,24 @@ void DataController::GetFilePath(std::vector<CString>& outvData)
 	outvData.clear();
 
 	outvData.assign(m_vFileVector.begin(), m_vFileVector.end());
+}
+
+void DataController::AddNewConfigData(std::vector<CString> inData)
+{
+	ConfigType* m_pTargetRef = new ConfigType;
+
+	m_pTargetRef->AddNewTest(inData);
+	m_pListTargetRefConfig.AddTail(m_pTargetRef);
+}
+
+BOOL DataController::Validation()
+{
+	ReadReference();
+
+	return TRUE;
+}
+
+void DataController::AddRootPath(CString inData)
+{
+	m_vRootDIr.push_back(inData);
 }

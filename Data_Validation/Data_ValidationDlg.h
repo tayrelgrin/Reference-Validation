@@ -46,7 +46,6 @@ public:
 public:
 	void AddConfigAndTestToListControl(CString inConfig ,std::vector<CString> vTestName);
 	void AddToTreeRefName(CString inData);
-	void AddVectorData(std::vector<CString> inData, std::vector<CString>& outTarget);	
 	BOOL CheckExistDataInTree(CString strRefName);	
 	void CreateProgressBar(int nIndex, int nSubIndex);
 	
