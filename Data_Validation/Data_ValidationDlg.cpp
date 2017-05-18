@@ -393,6 +393,71 @@ void CData_ValidationDlg::OnNMRClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 void CData_ValidationDlg::OnBnClickedButtonDelete()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	// 트리에서 선택한 아이템 정보 가져오기
+	
+	CString strSelectedConfigName;
+	strSelectedConfigName.Format("");
+
+	HTREEITEM hItem;
+	hItem = m_TreeMain.GetNextItem(NULL, TVGN_CARET); // 현재 선택된 아이템의 핸들을 가져온다.
+	strSelectedConfigName = m_TreeMain.GetItemText(hItem);
+
+	// 리스트 컨트롤에 삭제
+	if(hItem != NULL)
+	{
+		m_TreeMain.DeleteItem(hItem);
+		CString strConfigNum;
+		CString strTemp;
+		strConfigNum.Format("");
+		strTemp.Format("");
+
+		int nDelCount = 0;
+		// m_vTestName m_vDirName 에서 해당 정보 삭제
+		for (int i= 0; i< m_vDirVector.size(); i++)
+		{
+			if (m_vDirVector[i].Find(strSelectedConfigName))
+			{
+				m_vDirVector.erase(m_vDirVector.begin()+nDelCount);
+				if(strTemp == "")
+				{
+					int nTemp = m_vDirVector[i].ReverseFind('\\');
+					strTemp =  m_vDirVector[i].Mid(nTemp+1);
+					AfxExtractSubString(strConfigNum, strTemp, 4,'_');
+				}
+			}
+			else
+				nDelCount++;
+		}
+		
+		nDelCount = 0;
+
+		for (int i= 0; i< m_vFileVector.size(); i++)
+		{
+			if (m_vFileVector[i].Find(strSelectedConfigName))
+			{
+				m_vFileVector.erase(m_vFileVector.begin()+nDelCount);
+			}
+			else
+				nDelCount++;
+		}
+
+		nDelCount = 0;
+		int nItemCount = m_ListCtrl_Main.GetItemCount();
+		for (int i=0 ; i < nItemCount; i++)
+		{
+			CString strListItem;
+			strListItem.Format("");
+			strListItem = m_ListCtrl_Main.GetItemText(nDelCount,0);
+			if (strListItem == strConfigNum)
+			{
+				//m_ListCtrl_Main.DeleteItem(i);
+				m_ListCtrl_Main.DeleteItem(nDelCount);
+			}
+			else
+				nDelCount++;
+		}
+	}	
 }
 
 BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
@@ -410,6 +475,7 @@ void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::v
 		m_ListCtrl_Main.SetItem(i, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i],0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  "Ready",0,0,0,NULL);
+		m_ListCtrl_Main.SetItem(i, 3,LVIF_TEXT,  "0%",0,0,0,NULL);
 		//CreateProgressBar(i,3);
 	}
 }
@@ -442,5 +508,4 @@ void CData_ValidationDlg::CreateProgressBar(int nIndex, int nSubIndex)
 	ProgEntry->Create(PBS_SMOOTH | WS_CHILD | WS_VISIBLE, CRect(left, top, right, bottom), this, 1);
 	ProgEntry->SetRange(0, 100);
 	ProgEntry->SetPos(0);
-
 }
