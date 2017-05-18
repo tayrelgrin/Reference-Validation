@@ -20,10 +20,20 @@ public:
 	void GetTestNameFromTestDirNameVector(static std::vector<CString> invData, std::vector<CString>& outvData);
 	void RemoveRootPathInVector(const std::vector<CString> invData, std::vector<CString>& outvData, CString inRootPath);
 	void GetConfigFromTestDirNameVector(std::vector<CString> invData,CString& strConfig);
+	void ReadReference();
+	void AddTestDirectoryPath(std::vector<CString> invData);
+	void AddFilePath(std::vector<CString> invData);
+	void DeleteTestDirectoryPath(CString inTarget);
+	void DeleteFilPath(CString inTarget);
+	void GetTestDirectoryPath(std::vector<CString>& outvData);
+	void GetFilePath(std::vector<CString>& outvData);
 private:
 	std::vector<CString> m_vConfigName;
 	CList<ConfigType*> m_pListConfig;
 	CList<ConfigType*> m_pListSetting;
+	CList<ConfigType*> m_pListTargetRefConfig;
 	CList<BasicData*>  m_pListBaseInfo;
 	CList<DifferentItem*> m_pListDirrentItems;
+	std::vector<CString> m_vFileVector;
+	std::vector<CString> m_vDirVector;
 };

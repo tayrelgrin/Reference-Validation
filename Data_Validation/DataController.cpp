@@ -279,3 +279,80 @@ void DataController::GetConfigFromTestDirNameVector(std::vector<CString> invData
 	
 	strConfig = temp;
 }
+
+
+
+void DataController::ReadReference()
+{
+	ConfigType* m_pTargetRef = new ConfigType;
+
+// 	m_pTargetRef->SetTestList(m_vTestList);
+// 	m_pTargetRef->SetTestDirList(m_vDirList);
+// 	m_pTargetRef->SetBaseFiles(temp);
+// 	m_pTargetRef->GetFilePathInDir(temp, m_vDirList);
+// 
+// 	AddNewConfig(m_cNewConfigData, m_cNewSettingData);
+}
+
+void DataController::AddTestDirectoryPath(std::vector<CString> invData)
+{
+	for (int i = 0; i < invData.size(); i++)
+	{
+		m_vDirVector.push_back(invData[i]);
+	}
+}
+
+void DataController::AddFilePath(std::vector<CString> invData)
+{
+	for (int i = 0; i < invData.size(); i++)
+	{
+		m_vFileVector.push_back(invData[i]);
+	}
+}
+
+void DataController::DeleteFilPath(CString inTarget)
+{
+	int nDelCount = 0;
+	int nIndex = m_vFileVector.size();
+
+	for (int i= 0; i< nIndex ; i++)
+	{
+		if (m_vFileVector[nDelCount].Find(inTarget))
+		{
+			m_vFileVector.erase(m_vFileVector.begin()+nDelCount);
+		}
+		else
+			nDelCount++;
+	}
+}
+
+
+void DataController::DeleteTestDirectoryPath(CString inTarget)
+{
+	int nDelCount = 0;
+	int nIndex = m_vDirVector.size();
+
+	for (int i= 0; i < nIndex; i++)
+	{
+		if (m_vDirVector[nDelCount].Find(inTarget))
+		{
+			m_vDirVector.erase(m_vDirVector.begin()+nDelCount);
+		}
+		else
+			nDelCount++;
+	}
+}
+
+void DataController::GetTestDirectoryPath(std::vector<CString>& outvData)
+{
+	outvData.clear();
+
+	outvData.assign(m_vDirVector.begin(), m_vDirVector.end());
+}
+
+void DataController::GetFilePath(std::vector<CString>& outvData)
+{
+	outvData.clear();
+
+	outvData.assign(m_vFileVector.begin(), m_vFileVector.end());
+}

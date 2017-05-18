@@ -199,9 +199,11 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 	m_ButtonStart.EnableWindow(FALSE);
 	m_ButtonStart.ShowWindow(FALSE);
 
+	int nIndex = m_TreeMain.GetCount();
+
 	do
 	{
-		if(m_vDirVector.size() < 1)
+		if(nIndex < 1)
 		{
 			AfxMessageBox("No Reference!\nChoose Reference ", MB_OK);
 			break;
@@ -293,8 +295,8 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 					AddToTreeRefName(strRefName);
 
 					// Add To member vector
-					AddVectorData(vTestDir, m_vDirVector);
-					AddVectorData(vFileNames, m_vFileVector);
+					m_TotalData.AddTestDirectoryPath(vTestDir);
+					m_TotalData.AddFilePath(vFileNames);
 					m_ListLogDlg.AddListLog("Add to Member Vector");
 
 					// Extract Test Name From Dir Vector
@@ -406,58 +408,57 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 	// 리스트 컨트롤에 삭제
 	if(hItem != NULL)
 	{
-		m_TreeMain.DeleteItem(hItem);
-		CString strConfigNum;
-		CString strTemp;
-		strConfigNum.Format("");
-		strTemp.Format("");
-
-		int nDelCount = 0;
-		// m_vTestName m_vDirName 에서 해당 정보 삭제
-		for (int i= 0; i< m_vDirVector.size(); i++)
+		if (AfxMessageBox(_T("Delete %s Config?", strSelectedConfigName),MB_OKCANCEL) == 1)
 		{
-			if (m_vDirVector[i].Find(strSelectedConfigName))
+			m_TreeMain.DeleteItem(hItem);
+			CString strConfigNum;
+			CString strTemp;
+			strConfigNum.Format("");
+			strTemp.Format("");
+
+			std::vector<CString> vTestDIrPath;
+
+			m_TotalData.GetTestDirectoryPath(vTestDIrPath);
+
+			int nDelCount = 0;
+			// m_vTestName m_vDirName 에서 해당 정보 삭제
+			for (int i= 0; i< vTestDIrPath.size(); i++)
 			{
-				m_vDirVector.erase(m_vDirVector.begin()+nDelCount);
-				if(strTemp == "")
+				if (vTestDIrPath[i].Find(strSelectedConfigName))
 				{
-					int nTemp = m_vDirVector[i].ReverseFind('\\');
-					strTemp =  m_vDirVector[i].Mid(nTemp+1);
-					AfxExtractSubString(strConfigNum, strTemp, 4,'_');
+					m_TotalData.DeleteTestDirectoryPath(strSelectedConfigName);
+
+					if(strTemp == "")
+					{
+						int nTemp = vTestDIrPath[i].ReverseFind('\\');
+						strTemp =  vTestDIrPath[i].Mid(nTemp+1);
+						AfxExtractSubString(strConfigNum, strTemp, 4,'_');
+						break;
+					}
 				}
+				else
+					nDelCount++;
 			}
-			else
-				nDelCount++;
-		}
-		
-		nDelCount = 0;
+			
+			m_TotalData.DeleteFilPath(strSelectedConfigName);			
 
-		for (int i= 0; i< m_vFileVector.size(); i++)
-		{
-			if (m_vFileVector[i].Find(strSelectedConfigName))
+			nDelCount = 0;
+			int nItemCount = m_ListCtrl_Main.GetItemCount();
+			for (int i=0 ; i < nItemCount; i++)
 			{
-				m_vFileVector.erase(m_vFileVector.begin()+nDelCount);
+				CString strListItem;
+				strListItem.Format("");
+				strListItem = m_ListCtrl_Main.GetItemText(nDelCount,0);
+				if (strListItem == strConfigNum)
+				{
+					m_ListCtrl_Main.DeleteItem(nDelCount);
+				}
+				else
+					nDelCount++;
 			}
-			else
-				nDelCount++;
+			m_ListLogDlg.AddListLog("Delete Config :" + strConfigNum);
 		}
-
-		nDelCount = 0;
-		int nItemCount = m_ListCtrl_Main.GetItemCount();
-		for (int i=0 ; i < nItemCount; i++)
-		{
-			CString strListItem;
-			strListItem.Format("");
-			strListItem = m_ListCtrl_Main.GetItemText(nDelCount,0);
-			if (strListItem == strConfigNum)
-			{
-				//m_ListCtrl_Main.DeleteItem(i);
-				m_ListCtrl_Main.DeleteItem(nDelCount);
-			}
-			else
-				nDelCount++;
-		}
-	}	
+	}		
 }
 
 BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)

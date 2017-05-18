@@ -56,8 +56,6 @@ private:
 	ListLogTab m_ListLogDlg;
 	FailItem m_FailItemDlg;
 	DataController m_TotalData;
-	std::vector<CString> m_vFileVector;
-	std::vector<CString> m_vDirVector;
 	CWnd* m_pwndShow;
 	Config_Select_Dlg m_ConfigSelectDlg;
 
