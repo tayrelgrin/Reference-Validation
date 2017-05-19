@@ -80,7 +80,6 @@ END_MESSAGE_MAP()
 
 BOOL CData_ValidationDlg::OnInitDialog()
 {
-	//AfxSetAllocStop(11277);
 	CDialogEx::OnInitDialog();
 
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
@@ -205,6 +204,12 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			AfxMessageBox("No Reference!\nChoose Reference ", MB_OK);
 			break;
 		}
+
+		std::vector<CString> vValueFileList;
+		m_TotalData.LoadXMLFileListInValue();
+		m_TotalData.GetValueXMLFileList(vValueFileList);
+		m_ConfigSelectDlg.SetValueFileList(vValueFileList);
+		
 
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{

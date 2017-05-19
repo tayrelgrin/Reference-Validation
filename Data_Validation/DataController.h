@@ -30,9 +30,9 @@ public:
 	void AddNewConfigData(std::vector<CString> inData);
 	BOOL Validation();
 	void AddRootPath(CString inData);
-	
+	void GetValueXMLFileList(std::vector<CString>& outData);
 private:
-	std::vector<CString> m_vConfigName;
+	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
 	CList<ConfigType*> m_pListSetting;
 	CList<ConfigType*> m_pListTargetRefConfig;
@@ -41,4 +41,5 @@ private:
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;
 	std::vector<CString> m_vRootDIr;
+	
 };

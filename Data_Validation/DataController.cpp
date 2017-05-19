@@ -177,7 +177,7 @@ void DataController::LoadXMLFileListInValue()
 	CString strEXEDirectory;
 	strEXEDirectory.Format("");
 
-	m_vConfigName.clear();
+	m_vValueFileList.clear();
 
 	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
 
@@ -200,7 +200,7 @@ void DataController::LoadXMLFileListInValue()
 
 		CString strComb = strPrj + '_'+ strBuild + '_' + strConfig + '_' + strDOE;
 
-		m_vConfigName.push_back(strComb);
+		m_vValueFileList.push_back(strComb);
 	}
 }
 
@@ -466,3 +466,10 @@ void DataController::InitAllData()
 	}
 }
 
+
+void DataController::GetValueXMLFileList(std::vector<CString>& outData)
+{
+	outData.clear();
+
+	outData.assign(m_vValueFileList.begin(), m_vValueFileList.end());
+}
