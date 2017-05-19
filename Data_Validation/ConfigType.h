@@ -15,14 +15,14 @@ public:
 	void SetBuildNum(CString inData);
 	void SetConfigNum(CString inData);
 	void SetDOE(CString inData);
-	void AddNewTest(std::vector<CString> inBaseFile, int inNInput = 2);
+	void AddNewTest(std::vector<CString> invPath,int inNInput = 2);
 	void INIFileReadLine(std::vector<CString> invPath);
 	CString GetEXEDirectoryPath();
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitBaseInfoList();
-	
+	void InitList();
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

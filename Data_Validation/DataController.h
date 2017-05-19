@@ -30,6 +30,7 @@ public:
 	void AddNewConfigData(std::vector<CString> inData);
 	BOOL Validation();
 	void AddRootPath(CString inData);
+	
 private:
 	std::vector<CString> m_vConfigName;
 	CList<ConfigType*> m_pListConfig;

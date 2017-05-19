@@ -9,6 +9,7 @@ DataController::DataController(void)
 
 DataController::~DataController(void)
 {
+	InitAllData();
 }
 
 bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CString>& vTestDirPath)
@@ -386,6 +387,7 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 	ConfigType* m_pTargetRef = new ConfigType;
 
 	m_pTargetRef->AddNewTest(inData);
+
 	m_pListTargetRefConfig.AddTail(m_pTargetRef);
 }
 
@@ -400,3 +402,67 @@ void DataController::AddRootPath(CString inData)
 {
 	m_vRootDIr.push_back(inData);
 }
+
+void DataController::InitAllData()
+{
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListConfig.GetHeadPosition();
+
+	while(pPos && m_pListConfig.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		ConfigType* temp = m_pListConfig.GetNext(pPos);
+		delete temp;
+		m_pListConfig.RemoveAt(pTemp);
+	}
+
+	pTemp = NULL;
+	pPos = m_pListSetting.GetHeadPosition();
+
+	while(pPos && m_pListSetting.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		ConfigType* temp = m_pListSetting.GetNext(pPos);
+		delete temp;
+		m_pListSetting.RemoveAt(pTemp);
+	}
+
+	pTemp = NULL;
+	pPos = m_pListTargetRefConfig.GetHeadPosition();
+
+	while(pPos && m_pListTargetRefConfig.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		ConfigType* temp = m_pListTargetRefConfig.GetNext(pPos);
+		delete temp;
+		m_pListTargetRefConfig.RemoveAt(pTemp);
+	}
+
+	pTemp = NULL;
+	pPos = m_pListBaseInfo.GetHeadPosition();
+
+	while(pPos && m_pListBaseInfo.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		BasicData* temp = m_pListBaseInfo.GetNext(pPos);
+		delete temp;
+		m_pListBaseInfo.RemoveAt(pTemp);
+	}
+
+	pTemp = NULL;
+	pPos = m_pListDirrentItems.GetHeadPosition();
+
+	while(pPos && m_pListDirrentItems.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		DifferentItem* temp = m_pListDirrentItems.GetNext(pPos);
+		delete temp;
+		m_pListDirrentItems.RemoveAt(pTemp);
+	}
+}
+

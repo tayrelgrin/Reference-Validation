@@ -80,6 +80,7 @@ END_MESSAGE_MAP()
 
 BOOL CData_ValidationDlg::OnInitDialog()
 {
+	//AfxSetAllocStop(11277);
 	CDialogEx::OnInitDialog();
 
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
@@ -194,10 +195,6 @@ HCURSOR CData_ValidationDlg::OnQueryDragIcon()
 void CData_ValidationDlg::OnBnClickedButtonStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_ButtonStop.EnableWindow(TRUE);
-	m_ButtonStop.ShowWindow(TRUE);
-	m_ButtonStart.EnableWindow(FALSE);
-	m_ButtonStart.ShowWindow(FALSE);
 
 	int nIndex = m_TreeMain.GetCount();
 
@@ -223,6 +220,11 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			// 마우스 wait end
 			EndWaitCursor();
+
+			m_ButtonStop.EnableWindow(TRUE);
+			m_ButtonStop.ShowWindow(TRUE);
+			m_ButtonStart.EnableWindow(FALSE);
+			m_ButtonStart.ShowWindow(FALSE);
 		}
 	}while(false);	
 }
@@ -231,14 +233,17 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 void CData_ValidationDlg::OnBnClickedButtonStop()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	m_ButtonStop.EnableWindow(FALSE);
-	m_ButtonStop.ShowWindow(FALSE);
-	m_ButtonStart.EnableWindow(TRUE);
-	m_ButtonStart.ShowWindow(TRUE);
 
 	if (AfxMessageBox("Stop the validation?",MB_OKCANCEL)==1)
 	{
 		m_ListLogDlg.AddListLog("Stop Reference Validation");
+
+		m_TotalData.InitAllData();
+
+		m_ButtonStop.EnableWindow(FALSE);
+		m_ButtonStop.ShowWindow(FALSE);
+		m_ButtonStart.EnableWindow(TRUE);
+		m_ButtonStart.ShowWindow(TRUE);
 	}	
 }
 
