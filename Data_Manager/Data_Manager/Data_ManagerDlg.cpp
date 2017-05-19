@@ -557,9 +557,9 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 					nIndexTemp = strFileName.ReverseFind('.');
 					strConfig = strFileName.Left(nIndexTemp);
 
-					CString strTemp;
-					GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemp))), 255);
-					strResult.Format("%s%s",strTemp, strConfig);
+					CString strTemporary;
+					GetDlgItemText(IDC_STATIC_LOAD, (LPSTR(LPCTSTR(strTemporary))), 255);
+					strResult.Format("%s%s",strTemporary, strConfig);
 					LoadSettingTextChange(strResult,true);
 
 					m_bModify = true;

@@ -46,7 +46,7 @@ void ConfigDMData::InitListAndVectors()
 	}
 }
 
-void ConfigDMData::RefNameParsing(static CString instrData)
+void ConfigDMData::RefNameParsing(CString instrData)
 {
 	CString strProject, strConfig, strDOE, strTest;
 	strProject.Format("");
@@ -181,7 +181,7 @@ void ConfigDMData::RemoveRootPathInVector(const std::vector<CString> invData, st
 	}
 }
 
-void ConfigDMData::GetTestNameFromDirVector(static std::vector<CString> invData, std::vector<CString>& outvData)
+void ConfigDMData::GetTestNameFromDirVector(std::vector<CString> invData, std::vector<CString>& outvData)
 {
 	for (INT i= 0 ; i<invData.size(); i++)
 	{

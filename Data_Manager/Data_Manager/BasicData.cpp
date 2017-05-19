@@ -156,20 +156,3 @@ void BasicData::writeDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEle
 	Element->SetAttribute("Value",		m_strValue);
 }
 
-//////////////////////////////////////////////////////////////////////////
-// Name     : writeDataToFile
-// Function : Write Item to File
-// pre		: none
-// return	: none
-//////////////////////////////////////////////////////////////////////////
-void BasicData::readDataFromFile(static CString inFilePath)
-{
-	CStdioFile file;
-	file.Open(inFilePath, CFile::modeRead | CFile::typeText);
-
-	CString temp;
-	temp.Format("");
-	file.ReadString(temp);
-
-	file.Close();
-}

@@ -104,7 +104,7 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 	vFilePath.clear();
 }
 
-void TestType::GetFilePathInDir(static CString inPath, std::vector<CString>& outvData)
+void TestType::GetFilePathInDir(CString inPath, std::vector<CString>& outvData)
 {
 	CFileFind cFinder;
 

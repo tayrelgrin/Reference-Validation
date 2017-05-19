@@ -190,7 +190,7 @@ bool FileType::AddNewData(BasicData* inData)
 }
 
 
-void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& outData)
+void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
 {
 	CStdioFile sourceFile;
 	CString strLine;

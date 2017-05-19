@@ -25,7 +25,6 @@ public:
 	void getData(BasicData& outData);
 	bool operator==(const BasicData& inData);
 	void writeDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
-	void readDataFromFile(static CString inFilePath);
 private:
 	CString m_strSection;
 	CString m_strItem;
