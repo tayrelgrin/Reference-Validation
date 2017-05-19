@@ -64,18 +64,52 @@ void FileType::AddNewData(CString inData, int inNInput)
 	bool bFlag = false;
 	INIFileReadByLine(inData, vtemp);
 	BasicData* cNewData = NULL;
+	CString strTemp;
 	strSection.Format("");
 	strItem.Format("");
 	strValue.Format("");
+	strTemp.Format("");
+	CString m_strBasicLoadTxt = "Load Reference Setting :";
 
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
-		CString strTemp = vtemp[i];
-		if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
+		strTemp = vtemp[i];
+		if (strTemp.Find('/') != -1)
+		{
+			if (cNewData==NULL)
+				cNewData = new BasicData();
+
+			AfxExtractSubString(strItem,		strTemp, 0, '=');
+			if(inNInput!=2)
+			{
+				strValue.Format(_T("%d"), inNInput);
+			}
+			else
+				AfxExtractSubString(strValue,	strTemp, 1, '=');
+
+			if(strSection == m_strBasicLoadTxt)
+				strSection.Format("");
+			if (strValue == m_strBasicLoadTxt)
+				strValue.Format("");
+			if (strItem == m_strBasicLoadTxt)
+				strItem.Format("");
+
+			cNewData->setSection(strSection);
+			cNewData->setItem(strItem);
+			cNewData->setValue(strValue);
+		}
+		else if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{
 			if(cNewData==NULL)
 				cNewData = new BasicData();
 			strSection = strTemp;
+			cNewData->setSection(strTemp);
+			bFlag = true;
+		}
+		else if (strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == true)
+		{
+			m_pDataList.AddTail(cNewData);
+			cNewData = new BasicData();
 			cNewData->setSection(strTemp);
 			bFlag = true;
 		}
@@ -91,6 +125,13 @@ void FileType::AddNewData(CString inData, int inNInput)
 			}
 			else
 				AfxExtractSubString(strValue,	strTemp, 1, '=');
+
+			if(strSection == m_strBasicLoadTxt)
+				strSection.Format("");
+			if (strValue == m_strBasicLoadTxt)
+				strValue.Format("");
+			if (strItem == m_strBasicLoadTxt)
+				strItem.Format("");
 
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
@@ -159,15 +200,16 @@ void FileType::INIFileReadByLine(static CString inPath, std::vector<CString>& ou
 		return;
 	}
  
-	while(TRUE) {			
+	while(TRUE) {
 		BOOL bIsNotEOL = sourceFile.ReadString(strLine);
-		if(strLine!="")	// 공란 제거
-			outData.push_back(strLine);
 		if (strLine.GetLength() > 127)
 		{
 			bIsNotEOL = FALSE;
 		}
 		if(!bIsNotEOL) break;
+
+		if(strLine!="")	// 공란 제거
+			outData.push_back(strLine);		
 	}
 
 	sourceFile.Close();

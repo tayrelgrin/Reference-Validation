@@ -251,6 +251,9 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 	CString strIndex8th;
 	strIndex8th.Format("");
 	strTestName.Format("");
+	CString m_strBasicLoadTxt;
+	m_strBasicLoadTxt.Format("Load Reference Setting :");
+
 	AddCommonBaseFile(inBaseFile);
 	for (int i = 0; i<m_vTestDirPath.size(); i++)
 	{
@@ -265,6 +268,13 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 		AfxExtractSubString(strIndex8th,strDir,7,'_');
 		AfxExtractSubString(strIndex9th,strDir,8,'_');
 
+		if(strTestName == m_strBasicLoadTxt)
+			strTestName.Format("");
+		if (strIndex8th == m_strBasicLoadTxt)
+			strIndex8th.Format("");
+		if (strIndex9th == m_strBasicLoadTxt)
+			strIndex9th.Format("");
+
 		if (strIndex9th=="" && strIndex8th != "")
 		{
 			if(strIndex8th.Find('-') != -1)
@@ -276,12 +286,16 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 			strTestName = strIndex9th + "\\" + strTestName;
 		}
 
-		cAddData->SetTestName(strTestName);
-		cAddData->AddNewTest(m_vTestDirPath[i],m_vBaseFiles, inNInput);
-		
-		m_pListTestType.AddTail(cAddData);
-	}
-	
+		if(strTestName!="")
+		{
+			cAddData->SetTestName(strTestName);
+			cAddData->AddNewTest(m_vTestDirPath[i],m_vBaseFiles, inNInput);
+
+			m_pListTestType.AddTail(cAddData);
+		}
+		else
+			delete cAddData;
+	}	
 }
 
 void ConfigDMData::GetFilePathInDir(std::vector<CString> invPath, std::vector<CString>& outvData)

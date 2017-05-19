@@ -44,29 +44,29 @@ void InformationManager::InitAllData()
 
 void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 {
-	std::vector<CString> vTest;
-	inNewData->GetTestList(vTest);
+// 	std::vector<CString> vTest;
+// 	inNewData->GetTestList(vTest);
 	inNewData->AddNewTest(m_vBasicFile);
 
 	m_listConfigs.AddTail(inNewData);
-
-	vTest.clear();
+// 
+// 	vTest.clear();
 }
 
 void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
 {
-	std::vector<CString> vTest;
-	inNewData->GetTestList(vTest);
+// 	std::vector<CString> vTest;
+// 	inNewData->GetTestList(vTest);
 	int nInput = 0;
 	inNewData->AddNewTest(m_vBasicFile, nInput);
 
 	m_listSetting.AddTail(inNewData);
 
-	for(int i = 0; i<vTest.size(); i++)
-	{
-		vTest.erase(vTest.begin()+i);
-	}
-	vTest.clear();
+// 	for(int i = 0; i<vTest.size(); i++)
+// 	{
+// 		vTest.erase(vTest.begin()+i);
+// 	}
+// 	vTest.clear();
 }
 
 

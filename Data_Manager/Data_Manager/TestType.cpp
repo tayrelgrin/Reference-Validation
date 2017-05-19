@@ -71,7 +71,8 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 	for (int i = 0; i< vFilePath.size(); i++)
 	{
 		FileType* cNewFile = new FileType();				// 객체 생성
-		CString strFilePath = vFilePath[i];
+		CString strFilePath;
+		strFilePath.Format("%s",vFilePath[i] );
 		int nIndex = strFilePath.ReverseFind('\\');			// 파일 이름 인덱스
 		
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
