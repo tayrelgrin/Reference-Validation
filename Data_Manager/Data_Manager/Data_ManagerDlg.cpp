@@ -629,7 +629,7 @@ void CData_ManagerDlg::OnBnClickedButtonDelete()
 			pSetting->InitListAndVectors();
 
 			m_cValueData.LoadXMLFileListInValue();
-
+			m_cValueData.InitAllData();
 			m_cValueData.GetConfigNameList(m_vConfigName);
 			AddRefinfoToListBox();
 		}
