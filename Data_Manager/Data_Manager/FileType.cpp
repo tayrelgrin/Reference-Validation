@@ -157,6 +157,8 @@ void FileType::AddNewData(CString inData, int inNInput)
 			}
 		}	
 	}
+	if(cNewData != NULL)
+		m_pDataList.AddTail(cNewData);
 
 	vtemp.clear();
 }

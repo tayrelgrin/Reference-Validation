@@ -67,10 +67,16 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 	bool bInputResult = false;
 
 	GetFilePathInDir(inPath, vFilePath);
+	FileType* cNewFile = NULL;
 
 	for (int i = 0; i< vFilePath.size(); i++)
 	{
-		FileType* cNewFile = new FileType();				// 按眉 积己
+		if (cNewFile == NULL)
+		{
+			cNewFile = new FileType();// 按眉 积己
+			bInputResult = false;
+		}
+						
 		CString strFilePath;
 		strFilePath.Format("%s",vFilePath[i] );
 		int nIndex = strFilePath.ReverseFind('\\');			// 颇老 捞抚 牢郸胶
@@ -85,6 +91,7 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 				if(cNewFile->GetFileName().Find(invBasicFile[j]) != -1)
 				{
 					m_pFIleList.AddTail(cNewFile);
+					cNewFile = NULL;
 					bInputResult = true;
 					break;
 				}
@@ -93,11 +100,13 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 		else
 		{
 			m_pFIleList.AddTail(cNewFile);
+			cNewFile = NULL;
 			bInputResult = true;
 		}
 		if (!bInputResult)
 		{
 			delete cNewFile;
+			cNewFile = NULL;
 		}
 	}
 

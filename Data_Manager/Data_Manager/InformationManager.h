@@ -18,7 +18,6 @@ public:
 	void LoadXMLValueFileList(CString inData);
 	void LoadXMLSettingFileList(CString inData);
 	void SaveSettingToFile();
-	void LoadSettingFromFile();
 	void LoadBaseFileList();
 	void ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE);
 	void GetConfigNameList(std::vector<CString>& outvData);

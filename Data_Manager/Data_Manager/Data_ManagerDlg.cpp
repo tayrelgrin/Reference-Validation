@@ -141,7 +141,6 @@ BOOL CData_ManagerDlg::OnInitDialog()
 	m_cBasicData = new FileType;
 
 	m_strBasicLoadTxt = "Load Reference Setting :";
-/*	AfxSetAllocStop(98269);*/
 	m_bIsAllCheck = false;
 	InitMainList();
 	MakeDataDirectory();
