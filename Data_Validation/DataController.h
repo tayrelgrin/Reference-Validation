@@ -10,8 +10,8 @@ public:
 	~DataController(void);
 	void LoadXMLFileListInValue();
 	void LoadXMLFileListInSetting();
-	void LoadXMLValueFileList(CString inData);
-	void LoadXMLSettingFileList(CString inData);
+	void LoadXMLValueFile(CString inData);
+	void LoadXMLSettingFile(CString inData);
 	void LoadSettingFromFile();
 	void InitAllData();
 	bool CheckBaseInfoInAllData(CString instrPath,std::vector<CString>& vTestDirPath);
@@ -28,15 +28,17 @@ public:
 	void GetTestDirectoryPath(std::vector<CString>& outvData);
 	void GetFilePath(std::vector<CString>& outvData);
 	void AddNewConfigData(std::vector<CString> inData);
-	BOOL Validation();
+	BOOL Validation(CString inData);
 	void AddRootPath(CString inData);
 	void GetValueXMLFileList(std::vector<CString>& outData);
+	void LoadXMLDataFiles(CString inData);
+	CString GetEXEDirectoryPath();
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
 	CList<ConfigType*> m_pListSetting;
 	CList<ConfigType*> m_pListTargetRefConfig;
-	CList<BasicData*>  m_pListBaseInfo;
+	//CList<BasicData*>  m_pListBaseInfo;
 	CList<DifferentItem*> m_pListDirrentItems;
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;

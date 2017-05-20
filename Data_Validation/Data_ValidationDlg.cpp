@@ -205,31 +205,47 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			break;
 		}
 
+	
 		std::vector<CString> vValueFileList;
+		m_ListLogDlg.AddListLog("Load File list in Value Directory");
 		m_TotalData.LoadXMLFileListInValue();
+
 		m_TotalData.GetValueXMLFileList(vValueFileList);
 		m_ConfigSelectDlg.SetValueFileList(vValueFileList);
-		
 
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{
 			// 마우스 wait start
 			BeginWaitCursor();
-			// m_ConfigSelectDlg에서 값들 가져오기
-			// 조건문 : 값들이 다 있을 경우 수행
-
-			m_ListLogDlg.AddListLog("Start Reference Validation");
-
-			// Validation start
-			m_TotalData.Validation();
-
-			// 마우스 wait end
-			EndWaitCursor();
 
 			m_ButtonStop.EnableWindow(TRUE);
 			m_ButtonStop.ShowWindow(TRUE);
 			m_ButtonStart.EnableWindow(FALSE);
 			m_ButtonStart.ShowWindow(FALSE);
+
+			CString strPrj		= m_ConfigSelectDlg.GetProject();
+			CString strBuild	= m_ConfigSelectDlg.GetBuild();
+			CString strConfig	= m_ConfigSelectDlg.GetConfig();
+			CString strDOE		= m_ConfigSelectDlg.GetDOE();
+
+			CString strConfigName;
+			strConfigName.Format("%s-%s-%s-%s",strPrj,strBuild,strConfig,strDOE);
+			m_ListLogDlg.AddListLog(strConfigName);
+
+			m_ListLogDlg.AddListLog("Start Reference Validation");
+
+			// Validation start
+			m_TotalData.Validation(strConfigName);
+
+			m_ListLogDlg.AddListLog("Reference Validation is done");
+
+			m_ButtonStop.EnableWindow(FALSE);
+			m_ButtonStop.ShowWindow(FALSE);
+			m_ButtonStart.EnableWindow(TRUE);
+			m_ButtonStart.ShowWindow(TRUE);
+
+			// 마우스 wait end
+			EndWaitCursor();
 		}
 	}while(false);	
 }

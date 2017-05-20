@@ -391,11 +391,65 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 	m_pListTargetRefConfig.AddTail(m_pTargetRef);
 }
 
-BOOL DataController::Validation()
+BOOL DataController::Validation(CString inData)
 {
+	// Read Target Reference 
 	ReadReference();
 
+	// Read Base Reference
+	LoadXMLDataFiles(inData);
+
 	return TRUE;
+}
+
+void DataController::LoadXMLDataFiles(CString inData)
+{
+	ConfigType* pAddValue	= new ConfigType;
+	ConfigType* pAddSetting = new ConfigType;
+
+	CString strValuePath;
+	CString strSettingPath;
+	CString strEXEDirectory;
+	
+	CString strPrj, strBuild, strConfig, strDOE;
+
+	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
+
+	strEXEDirectory = GetEXEDirectoryPath();
+	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", strPrj, "\\", strBuild,"-", strConfig, "-", strDOE,".xml");
+	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", strPrj, "-", strBuild, "-", strConfig, "-", strDOE,".xml");
+
+	pAddValue->LoadDataFiles(strValuePath);
+	pAddSetting->LoadDataFiles(strSettingPath);
+
+	pAddValue->SetProject(strPrj);
+	pAddValue->SetBuildNum(strBuild);
+	pAddValue->SetConfigNum(strConfig);
+	pAddValue->SetDOE(strDOE);
+
+	pAddSetting->SetProject(strPrj);
+	pAddSetting->SetBuildNum(strBuild);
+	pAddSetting->SetConfigNum(strConfig);
+	pAddSetting->SetDOE(strDOE);
+
+	m_pListConfig.AddTail(pAddValue);
+	m_pListSetting.AddTail(pAddSetting);
+}
+
+CString DataController::GetEXEDirectoryPath()
+{
+	CString strDirecPath;
+	TCHAR path[_MAX_PATH];
+
+	GetModuleFileName(NULL, path, sizeof path);
+
+	strDirecPath = path;
+
+	int i = strDirecPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
+
+	strDirecPath = strDirecPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
+
+	return strDirecPath;
 }
 
 void DataController::AddRootPath(CString inData)
@@ -441,18 +495,7 @@ void DataController::InitAllData()
 		m_pListTargetRefConfig.RemoveAt(pTemp);
 	}
 
-	pTemp = NULL;
-	pPos = m_pListBaseInfo.GetHeadPosition();
-
-	while(pPos && m_pListBaseInfo.GetSize()>0)
-	{
-		pTemp = pPos;
-
-		BasicData* temp = m_pListBaseInfo.GetNext(pPos);
-		delete temp;
-		m_pListBaseInfo.RemoveAt(pTemp);
-	}
-
+	
 	pTemp = NULL;
 	pPos = m_pListDirrentItems.GetHeadPosition();
 

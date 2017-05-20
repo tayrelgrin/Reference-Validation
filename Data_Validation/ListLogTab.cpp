@@ -51,4 +51,7 @@ void ListLogTab::AddListLog(CString inData)
 	CString strListLog;
 	strListLog.Format("%02d.%02d, %02d:%02d:%02d, %s", cTimer.GetMonth(),cTimer.GetDay(), cTimer.GetHour(), cTimer.GetMinute(), cTimer.GetSecond(), inData);
 	m_listLogBox.AddString(strListLog);
+
+	int nCount = m_listLogBox.GetCount();
+	m_listLogBox.SetCurSel(nCount-1);
 }

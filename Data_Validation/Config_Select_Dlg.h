@@ -25,6 +25,10 @@ public:
 	void SetValueFileList(std::vector<CString> inValueFiles);
 	void AddPrjToCombo();
 	void FindStringInVector(std::vector<CString> invData, CString inTarget, std::vector<CString>& outvData);
+	CString GetProject();
+	CString GetBuild();
+	CString GetConfig();
+	CString GetDOE();
 private:
 	CString m_strProject;
 	CString m_strBuild;

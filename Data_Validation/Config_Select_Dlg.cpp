@@ -251,3 +251,21 @@ void Config_Select_Dlg::OnBnClickedOk()
 // 	}
 
 }
+
+
+CString Config_Select_Dlg::GetProject()
+{
+	return m_strProject;
+}
+CString Config_Select_Dlg::GetBuild()
+{
+	return m_strBuild;
+}
+CString Config_Select_Dlg::GetConfig()
+{
+	return m_strConfig;
+}
+CString Config_Select_Dlg::GetDOE()
+{
+	return m_strDOE;
+}
