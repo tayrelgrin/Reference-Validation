@@ -23,7 +23,12 @@ public:
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitList();
 	void InitListAndVectors();
-	BOOL ConfigCompare(ConfigType* inTarget);
+	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail);
+	void GetDataList(CList<TestType*>& outData);
+	CString GetProject(){return m_strPrj;};
+	CString GetBuildNum(){return m_strBuildNum;};
+	CString GetConfigNum(){return m_strConfigNum;};
+	CString GetDOE(){return m_strDOE;};
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

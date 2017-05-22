@@ -156,3 +156,18 @@ void BasicData::writeDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLEle
 	Element->SetAttribute("Value",		m_strValue);
 }
 
+//////////////////////////////////////////////////////////////////////////
+// Name     : operator==
+// Function : compare inData and this data
+// pre		: none
+// return	: if same data False or true
+//////////////////////////////////////////////////////////////////////////
+bool BasicData::operator!=(const BasicData& inData)
+{
+	bool bResult =  false;
+
+	if(inData.m_strItem != this->m_strItem || inData.m_strSection != this->m_strSection || inData.m_strValue != this->m_strValue)
+		bResult = true;
+
+	return bResult;
+}

@@ -112,6 +112,7 @@
     <ClInclude Include="DifferentItem.h" />
     <ClInclude Include="FailItem.h" />
     <ClInclude Include="FileType.h" />
+    <ClInclude Include="ListLog.h" />
     <ClInclude Include="ListLogTab.h" />
     <ClInclude Include="LogInDlg.h" />
     <ClInclude Include="Resource.h" />
@@ -130,6 +131,7 @@
     <ClCompile Include="DifferentItem.cpp" />
     <ClCompile Include="FailItem.cpp" />
     <ClCompile Include="FileType.cpp" />
+    <ClCompile Include="ListLog.cpp" />
     <ClCompile Include="ListLogTab.cpp" />
     <ClCompile Include="LogInDlg.cpp" />
     <ClCompile Include="stdafx.cpp">

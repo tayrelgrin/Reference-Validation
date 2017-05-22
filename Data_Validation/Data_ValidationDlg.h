@@ -10,6 +10,7 @@
 #include "ListLogTab.h"
 #include "FailItem.h"
 #include "Config_Select_Dlg.h"
+#include "ListLog.h"
 
 // CData_ValidationDlg 대화 상자
 class CData_ValidationDlg : public CDialogEx
@@ -54,14 +55,16 @@ private:
 	LogInDlg m_LogInDlg;
 	ListLogTab m_ListLogDlg;
 	FailItem m_FailItemDlg;
+	ListLog* m_ListLog;
 	DataController m_TotalData;
 	CWnd* m_pwndShow;
 	Config_Select_Dlg m_ConfigSelectDlg;
-
+	
 public:
 	CTabCtrl m_TabCtrl_Main;
 	CButton m_ButtonStart;
 	CButton m_ButtonStop;
 	CListCtrl m_ListCtrl_Main;
 	CTreeCtrl m_TreeMain;
+	virtual void PostNcDestroy();
 };

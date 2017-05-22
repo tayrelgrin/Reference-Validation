@@ -2,10 +2,9 @@
 #include "DataController.h"
 
 
-DataController::DataController(void)
+DataController::DataController()
 {
 }
-
 
 DataController::~DataController(void)
 {
@@ -206,19 +205,36 @@ void DataController::LoadXMLFileListInValue()
 
 void DataController::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
 {
-	int nIndex = inStr.ReverseFind('\\');
-	CString strFileName = inStr.Mid((nIndex+1));
-	CString strTemp = inStr.Left(nIndex);
+	if (inStr.Find(".xml")!= -1)
+	{
+		int nIndex = inStr.ReverseFind('\\');
+		CString strFileName = inStr.Mid((nIndex+1));
+		CString strTemp = inStr.Left(nIndex);
 
-	AfxExtractSubString(outStrBuild,	strFileName,0,'-');
-	AfxExtractSubString(outStrConfig,	strFileName,1,'-');
-	nIndex = strFileName.Find('-',0);
-	nIndex = strFileName.Find('-',nIndex+1);
-	outStrDOE = strFileName.Mid(nIndex+1);
-	AfxExtractSubString(outStrDOE,		outStrDOE,0,'.');
+		AfxExtractSubString(outStrBuild,	strFileName,0,'-');
+		AfxExtractSubString(outStrConfig,	strFileName,1,'-');
+		nIndex = strFileName.Find('-',0);
+		nIndex = strFileName.Find('-',nIndex+1);
+		outStrDOE = strFileName.Mid(nIndex+1);
+		AfxExtractSubString(outStrDOE,		outStrDOE,0,'.');
 
-	nIndex = strTemp.ReverseFind('\\');
-	outStrPrj = strTemp.Mid(nIndex+1);
+		nIndex = strTemp.ReverseFind('\\');
+		outStrPrj = strTemp.Mid(nIndex+1);
+	}
+	else
+	{
+		int nIndex = inStr.ReverseFind('\\');
+		CString strFileName = inStr.Mid((nIndex+1));
+		CString strTemp = inStr.Left(nIndex);
+
+		AfxExtractSubString(outStrPrj,		strFileName,0,'_');
+		AfxExtractSubString(outStrConfig,	strFileName,4,'_');
+		outStrBuild.Format("%c%c.%c",outStrConfig[0],outStrConfig[1],outStrConfig[2]);
+		
+		AfxExtractSubString(outStrDOE,		strFileName,8,'_');
+		if(outStrDOE=="")
+			outStrDOE = "Main Build";
+	}	
 }
 
 void DataController::GetTestNameFromTestDirNameVector(static std::vector<CString> invData, std::vector<CString>& outvData)
@@ -385,23 +401,36 @@ void DataController::GetFilePath(std::vector<CString>& outvData)
 void DataController::AddNewConfigData(std::vector<CString> inData)
 {
 	ConfigType* m_pTargetRef = new ConfigType;
+	CString strPrj,strBuild,strConfig,strDOE;
+	
+	ParsingBBCD(inData[0],strPrj,strBuild,strConfig,strDOE);
+	m_pTargetRef->SetProject(strPrj);
+	m_pTargetRef->SetBuildNum(strBuild);
+	m_pTargetRef->SetConfigNum(strConfig);
+	m_pTargetRef->SetDOE(strDOE);
 
 	m_pTargetRef->AddNewTest(inData);
 
 	m_pListTargetRefConfig.AddTail(m_pTargetRef);
 }
 
-BOOL DataController::Validation(CString inData, ListLogTab& inListLog)
+BOOL DataController::Validation(CString inData)
 {
 	// Read Target Reference 
-	inListLog.AddListLog("Read Target Reference Strat");
+	m_ListLog->WriteLogFile("Read Target Reference Start");
 	ReadReference();
-	inListLog.AddListLog("Read Target Reference End");
+	m_ListLog->WriteLogFile("Read Target Reference End");
 
 	// Read Base Reference
-	inListLog.AddListLog("Read Base Reference Strat");
+	m_ListLog->WriteLogFile("Read Base Reference Start");
 	LoadXMLDataFiles(inData);
-	inListLog.AddListLog("Read Base Reference End");
+	m_ListLog->WriteLogFile("Read Base Reference End");
+
+	std::vector<CString> vTemp;
+	// Compare
+	m_ListLog->WriteLogFile("======================Compare Reference Start======================");
+	CompareReference(vTemp);
+	m_ListLog->WriteLogFile("======================Compare Reference End======================");
 
 	return TRUE;
 }
@@ -527,17 +556,34 @@ BOOL DataController::CompareReference(std::vector<CString> outResult)
 	BOOL bResult = FALSE;
 	POSITION pBaseRefPos = m_pListConfig.GetHeadPosition();
 	POSITION pTargetRefPos = m_pListTargetRefConfig.GetHeadPosition();
+	CString strTarget, strBase;
+	std::vector<CString> vFailList;
+
 
 	while(pBaseRefPos)
 	{
 		ConfigType* pBaseRef = m_pListConfig.GetNext(pBaseRefPos);
+		strBase.Format("%s : %s_%s_%s_%s","Base Ref", pBaseRef->GetProject(),pBaseRef->GetBuildNum(),pBaseRef->GetConfigNum(),pBaseRef->GetDOE());
+		m_ListLog->WriteLogFile(strBase);
 		while(pTargetRefPos)
 		{
 			ConfigType* pTargetRef = m_pListTargetRefConfig.GetNext(pTargetRefPos);
+			strTarget.Format("%s : %s_%s_%s_%s","Target Ref", pTargetRef->GetProject(),pTargetRef->GetBuildNum(),pTargetRef->GetConfigNum(),pTargetRef->GetDOE());
+			m_ListLog->WriteLogFile(strTarget);
 
-			pTargetRef->ConfigCompare(pBaseRef);
+			pTargetRef->ConfigCompare(pBaseRef, vFailList);
 		}
 	}
 
+	for (int i =0; i < vFailList.size(); i++)
+	{
+		m_ListLog->WriteLogFile(vFailList[i]);
+	}
+
 	return bResult;
+}
+
+void DataController::SetListLog(ListLog* inData)
+{
+	m_ListLog = inData;
 }

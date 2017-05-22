@@ -238,18 +238,17 @@ void Config_Select_Dlg::OnCbnSelchangeComboDoe()
 void Config_Select_Dlg::OnBnClickedOk()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-// 	if(m_strProject != "" && 
-// 		m_strBuild != "" &&
-// 		m_strConfig != "" &&
-// 		m_strDOE != "")
-// 	{
+	if(m_strProject != "" && 
+		m_strBuild != "" &&
+		m_strConfig != "" &&
+		m_strDOE != "")
+	{
 		CDialogEx::OnOK();
-// 	}
-// 	else
-// 	{
-// 		AfxMessageBox("Choose Reference ", MB_OK);
-// 	}
-
+	}
+	else
+	{
+		AfxMessageBox("Choose Reference ", MB_OK);
+	}
 }
 
 

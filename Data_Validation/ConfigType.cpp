@@ -200,9 +200,54 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 }
 
 
-BOOL ConfigType::ConfigCompare(ConfigType* inTarget)
+BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail)
 {
+	CList<TestType*> pListTargetTest;
+
 	// inTarget의 리스트 카피해오기
+	inTarget->GetDataList(pListTargetTest);
+
 	// this list 와 inTarget list 비교 수행
+	POSITION pThisListPos = m_pListTestType.GetHeadPosition();
+	POSITION pTargetListPos = pListTargetTest.GetHeadPosition();
+	TestType* pThis;
+	TestType* pTarget;
+
+	while(pThisListPos)
+	{
+		pThis = m_pListTestType.GetNext(pThisListPos);
+		pTargetListPos = pListTargetTest.GetHeadPosition();
+
+		while (pTargetListPos)
+		{
+			pTarget = pListTargetTest.GetNext(pTargetListPos);
+			CString strTargetName = pTarget->GetTestName();
+			strTargetName.Replace(':','\\');
+			if(pThis->GetTestName()==strTargetName)
+			{
+				CString strTestLog;
+				strTestLog.Format("=====================  %s Compare Start =====================", strTargetName);
+				outFail.push_back(strTestLog);
+				pThis->CompareTest(pTarget, outFail);
+				break;
+			}
+		}
+	}
+	
 	// TestType->Compare 수행
+	return TRUE;
+}
+
+void ConfigType::GetDataList(CList<TestType*>& outData)
+{
+	outData.RemoveAll();
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+
+	TestType* pTemp;
+
+	while(pPos)
+	{
+		pTemp = m_pListTestType.GetNext(pPos);
+		outData.AddTail(pTemp);
+	}
 }

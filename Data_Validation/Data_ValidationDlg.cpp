@@ -108,6 +108,8 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+	
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
 
@@ -133,9 +135,15 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	m_FailItemDlg.SetWindowPos(NULL, 0, 25, rect.Width()-30, rect.Height()-30, SWP_NOZORDER);
 
 	//////////////////////////////////////////////////////////////////////////
-
-	m_ListLogDlg.AddListLog("Load XML File List From Value Directory");
+	
+	CString strEXEPath = m_TotalData.GetEXEDirectoryPath();
+	m_ListLog = new ListLog(strEXEPath, &m_ListLogDlg);
+	m_ListLog->CreateLogFile();
+	m_ListLog->WriteLogFile("Start Validation SW");
+	m_TotalData.SetListLog(m_ListLog);
+	
 	m_TotalData.LoadXMLFileListInValue();
+	m_ListLog->WriteLogFile("Load XML File List From Value Directory");
 
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
@@ -206,7 +214,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 		}
 	
 		std::vector<CString> vValueFileList;
-		m_ListLogDlg.AddListLog("Load File list in Value Directory");
+		m_ListLog->WriteLogFile("Load File list in Value Directory");
 		m_TotalData.LoadXMLFileListInValue();
 
 		m_TotalData.GetValueXMLFileList(vValueFileList);
@@ -228,15 +236,14 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			CString strDOE		= m_ConfigSelectDlg.GetDOE();
 
 			CString strConfigName;
-			strConfigName.Format("%s\\%s-%s-%s",strPrj,strBuild,strConfig,strDOE);
-			m_ListLogDlg.AddListLog(strConfigName);
-
-			m_ListLogDlg.AddListLog("Start Reference Validation");
+			strConfigName.Format("%s\\%s-%s-%s.xml",strPrj,strBuild,strConfig,strDOE);
+			m_ListLog->WriteLogFile(strConfigName);
+			m_ListLog->WriteLogFile("Start Reference Validation");
 
 			// Validation start
-			m_TotalData.Validation(strConfigName, m_ListLogDlg);
+			m_TotalData.Validation(strConfigName);
 
-			m_ListLogDlg.AddListLog("Reference Validation is done");
+			m_ListLog->WriteLogFile("Reference Validation is done");
 
 			m_ButtonStop.EnableWindow(FALSE);
 			m_ButtonStop.ShowWindow(FALSE);
@@ -279,7 +286,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	std::vector<CString> vTestDir;
 	std::vector<CString> vFileNames;
 
-	m_ListLogDlg.AddListLog("Pushed Select Ref Button");
+	m_ListLog->WriteLogFile("Pushed Select Ref Button");
 
 	BrInfo.hwndOwner = GetSafeHwnd();
 	BrInfo.pidlRoot = NULL;
@@ -302,13 +309,13 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 		{
 			// file, directory check
 			m_TotalData.GetDirList(Pathname,vTestDir, vFileNames);
-			m_ListLogDlg.AddListLog(Pathname);
-			m_ListLogDlg.AddListLog("Check Base Info In All Data");
+			m_ListLog->WriteLogFile(Pathname);
+			m_ListLog->WriteLogFile("Check Base Info In All Data");
 
 			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData(Pathname, vTestDir);
 			if(bCheckResult == false)
 			{
-				m_ListLogDlg.AddListLog("Reference Checking Fail!");
+				m_ListLog->WriteLogFile("Reference Checking Fail!");
 				AfxMessageBox("Reference Checking Fail!", MB_OK);
 				vTestDir.clear();
 				vFileNames.clear();
@@ -316,7 +323,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 			else
 			{
 				m_TotalData.AddRootPath(Pathname);
-				m_ListLogDlg.AddListLog("Check Base Info In All Data : PASS");
+				m_ListLog->WriteLogFile("Check Base Info In All Data : PASS");
 				CString strRefName, strTemp;
 				strRefName.Format("");
 				strTemp.Format("");
@@ -334,7 +341,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 					// Add To member vector
 					m_TotalData.AddTestDirectoryPath(vTestDir);
 					m_TotalData.AddFilePath(vFileNames);
-					m_ListLogDlg.AddListLog("Add to Member Vector");
+					m_ListLog->WriteLogFile("Add to Member Vector");
 
 					// Extract Test Name From Dir Vector
 					std::vector<CString> vTestName;
@@ -343,13 +350,13 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 					strConfig.Format("");
 
 					m_TotalData.RemoveRootPathInVector( vTestDir,  vTempName,  Pathname);
-					m_ListLogDlg.AddListLog("Remove Root Path in Directory Vector");
+					m_ListLog->WriteLogFile("Remove Root Path in Directory Vector");
 
 					m_TotalData.GetConfigFromTestDirNameVector(vTempName, strConfig);
-					m_ListLogDlg.AddListLog("Extract Config : " + strConfig );
+					m_ListLog->WriteLogFile("Extract Config : " + strConfig );
 
 					m_TotalData.GetTestNameFromTestDirNameVector(vTempName, vTestName);
-					m_ListLogDlg.AddListLog("Extract Test Name From Directory Name");
+					m_ListLog->WriteLogFile("Extract Test Name From Directory Name");
 
 					// Add To ListControl
 					AddConfigAndTestToListControl(strConfig, vTestName);
@@ -362,7 +369,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 		}
 		else
 		{
-			m_ListLogDlg.AddListLog("Wrong Folder.");
+			m_ListLog->WriteLogFile("Wrong Folder.");
 			MessageBox(_T("Wrong Folder."), _T("lol"), MB_OKCANCEL|MB_ICONASTERISK );
 		}
 	}
@@ -373,7 +380,7 @@ void CData_ValidationDlg::OnBnClickedButtonLogin()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	m_ListLogDlg.AddListLog("Log in");
+	m_ListLog->WriteLogFile("Log in");
 	m_LogInDlg.DoModal();
 }
 
@@ -485,7 +492,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 				else
 					nDelCount++;
 			}
-			m_ListLogDlg.AddListLog("Delete Config :" + strConfigNum);
+			m_ListLog->WriteLogFile("Delete Config :" + strConfigNum);
 		}
 	}		
 }
@@ -538,4 +545,12 @@ void CData_ValidationDlg::CreateProgressBar(int nIndex, int nSubIndex)
 	ProgEntry->Create(PBS_SMOOTH | WS_CHILD | WS_VISIBLE, CRect(left, top, right, bottom), this, 1);
 	ProgEntry->SetRange(0, 100);
 	ProgEntry->SetPos(0);
+}
+
+void CData_ValidationDlg::PostNcDestroy()
+{
+	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	delete m_ListLog;
+
+	CDialogEx::PostNcDestroy();
 }

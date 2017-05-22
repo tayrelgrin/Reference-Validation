@@ -2,14 +2,15 @@
 #include "ConfigType.h"
 #include "DifferentItem.h"
 #include "resource.h"
-#include "ListLogTab.h"
+#include "ListLog.h"
 
 
 class DataController
 {
 public:
-	DataController(void);
+	DataController();
 	~DataController(void);
+	void SetListLog(ListLog* inData);
 	void LoadXMLFileListInValue();
 	void LoadXMLFileListInSetting();
 	void LoadXMLValueFile(CString inData);
@@ -30,7 +31,7 @@ public:
 	void GetTestDirectoryPath(std::vector<CString>& outvData);
 	void GetFilePath(std::vector<CString>& outvData);
 	void AddNewConfigData(std::vector<CString> inData);
-	BOOL Validation(CString inData, ListLogTab& inListLog);
+	BOOL Validation(CString inData);
 	void AddRootPath(CString inData);
 	void GetValueXMLFileList(std::vector<CString>& outData);
 	void LoadXMLDataFiles(CString inData);
@@ -47,5 +48,5 @@ private:
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;
 	std::vector<CString> m_vRootDIr;
-	
+	ListLog* m_ListLog;
 };

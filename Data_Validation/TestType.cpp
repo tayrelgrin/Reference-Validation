@@ -305,3 +305,130 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 		}
 	}
 }
+
+BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
+{
+	BOOL bResult = FALSE;
+	BOOL bFileCount = FALSE;
+
+	//////////////////////////////////////////////////////////////////////////
+	// file name 가져오기
+	//////////////////////////////////////////////////////////////////////////
+	std::vector<CString> vTargetFileName;
+	std::vector<CString> vBaseFileName;
+	CString strTargetRef, strTargetRegister;
+	CString strBaseRef, strBaseRegister;
+	strTargetRef.Format("");
+	strTargetRegister.Format("");
+	strBaseRef.Format("");
+	strBaseRegister.Format("");
+
+	inTarget->GetFileNames(m_strTestName,vTargetFileName);
+	this->GetFileNames(m_strTestName,vBaseFileName);
+
+	//////////////////////////////////////////////////////////////////////////
+	// Ref, Register 파일
+	//////////////////////////////////////////////////////////////////////////
+	for(int i=0; i<vTargetFileName.size(); i++)
+	{
+		if (vTargetFileName[i].Find("_Register") != -1)
+		{
+			CString strRefFile;
+			strRefFile.Format("");
+			strRefFile = vTargetFileName[i];
+			strRefFile.Replace("_Register","");
+
+			strTargetRef = strRefFile;
+			strTargetRegister = vTargetFileName[i];
+			break;
+		}
+	}
+	for(int i=0; i<vBaseFileName.size(); i++)
+	{
+		if (vBaseFileName[i].Find("_Register") != -1)
+		{
+			CString strRefFile;
+			strRefFile.Format("");
+			strRefFile = vBaseFileName[i];
+			strRefFile.Replace("_Register","");
+
+			strBaseRef = strRefFile;
+			strBaseRegister = vBaseFileName[i];
+			break;
+		}
+	}
+
+	int nFilecount = 0;
+
+	for(int i = 0; i < vBaseFileName.size(); i++)
+	{
+		for(int j = 0; j < vTargetFileName.size(); j++)
+		{
+			if(vBaseFileName[i] == vTargetFileName[j])
+			{
+				nFilecount++;
+				break;
+			}
+		}
+	}
+
+	if (nFilecount == vBaseFileName.size() &&
+		nFilecount == vTargetFileName.size())
+	{
+		// File 개수 체크 패스
+		bFileCount = TRUE;
+	}
+	else
+	{
+		bFileCount = FALSE;
+	}
+	//////////////////////////////////////////////////////////////////////////
+	// list copy and compare
+	//////////////////////////////////////////////////////////////////////////
+	
+	CList<FileType*> pListTargetFile;
+
+	inTarget->GetDataList(pListTargetFile);
+
+	POSITION pThisListPos = m_pFIleList.GetHeadPosition();
+	POSITION pTargetListPos = pListTargetFile.GetHeadPosition();
+	FileType* pThis;
+	FileType* pTarget;
+
+	while(pThisListPos)
+	{
+		pThis = m_pFIleList.GetNext(pThisListPos);
+		pTargetListPos = pListTargetFile.GetHeadPosition();
+
+		while (pTargetListPos)
+		{
+			pTarget = pListTargetFile.GetNext(pTargetListPos);
+
+			// if(RefFile )
+			// if (Register)
+			if(pThis->GetFileName()==pTarget->GetFileName())
+			{
+				outFail.push_back(pThis->GetFileName());
+				pThis->CompareFile(pTarget, outFail);
+				break;
+			}
+		}
+	}
+
+	return bResult;
+}
+
+
+void TestType::GetDataList(CList<FileType*>& outData)
+{
+	outData.RemoveAll();
+	POSITION pPos = m_pFIleList.GetHeadPosition();
+
+	FileType* pTemp;
+
+	while(pPos)
+	{
+		pTemp = m_pFIleList.GetNext(pPos);
+		outData.AddTail(pTemp);
+	}
+}

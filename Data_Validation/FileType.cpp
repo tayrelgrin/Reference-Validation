@@ -333,3 +333,58 @@ void FileType::ModifyData(BasicData* inTarget)
 		}
 	}
 }
+
+
+BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
+{
+	CList<BasicData*> pListTargetData;
+
+	inTarget->CopyDataToList(pListTargetData);
+
+	POSITION pThisListPos = m_pDataList.GetHeadPosition();
+	POSITION pTargetListPos = pListTargetData.GetHeadPosition();
+	BasicData* pThis;
+	BasicData* pTarget;
+	bool bFlagSection = false;
+	bool bFlagItem = false;
+
+	while(pThisListPos )
+	{
+		pThis = m_pDataList.GetNext(pThisListPos);		
+		pTargetListPos = pListTargetData.GetHeadPosition();
+		CString strFail;
+
+		while(pTargetListPos)
+		{
+			pTarget = pListTargetData.GetNext(pTargetListPos);
+
+			if (pThis->getSection()==pTarget->getSection())
+			{
+				if (pThis->getItem()==pTarget->getItem())
+				{
+					if (pThis->getValue()!=pTarget->getValue())
+					{
+						strFail.Format("%s : %s %s %s %s : %s","Fail Item",m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
+						outFail.push_back(strFail);
+// 						strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName , pThis->getItem(), pTarget->getItem());
+// 						outFail.push_back(strFail);
+// 						strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName ,pThis->getValue(), pTarget->getValue());
+// 						outFail.push_back(strFail);
+					}
+					bFlagItem = true;
+					break;
+				}
+				bFlagSection = true;
+			}
+		}
+		if (bFlagSection && !bFlagItem)
+		{
+			strFail.Format("%s : %s %s : %s ","Fail Item",m_strFileName , pThis->getSection(),  "Not Exist Item");
+			outFail.push_back(strFail);
+			strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName , pThis->getItem(), "Not Exist Value");
+			outFail.push_back(strFail);
+		}
+	}
+
+	return TRUE;
+}
