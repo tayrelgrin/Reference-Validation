@@ -23,6 +23,7 @@ public:
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 	void ModifyData(CString inTargetFileName, BasicData* inTarget);
 	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
+	BOOL CompareTest(TestType* inTarget);
 private:
 	CList<FileType*> m_pFIleList;
 	CString m_strTestName;

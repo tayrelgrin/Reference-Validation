@@ -391,13 +391,17 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 	m_pListTargetRefConfig.AddTail(m_pTargetRef);
 }
 
-BOOL DataController::Validation(CString inData)
+BOOL DataController::Validation(CString inData, ListLogTab& inListLog)
 {
 	// Read Target Reference 
+	inListLog.AddListLog("Read Target Reference Strat");
 	ReadReference();
+	inListLog.AddListLog("Read Target Reference End");
 
 	// Read Base Reference
+	inListLog.AddListLog("Read Base Reference Strat");
 	LoadXMLDataFiles(inData);
+	inListLog.AddListLog("Read Base Reference End");
 
 	return TRUE;
 }
@@ -515,4 +519,25 @@ void DataController::GetValueXMLFileList(std::vector<CString>& outData)
 	outData.clear();
 
 	outData.assign(m_vValueFileList.begin(), m_vValueFileList.end());
+}
+
+
+BOOL DataController::CompareReference(std::vector<CString> outResult)
+{
+	BOOL bResult = FALSE;
+	POSITION pBaseRefPos = m_pListConfig.GetHeadPosition();
+	POSITION pTargetRefPos = m_pListTargetRefConfig.GetHeadPosition();
+
+	while(pBaseRefPos)
+	{
+		ConfigType* pBaseRef = m_pListConfig.GetNext(pBaseRefPos);
+		while(pTargetRefPos)
+		{
+			ConfigType* pTargetRef = m_pListTargetRefConfig.GetNext(pTargetRefPos);
+
+			pTargetRef->ConfigCompare(pBaseRef);
+		}
+	}
+
+	return bResult;
 }

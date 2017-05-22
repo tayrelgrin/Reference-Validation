@@ -198,3 +198,11 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 		}
 	}
 }
+
+
+BOOL ConfigType::ConfigCompare(ConfigType* inTarget)
+{
+	// inTarget의 리스트 카피해오기
+	// this list 와 inTarget list 비교 수행
+	// TestType->Compare 수행
+}

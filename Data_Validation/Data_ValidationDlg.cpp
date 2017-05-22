@@ -204,7 +204,6 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			AfxMessageBox("No Reference!\nChoose Reference ", MB_OK);
 			break;
 		}
-
 	
 		std::vector<CString> vValueFileList;
 		m_ListLogDlg.AddListLog("Load File list in Value Directory");
@@ -229,13 +228,13 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			CString strDOE		= m_ConfigSelectDlg.GetDOE();
 
 			CString strConfigName;
-			strConfigName.Format("%s-%s-%s-%s",strPrj,strBuild,strConfig,strDOE);
+			strConfigName.Format("%s\\%s-%s-%s",strPrj,strBuild,strConfig,strDOE);
 			m_ListLogDlg.AddListLog(strConfigName);
 
 			m_ListLogDlg.AddListLog("Start Reference Validation");
 
 			// Validation start
-			m_TotalData.Validation(strConfigName);
+			m_TotalData.Validation(strConfigName, m_ListLogDlg);
 
 			m_ListLogDlg.AddListLog("Reference Validation is done");
 

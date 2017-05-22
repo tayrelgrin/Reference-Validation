@@ -1,6 +1,8 @@
 #pragma once
 #include "ConfigType.h"
 #include "DifferentItem.h"
+#include "resource.h"
+#include "ListLogTab.h"
 
 
 class DataController
@@ -28,11 +30,13 @@ public:
 	void GetTestDirectoryPath(std::vector<CString>& outvData);
 	void GetFilePath(std::vector<CString>& outvData);
 	void AddNewConfigData(std::vector<CString> inData);
-	BOOL Validation(CString inData);
+	BOOL Validation(CString inData, ListLogTab& inListLog);
 	void AddRootPath(CString inData);
 	void GetValueXMLFileList(std::vector<CString>& outData);
 	void LoadXMLDataFiles(CString inData);
 	CString GetEXEDirectoryPath();
+	BOOL CompareReference(std::vector<CString> outResult);
+
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;

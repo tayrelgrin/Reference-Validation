@@ -23,6 +23,7 @@ public:
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitList();
 	void InitListAndVectors();
+	BOOL ConfigCompare(ConfigType* inTarget);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;
