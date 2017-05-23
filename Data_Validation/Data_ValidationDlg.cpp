@@ -80,6 +80,7 @@ END_MESSAGE_MAP()
 
 BOOL CData_ValidationDlg::OnInitDialog()
 {
+	//AfxSetAllocStop(200094);
 	CDialogEx::OnInitDialog();
 
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
@@ -263,7 +264,7 @@ void CData_ValidationDlg::OnBnClickedButtonStop()
 
 	if (AfxMessageBox("Stop the validation?",MB_OKCANCEL)==1)
 	{
-		m_ListLogDlg.AddListLog("Stop Reference Validation");
+		m_ListLog->WriteLogFile("Stop Reference Validation");
 
 		m_TotalData.InitAllData();
 
@@ -550,6 +551,8 @@ void CData_ValidationDlg::CreateProgressBar(int nIndex, int nSubIndex)
 void CData_ValidationDlg::PostNcDestroy()
 {
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
+	m_ListLog->WriteLogFile("Validation SW Closed");
+
 	delete m_ListLog;
 
 	CDialogEx::PostNcDestroy();

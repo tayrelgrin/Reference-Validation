@@ -29,6 +29,7 @@ public:
 	CString GetBuildNum(){return m_strBuildNum;};
 	CString GetConfigNum(){return m_strConfigNum;};
 	CString GetDOE(){return m_strDOE;};
+	void SetRootPath(CString inPath);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

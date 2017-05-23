@@ -404,9 +404,19 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
 		{
 			pTarget = pListTargetFile.GetNext(pTargetListPos);
 
-			// if(RefFile )
-			// if (Register)
-			if(pThis->GetFileName()==pTarget->GetFileName())
+			if(strTargetRef.Find(pTarget->GetFileName()) != -1 &&  strBaseRef.Find(pThis->GetFileName()) != -1 )
+			{
+				outFail.push_back(pThis->GetFileName());
+				pThis->CompareFile(pTarget, outFail);
+				break;
+			}
+			else if (strTargetRegister.Find(pTarget->GetFileName()) != -1 &&  strBaseRegister.Find(pThis->GetFileName()) != -1 )
+			{
+				outFail.push_back(pThis->GetFileName());
+				pThis->CompareFile(pTarget, outFail);
+				break;
+			}
+			else if(pThis->GetFileName()==pTarget->GetFileName())
 			{
 				outFail.push_back(pThis->GetFileName());
 				pThis->CompareFile(pTarget, outFail);

@@ -258,6 +258,8 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 
 	if(bFlag)
 		m_pDataList.AddTail(outData);
+	else
+		delete outData;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -353,29 +355,37 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 		pThis = m_pDataList.GetNext(pThisListPos);		
 		pTargetListPos = pListTargetData.GetHeadPosition();
 		CString strFail;
-
+		CString strPreSection;
+		bFlagSection = false;
+		bFlagItem = false;
 		while(pTargetListPos)
 		{
 			pTarget = pListTargetData.GetNext(pTargetListPos);
 
 			if (pThis->getSection()==pTarget->getSection())
 			{
+				strPreSection = pThis->getSection();
 				if (pThis->getItem()==pTarget->getItem())
 				{
 					if (pThis->getValue()!=pTarget->getValue())
 					{
 						strFail.Format("%s : %s %s %s %s : %s","Fail Item",m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
-// 						strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName , pThis->getItem(), pTarget->getItem());
-// 						outFail.push_back(strFail);
-// 						strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName ,pThis->getValue(), pTarget->getValue());
-// 						outFail.push_back(strFail);
 					}
+// 					else if (pThis->getValue()==pTarget->getValue())
+// 					{
+// 						strFail.Format("%s : %s %s %s %s : %s","Pass Item",m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
+// 						outFail.push_back(strFail);
+// 					}
 					bFlagItem = true;
 					break;
 				}
 				bFlagSection = true;
 			}
+// 			if (strPreSection != pTarget->getSection())
+// 			{
+// 				break;
+// 			}
 		}
 		if (bFlagSection && !bFlagItem)
 		{
@@ -383,6 +393,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 			outFail.push_back(strFail);
 			strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName , pThis->getItem(), "Not Exist Value");
 			outFail.push_back(strFail);
+			break;
 		}
 	}
 

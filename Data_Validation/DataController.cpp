@@ -402,12 +402,24 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 {
 	ConfigType* m_pTargetRef = new ConfigType;
 	CString strPrj,strBuild,strConfig,strDOE;
+	CString strDirRootPath;
+	strDirRootPath.Format("");
 	
+	for (int i = 0; i < m_vRootDIr.size(); i++)
+	{
+		if(inData[0].Find(m_vRootDIr[i]) != -1)
+		{
+			strDirRootPath = m_vRootDIr[i];
+			break;
+		}
+	}
+
 	ParsingBBCD(inData[0],strPrj,strBuild,strConfig,strDOE);
 	m_pTargetRef->SetProject(strPrj);
 	m_pTargetRef->SetBuildNum(strBuild);
 	m_pTargetRef->SetConfigNum(strConfig);
 	m_pTargetRef->SetDOE(strDOE);
+	m_pTargetRef->SetRootPath(strDirRootPath);
 
 	m_pTargetRef->AddNewTest(inData);
 
@@ -416,6 +428,8 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 
 BOOL DataController::Validation(CString inData)
 {
+	m_ListLog->WriteLogFile("Init All Lists");
+	InitAllData();
 	// Read Target Reference 
 	m_ListLog->WriteLogFile("Read Target Reference Start");
 	ReadReference();
@@ -432,6 +446,12 @@ BOOL DataController::Validation(CString inData)
 	CompareReference(vTemp);
 	m_ListLog->WriteLogFile("======================Compare Reference End======================");
 
+	// Ref Naming rule checking
+	
+	// CRC 계산
+	
+	// 공동 데이터 확인
+
 	return TRUE;
 }
 
@@ -446,13 +466,16 @@ void DataController::LoadXMLDataFiles(CString inData)
 	
 	CString strPrj, strBuild, strConfig, strDOE;
 
+	m_ListLog->WriteLogFile("ParsingBBCD");
 	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
 
 	strEXEDirectory = GetEXEDirectoryPath();
 	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", strPrj, "\\", strBuild,"-", strConfig, "-", strDOE,".xml");
 	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", strPrj, "-", strBuild, "-", strConfig, "-", strDOE,".xml");
-
+	
+	m_ListLog->WriteLogFile("LoadDataFiles");
 	pAddValue->LoadDataFiles(strValuePath);
+	m_ListLog->WriteLogFile("LoadDataFiles" + strSettingPath);
 	pAddSetting->LoadDataFiles(strSettingPath);
 
 	pAddValue->SetProject(strPrj);
@@ -559,17 +582,19 @@ BOOL DataController::CompareReference(std::vector<CString> outResult)
 	CString strTarget, strBase;
 	std::vector<CString> vFailList;
 
-
 	while(pBaseRefPos)
 	{
 		ConfigType* pBaseRef = m_pListConfig.GetNext(pBaseRefPos);
 		strBase.Format("%s : %s_%s_%s_%s","Base Ref", pBaseRef->GetProject(),pBaseRef->GetBuildNum(),pBaseRef->GetConfigNum(),pBaseRef->GetDOE());
-		m_ListLog->WriteLogFile(strBase);
+		
 		while(pTargetRefPos)
 		{
 			ConfigType* pTargetRef = m_pListTargetRefConfig.GetNext(pTargetRefPos);
 			strTarget.Format("%s : %s_%s_%s_%s","Target Ref", pTargetRef->GetProject(),pTargetRef->GetBuildNum(),pTargetRef->GetConfigNum(),pTargetRef->GetDOE());
-			m_ListLog->WriteLogFile(strTarget);
+			vFailList.push_back("===================================================================");
+			vFailList.push_back(strBase);
+			vFailList.push_back(strTarget);
+			vFailList.push_back("===================================================================");
 
 			pTargetRef->ConfigCompare(pBaseRef, vFailList);
 		}

@@ -33,31 +33,26 @@ CString ConfigType::GetEXEDirectoryPath()
 void ConfigType::AddNewTest(std::vector<CString> invPath, int inNInput)
 {
 	CString strTestName;
-	CString strIndex8th;
-	strIndex8th.Format("");
+
 	strTestName.Format("");
 	for (int i = 0; i<invPath.size(); i++)
 	{
 		TestType* cAddData = new TestType;
-		int nIndex = invPath[i].ReverseFind('\\');
 		CString strDir = invPath[i];
-		strDir = strDir.Mid(nIndex+1);
-		CString strIndex9th;
-		strIndex9th.Format("");
+		CString strTemp;
+		strTemp.Format("%s%c",m_strInputDirPath,'\\');
+		strDir.Replace(strTemp, "");
+		CString strSubDir;
+		strSubDir.Format("");
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
-		AfxExtractSubString(strIndex8th,strDir,7,'_');
-		AfxExtractSubString(strIndex9th,strDir,8,'_');
 
-		if (strIndex9th=="" && strIndex8th != "")
+		if (strDir.Find('\\') != -1)
 		{
-			if(strIndex8th.Find('-') != -1)
-				strIndex9th = strIndex8th;
-		}
-
-		if(strIndex9th != "" && strTestName != "")
-		{
-			strTestName = strIndex9th + "\\" + strTestName;
+			int nIndex = strDir.Find('\\');
+			strSubDir = strDir.Left(nIndex);
+			CString strTemp = strTestName;
+			strTestName.Format("%s\\%s",strSubDir, strTemp);
 		}
 
 		cAddData->SetTestName(strTestName);
@@ -124,6 +119,8 @@ void ConfigType::LoadDataFiles(CString inStrPath)
 	InitListAndVectors();
 
 	SearchXMLData(&xmlDoc);
+
+	xmlDoc.Clear();
 }
 
 
@@ -250,4 +247,10 @@ void ConfigType::GetDataList(CList<TestType*>& outData)
 		pTemp = m_pListTestType.GetNext(pPos);
 		outData.AddTail(pTemp);
 	}
+}
+
+
+void ConfigType::SetRootPath(CString inPath)
+{
+	m_strInputDirPath = inPath;
 }
