@@ -47,6 +47,7 @@ public:
 	void SetBaseInfoList(CList<BasicData*>& outList);
 	void InitBaseInfoList();
 	void ChangeFileName(CString inTestName, CString inNewFileName, CString inTargetFileName);
+	void SetRootPath(CString inPath);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

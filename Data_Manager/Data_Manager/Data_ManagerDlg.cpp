@@ -298,11 +298,13 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 			m_cNewConfigData->SetBuildNum(m_strBuildNum);
 			m_cNewConfigData->SetConfigNum(m_strConfigNum);
 			m_cNewConfigData->SetDOE(m_strDOE);
+			m_cNewConfigData->SetRootPath(m_strRootPath);
 
 			m_cNewSettingData->SetProject(m_strPrj);
 			m_cNewSettingData->SetBuildNum(m_strBuildNum);
 			m_cNewSettingData->SetConfigNum(m_strConfigNum);
 			m_cNewSettingData->SetDOE(m_strDOE);
+			m_cNewSettingData->SetRootPath(m_strRootPath);
 
 			m_cAddNewRefDlg.GetDirList(m_vDirList);
 
@@ -1767,7 +1769,8 @@ bool CData_ManagerDlg::CheckBaseInfoInAllData()
 
 	bool bResult = m_cValueData.CheckBaseInfoInAllData(vDifferentTest);
 
-	CString strErrorMessage = "";
+	CString strErrorMessage;
+	strErrorMessage.Format("");
 
 	for (int i = 0; i < vDifferentTest.size(); i++)
 	{

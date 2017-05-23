@@ -258,32 +258,46 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 	for (int i = 0; i<m_vTestDirPath.size(); i++)
 	{
 		TestType* cAddData = new TestType;
-		int nIndex = m_vTestDirPath[i].ReverseFind('\\');
+
 		CString strDir = m_vTestDirPath[i];
-		strDir = strDir.Mid(nIndex+1);
-		CString strIndex9th;
-		strIndex9th.Format("");
+		CString strTemp;
+		strTemp.Format("%s%c",m_strInputDirPath,'\\');
+		strDir.Replace(strTemp, "");
+
+		//int nIndex = m_vTestDirPath[i].ReverseFind('\\');
+// 		CString strDir = m_vTestDirPath[i];
+// 		strDir = strDir.Mid(nIndex+1);
+		CString strSubDir;
+		strSubDir.Format("");
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
-		AfxExtractSubString(strIndex8th,strDir,7,'_');
-		AfxExtractSubString(strIndex9th,strDir,8,'_');
+// 		AfxExtractSubString(strIndex8th,strDir,7,'_');
+// 		AfxExtractSubString(strIndex9th,strDir,8,'_');
 
 		if(strTestName == m_strBasicLoadTxt)
 			strTestName.Format("");
-		if (strIndex8th == m_strBasicLoadTxt)
-			strIndex8th.Format("");
-		if (strIndex9th == m_strBasicLoadTxt)
-			strIndex9th.Format("");
+// 		if (strIndex8th == m_strBasicLoadTxt)
+// 			strIndex8th.Format("");
+// 		if (strIndex9th == m_strBasicLoadTxt)
+// 			strIndex9th.Format("");
+// 
+// 		if (strIndex9th=="" && strIndex8th != "")
+// 		{
+// 			if(strIndex8th.Find('-') != -1)
+// 				strIndex9th = strIndex8th;
+// 		}
 
-		if (strIndex9th=="" && strIndex8th != "")
+// 		if(strIndex9th != "" && strTestName != "")
+// 		{
+// 			strTestName = strIndex9th + "\\" + strTestName;
+// 		}
+// 		
+		if (strDir.Find('\\') != -1)
 		{
-			if(strIndex8th.Find('-') != -1)
-				strIndex9th = strIndex8th;
-		}
-
-		if(strIndex9th != "" && strTestName != "")
-		{
-			strTestName = strIndex9th + "\\" + strTestName;
+			int nIndex = strDir.Find('\\');
+			strSubDir = strDir.Left(nIndex);
+			CString strTemp = strTestName;
+			strTestName.Format("%s\\%s",strSubDir, strTemp);
 		}
 
 		if(strTestName!="")
@@ -838,4 +852,9 @@ void ConfigDMData::ChangeFileName(CString inTestName, CString inNewFileName, CSt
 			break;
 		}
 	}
+}
+
+void ConfigDMData::SetRootPath(CString inPath)
+{
+	m_strInputDirPath = inPath;
 }
