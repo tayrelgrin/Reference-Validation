@@ -48,10 +48,10 @@ BOOL Config_Select_Dlg::OnInitDialog()
 	CDialogEx::OnInitDialog();
 
 	// TODO:  여기에 추가 초기화 작업을 추가합니다.
-	m_strProject.Format("");
-	m_strBuild.Format("");
-	m_strConfig.Format("");
-	m_strDOE.Format("");
+	m_strProject.Format(_T(""));
+	m_strBuild.Format(_T(""));
+	m_strConfig.Format(_T(""));
+	m_strDOE.Format(_T(""));
 
 	AddPrjToCombo();
 
@@ -94,7 +94,7 @@ void Config_Select_Dlg::OnCbnSelchangeComboPrj()
 	m_cCombo_Config.ResetContent();
 	m_cCombo_DOE.ResetContent();
 
-	m_cCombo_Build.AddString("");
+	m_cCombo_Build.AddString(_T(""));
 	m_cCombo_Build.SetCurSel(0);
 
 	int nIndex = m_cCombo_Prj.GetCurSel();
@@ -141,7 +141,7 @@ void Config_Select_Dlg::OnCbnSelchangeComboBuild()
 	m_cCombo_Config.ResetContent();
 	m_cCombo_DOE.ResetContent();
 
-	m_cCombo_Config.AddString("");
+	m_cCombo_Config.AddString(_T(""));
 	m_cCombo_Config.SetCurSel(0);
 
 	int nIndex = m_cCombo_Build.GetCurSel();
@@ -179,7 +179,7 @@ void Config_Select_Dlg::OnCbnSelchangeComboConfig()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	m_cCombo_DOE.ResetContent();
 
-	m_cCombo_DOE.AddString("");
+	m_cCombo_DOE.AddString(_T(""));
 	m_cCombo_DOE.SetCurSel(0);
 
 	int nIndex = m_cCombo_Prj.GetCurSel();
@@ -247,7 +247,7 @@ void Config_Select_Dlg::OnBnClickedOk()
 	}
 	else
 	{
-		AfxMessageBox("Choose Reference ", MB_OK);
+		AfxMessageBox(_T("Choose Reference "), MB_OK);
 	}
 }
 

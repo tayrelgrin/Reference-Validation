@@ -29,13 +29,13 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 	CString strError;
 	CString strListLog;
 
-	strFileName.Format("");
-	strDirName.Format("");
-	strDirPath.Format("");
-	strRegister.Format("");
-	strRefFile.Format("");
-	strError.Format("");
-	strListLog.Format("");
+	strFileName.Format(_T(""));
+	strDirName.Format(_T(""));
+	strDirPath.Format(_T(""));
+	strRegister.Format(_T(""));
+	strRefFile.Format(_T(""));
+	strError.Format(_T(""));
+	strListLog.Format(_T(""));
 
 	std::vector<bool> vResult;
 
@@ -54,8 +54,8 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 		bool bSpec = false;		
 		bool bDirectory = false;
 
-		strRefFile	= strDirName + ".ini";
-		strRegister = strDirName + "_Register.ini";
+		strRefFile.Format(_T("%s%s"), strDirName, _T(".ini"));
+		strRegister.Format(_T("%s%s"), strDirName, _T( "_Register.ini"));
 		nFileCount = 0;
 
 		while(bSearching)
@@ -74,18 +74,18 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 				if (strFileName == strRefFile)
 				{
 					bRefFile = true;					
-					strListLog.Format("%s%s",strRefFile, ": OK");
+					strListLog.Format(_T("%s%s"),strRefFile, _T(": OK"));
 					//m_ListLogDlg.AddListLog(strListLog);
 				}
 				else if(strFileName == strRegister)
 				{
-					strListLog.Format("%s%s",strRegister, ": OK");
+					strListLog.Format(_T("%s%s"),strRegister, _T(": OK"));
 					//m_ListLogDlg.AddListLog(strListLog);
 					bRegister = true;
 				}
-				else if(strFileName == "Spec.ini")
+				else if(strFileName == _T("Spec.ini"))
 				{
-					strListLog.Format("%s%s",strFileName, ": OK");
+					strListLog.Format(_T("%s%s"),strFileName, _T(": OK"));
 					//m_ListLogDlg.AddListLog(strListLog);
 					bSpec = true;
 				}
@@ -109,7 +109,7 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 			}
 			else
 			{
-				strListLog.Format("%s%s",strFileName, ": Fail");
+				strListLog.Format(_T("%s%s"),strFileName, _T(": Fail"));
 				//m_ListLogDlg.AddListLog(strListLog);
 				vResult.push_back(false);
 			}
@@ -142,8 +142,8 @@ void DataController::GetDirList(CString instrPath, std::vector<CString>& outDirV
 	CString DirName;
 	CString fileName;
 
-	DirName.Format("");
-	fileName.Format("");
+	DirName.Format(_T(""));
+	fileName.Format(_T(""));
 
 	while (bWorking)
 	{
@@ -174,13 +174,13 @@ void DataController::LoadXMLFileListInValue()
 	ConfigType cTempConfig;
 
 	CString strEXEDirectory;
-	strEXEDirectory.Format("");
+	strEXEDirectory.Format(_T(""));
 
 	m_vValueFileList.clear();
 
 	strEXEDirectory = cTempConfig.GetEXEDirectoryPath();
 
-	strEXEDirectory += "\\Data\\Value";
+	strEXEDirectory += _T("\\Data\\Value");
 
 	SetCurrentDirectory(strEXEDirectory); //현재 검색할 디렉터리 설정.
 
@@ -205,7 +205,7 @@ void DataController::LoadXMLFileListInValue()
 
 void DataController::ParsingBBCD(CString inStr, CString& outStrPrj, CString& outStrBuild, CString& outStrConfig, CString& outStrDOE)
 {
-	if (inStr.Find(".xml")!= -1)
+	if (inStr.Find(_T(".xml"))!= -1)
 	{
 		int nIndex = inStr.ReverseFind('\\');
 		CString strFileName = inStr.Mid((nIndex+1));
@@ -229,11 +229,11 @@ void DataController::ParsingBBCD(CString inStr, CString& outStrPrj, CString& out
 
 		AfxExtractSubString(outStrPrj,		strFileName,0,'_');
 		AfxExtractSubString(outStrConfig,	strFileName,4,'_');
-		outStrBuild.Format("%c%c.%c",outStrConfig[0],outStrConfig[1],outStrConfig[2]);
+		outStrBuild.Format(_T("%c%c.%c"),outStrConfig[0],outStrConfig[1],outStrConfig[2]);
 		
 		AfxExtractSubString(outStrDOE,		strFileName,8,'_');
 		if(outStrDOE=="")
-			outStrDOE = "Main Build";
+			outStrDOE = _T("Main Build");
 	}	
 }
 
@@ -244,9 +244,9 @@ void DataController::GetTestNameFromTestDirNameVector(static std::vector<CString
 		CString temp;
 		CString temp1;
 		CString temp2;
-		temp.Format("");
-		temp1.Format("%s", invData[i]);
-		temp2.Format("");
+		temp.Format(_T(""));
+		temp1.Format(_T("%s"), invData[i]);
+		temp2.Format(_T(""));
 
 		if(temp1.Find('\\') == -1)
 		{
@@ -288,8 +288,8 @@ void DataController::GetConfigFromTestDirNameVector(std::vector<CString> invData
 	CString temp;
 	CString temp1;
 
-	temp.Format("");
-	temp1.Format("%s", invData[0]);
+	temp.Format(_T(""));
+	temp1.Format(_T("%s"), invData[0]);
 
 
 	AfxExtractSubString(temp, temp1, 4, '_');
@@ -302,8 +302,8 @@ void DataController::GetConfigFromTestDirNameVector(std::vector<CString> invData
 void DataController::ReadReference()
 {
 	CString strDir, strRootPath;
-	strDir.Format("");
-	strRootPath.Format("");
+	strDir.Format(_T(""));
+	strRootPath.Format(_T(""));
 
 	std::vector<CString> vConfig;
 
@@ -403,7 +403,7 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 	ConfigType* m_pTargetRef = new ConfigType;
 	CString strPrj,strBuild,strConfig,strDOE;
 	CString strDirRootPath;
-	strDirRootPath.Format("");
+	strDirRootPath.Format(_T(""));
 	
 	for (int i = 0; i < m_vRootDIr.size(); i++)
 	{
@@ -428,23 +428,24 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 
 BOOL DataController::Validation(CString inData)
 {
-	m_ListLog->WriteLogFile("Init All Lists");
+	m_ListLog->WriteLogFile(_T("Init All Lists"));
 	InitAllData();
+
 	// Read Target Reference 
-	m_ListLog->WriteLogFile("Read Target Reference Start");
+	m_ListLog->WriteLogFile(_T("Read Target Reference Start"));
 	ReadReference();
-	m_ListLog->WriteLogFile("Read Target Reference End");
+	m_ListLog->WriteLogFile(_T("Read Target Reference End"));
 
 	// Read Base Reference
-	m_ListLog->WriteLogFile("Read Base Reference Start");
+	m_ListLog->WriteLogFile(_T("Read Base Reference Start"));
 	LoadXMLDataFiles(inData);
-	m_ListLog->WriteLogFile("Read Base Reference End");
+	m_ListLog->WriteLogFile(_T("Read Base Reference End"));
 
 	std::vector<CString> vTemp;
 	// Compare
-	m_ListLog->WriteLogFile("======================Compare Reference Start======================");
+	m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
 	CompareReference(vTemp);
-	m_ListLog->WriteLogFile("======================Compare Reference End======================");
+	m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
 	// Ref Naming rule checking
 	
@@ -466,16 +467,19 @@ void DataController::LoadXMLDataFiles(CString inData)
 	
 	CString strPrj, strBuild, strConfig, strDOE;
 
-	m_ListLog->WriteLogFile("ParsingBBCD");
+	m_ListLog->WriteLogFile(_T("ParsingBBCD"));
 	ParsingBBCD(inData, strPrj, strBuild, strConfig, strDOE);
 
 	strEXEDirectory = GetEXEDirectoryPath();
-	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, "\\Data\\Value\\", strPrj, "\\", strBuild,"-", strConfig, "-", strDOE,".xml");
-	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,"\\Data\\Setting\\Setting-", strPrj, "-", strBuild, "-", strConfig, "-", strDOE,".xml");
+	strValuePath.Format(_T("%s%s%s%s%s%s%s%s%s%s"), strEXEDirectory, _T("\\Data\\Value\\"), strPrj, _T("\\"), strBuild,_T("-"), strConfig, _T("-"), strDOE,_T(".xml"));
+	strSettingPath.Format(_T("%s%s%s%s%s%s%s%s%s%s"),strEXEDirectory,_T("\\Data\\Setting\\Setting-"), strPrj, _T("-"), strBuild, _T("-"), strConfig, _T("-"), strDOE,_T(".xml"));
 	
-	m_ListLog->WriteLogFile("LoadDataFiles");
+	m_ListLog->WriteLogFile(_T("Load Data Files"));
+	pAddValue->SetListLog(m_ListLog);
 	pAddValue->LoadDataFiles(strValuePath);
-	m_ListLog->WriteLogFile("LoadDataFiles" + strSettingPath);
+
+	m_ListLog->WriteLogFile(_T("LoadDataFiles") + strSettingPath);
+	pAddSetting->SetListLog(m_ListLog);
 	pAddSetting->LoadDataFiles(strSettingPath);
 
 	pAddValue->SetProject(strPrj);
@@ -585,16 +589,16 @@ BOOL DataController::CompareReference(std::vector<CString> outResult)
 	while(pBaseRefPos)
 	{
 		ConfigType* pBaseRef = m_pListConfig.GetNext(pBaseRefPos);
-		strBase.Format("%s : %s_%s_%s_%s","Base Ref", pBaseRef->GetProject(),pBaseRef->GetBuildNum(),pBaseRef->GetConfigNum(),pBaseRef->GetDOE());
+		strBase.Format(_T("%s : %s_%s_%s_%s"),_T("Base Ref"), pBaseRef->GetProject(),pBaseRef->GetBuildNum(),pBaseRef->GetConfigNum(),pBaseRef->GetDOE());
 		
 		while(pTargetRefPos)
 		{
 			ConfigType* pTargetRef = m_pListTargetRefConfig.GetNext(pTargetRefPos);
-			strTarget.Format("%s : %s_%s_%s_%s","Target Ref", pTargetRef->GetProject(),pTargetRef->GetBuildNum(),pTargetRef->GetConfigNum(),pTargetRef->GetDOE());
-			vFailList.push_back("===================================================================");
+			strTarget.Format(_T("%s : %s_%s_%s_%s"),_T("Target Ref"), pTargetRef->GetProject(),pTargetRef->GetBuildNum(),pTargetRef->GetConfigNum(),pTargetRef->GetDOE());
+			vFailList.push_back(_T("==================================================================="));
 			vFailList.push_back(strBase);
 			vFailList.push_back(strTarget);
-			vFailList.push_back("===================================================================");
+			vFailList.push_back(_T("==================================================================="));
 
 			pTargetRef->ConfigCompare(pBaseRef, vFailList);
 		}

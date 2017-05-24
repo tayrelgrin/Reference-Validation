@@ -9,7 +9,7 @@ ListLog::ListLog(CString inData, ListLogTab* inListLogDlg)
 	m_ListLogTab = inListLogDlg;
 	COleDateTime currentTime;
 	currentTime = COleDateTime::GetCurrentTime();
-	m_strLogPath.Format("%s\\ListLog\\ListLog_%04d_%02d_%02d.txt", inData, currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay());
+	m_strLogPath.Format(_T("%s\\ListLog\\ListLog_%04d_%02d_%02d.txt"), inData, currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay());
 }
 
 
@@ -34,16 +34,16 @@ void ListLog::CreateLogFile()
 }
 
 
-void ListLog::WriteLogFile(CStringA strContents)
+void ListLog::WriteLogFile(CString strContents)
 {
 	//CFile file;
 	CStdioFile file;
-	CStringA strTemp;
+	CString strTemp;
 	if (file.Open(m_strLogPath, CFile::modeCreate | CFile::modeNoTruncate | CFile::modeWrite | CFile::typeText) != FALSE){
 		COleDateTime currentTime;
 		currentTime = COleDateTime::GetCurrentTime();
 		file.SeekToEnd();
-		strTemp.Format("[%04d/%02d/%02d %02d:%02d:%02d] %s\r", currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay(), currentTime.GetHour(), currentTime.GetMinute(), currentTime.GetSecond(), strContents);
+		strTemp.Format(_T("[%04d/%02d/%02d %02d:%02d:%02d] %s\r"), currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay(), currentTime.GetHour(), currentTime.GetMinute(), currentTime.GetSecond(), strContents);
 		m_ListLogTab->AddListLog(strTemp);
 		file.Write(strTemp, strTemp.GetLength());
 		file.Close();

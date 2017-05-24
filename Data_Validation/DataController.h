@@ -43,7 +43,6 @@ private:
 	CList<ConfigType*> m_pListConfig;
 	CList<ConfigType*> m_pListSetting;
 	CList<ConfigType*> m_pListTargetRefConfig;
-	//CList<BasicData*>  m_pListBaseInfo;
 	CList<DifferentItem*> m_pListDirrentItems;
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;

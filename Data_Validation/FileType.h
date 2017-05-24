@@ -2,6 +2,7 @@
 #include "BasicData.h"
 #include <afxtempl.h>
 #include <vector>
+#include "ListLog.h"
 
 class FileType
 {
@@ -21,6 +22,7 @@ public:
 	void ModifyData(BasicData* inTarget);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
 	BOOL CompareFile(FileType* inTarget, std::vector<CString>& outFail);
+	
 private:
 	CList<BasicData*> m_pDataList;
 	CString m_strFileName;

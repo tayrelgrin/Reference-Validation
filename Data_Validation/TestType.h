@@ -3,6 +3,7 @@
 #include "FileType.h"
 #include <vector>
 #include "tinyxml2.h"
+#include "ListLog.h"
 
 class TestType
 {
@@ -25,6 +26,7 @@ public:
 	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
 	BOOL CompareTest(TestType* inTarget, std::vector<CString>& outFail);
 	void GetDataList(CList<FileType*>& outData);
+
 private:
 	CList<FileType*> m_pFIleList;
 	CString m_strTestName;

@@ -15,9 +15,9 @@
 //////////////////////////////////////////////////////////////////////////
 BasicData::BasicData(void)
 {
-	m_strSection.Format("");
-	m_strItem.Format("");
-	m_strValue.Format("");
+	m_strSection.Format(_T(""));
+	m_strItem.Format(_T(""));
+	m_strValue.Format(_T(""));
 }
 
 //////////////////////////////////////////////////////////////////////////

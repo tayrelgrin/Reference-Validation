@@ -65,11 +65,11 @@ void FileType::AddNewData(CString inData, int inNInput)
 	INIFileReadByLine(inData, vtemp);
 	BasicData* cNewData = NULL;
 	CString strTemp;
-	strSection.Format("");
-	strItem.Format("");
-	strValue.Format("");
-	strTemp.Format("");
-	CString m_strBasicLoadTxt = "Load Reference Setting :";
+	strSection.Format(_T(""));
+	strItem.Format(_T(""));
+	strValue.Format(_T(""));
+	strTemp.Format(_T(""));
+	CString m_strBasicLoadTxt = _T("Load Reference Setting :");
 
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
@@ -88,11 +88,11 @@ void FileType::AddNewData(CString inData, int inNInput)
 				AfxExtractSubString(strValue,	strTemp, 1, '=');
 
 			if(strSection == m_strBasicLoadTxt)
-				strSection.Format("");
+				strSection.Format(_T(""));
 			if (strValue == m_strBasicLoadTxt)
-				strValue.Format("");
+				strValue.Format(_T(""));
 			if (strItem == m_strBasicLoadTxt)
-				strItem.Format("");
+				strItem.Format(_T(""));
 
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
@@ -127,11 +127,11 @@ void FileType::AddNewData(CString inData, int inNInput)
 				AfxExtractSubString(strValue,	strTemp, 1, '=');
 
 			if(strSection == m_strBasicLoadTxt)
-				strSection.Format("");
+				strSection.Format(_T(""));
 			if (strValue == m_strBasicLoadTxt)
-				strValue.Format("");
+				strValue.Format(_T(""));
 			if (strItem == m_strBasicLoadTxt)
-				strItem.Format("");
+				strItem.Format(_T(""));
 
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
@@ -196,7 +196,7 @@ void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
 {
 	CStdioFile sourceFile;
 	CString strLine;
-	strLine.Format("");
+	strLine.Format(_T(""));
 
 	if(!sourceFile.Open(inPath, CFile::modeRead, NULL)){   
 		return;
@@ -369,7 +369,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 				{
 					if (pThis->getValue()!=pTarget->getValue())
 					{
-						strFail.Format("%s : %s %s %s %s : %s","Fail Item",m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
+						strFail.Format(_T("%s : %s %s %s %s : %s"),_T("Fail Item"),m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
 					}
 // 					else if (pThis->getValue()==pTarget->getValue())
@@ -389,9 +389,9 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 		}
 		if (bFlagSection && !bFlagItem)
 		{
-			strFail.Format("%s : %s %s : %s ","Fail Item",m_strFileName , pThis->getSection(),  "Not Exist Item");
+			strFail.Format(_T("%s : %s %s : %s ","Fail Item"),m_strFileName , pThis->getSection(),  _T("Not Exist Item"));
 			outFail.push_back(strFail);
-			strFail.Format("%s : %s %s : %s","Fail Item",m_strFileName , pThis->getItem(), "Not Exist Value");
+			strFail.Format(_T("%s : %s %s : %s","Fail Item"),m_strFileName , pThis->getItem(), _T("Not Exist Value"));
 			outFail.push_back(strFail);
 			break;
 		}

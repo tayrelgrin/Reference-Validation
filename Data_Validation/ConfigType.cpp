@@ -16,7 +16,7 @@ ConfigType::~ConfigType(void)
 CString ConfigType::GetEXEDirectoryPath()
 {
 	CString strDirecPath;
-	strDirecPath.Format("");
+	strDirecPath.Format(_T(""));
 	TCHAR path[_MAX_PATH];
 
 	GetModuleFileName(NULL, path, sizeof path);
@@ -34,16 +34,16 @@ void ConfigType::AddNewTest(std::vector<CString> invPath, int inNInput)
 {
 	CString strTestName;
 
-	strTestName.Format("");
+	strTestName.Format(_T(""));
 	for (int i = 0; i<invPath.size(); i++)
 	{
 		TestType* cAddData = new TestType;
 		CString strDir = invPath[i];
 		CString strTemp;
-		strTemp.Format("%s%c",m_strInputDirPath,'\\');
-		strDir.Replace(strTemp, "");
+		strTemp.Format(_T("%s%c"),m_strInputDirPath,'\\');
+		strDir.Replace(strTemp, _T(""));
 		CString strSubDir;
-		strSubDir.Format("");
+		strSubDir.Format(_T(""));
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
 
@@ -52,7 +52,7 @@ void ConfigType::AddNewTest(std::vector<CString> invPath, int inNInput)
 			int nIndex = strDir.Find('\\');
 			strSubDir = strDir.Left(nIndex);
 			CString strTemp = strTestName;
-			strTestName.Format("%s\\%s",strSubDir, strTemp);
+			strTestName.Format(_T("%s\\%s"),strSubDir, strTemp);
 		}
 
 		cAddData->SetTestName(strTestName);
@@ -76,19 +76,7 @@ void ConfigType::InitList()
 		delete temp;
 		m_pListTestType.RemoveAt(pTemp);
 	}
-
-	pTemp = NULL;
-	pPos = m_pListBaseInfo.GetHeadPosition();
-
-	while(pPos && m_pListBaseInfo.GetSize()>0)
-	{
-		pTemp = pPos;
-
-		BasicData* temp = m_pListBaseInfo.GetNext(pPos);
-		delete temp;
-		m_pListBaseInfo.RemoveAt(pTemp);
-	}
-}
+ }
 
 
 void ConfigType::SetProject(CString inData)
@@ -116,29 +104,13 @@ void ConfigType::LoadDataFiles(CString inStrPath)
 	tinyxml2::XMLDocument xmlDoc;
 	tinyxml2::XMLError eResult = xmlDoc.LoadFile( LPSTR(LPCTSTR(inStrPath)));
 
-	InitListAndVectors();
+	InitList();
 
 	SearchXMLData(&xmlDoc);
 
 	xmlDoc.Clear();
 }
 
-
-void ConfigType::InitListAndVectors()
-{
-	
-	POSITION pTemp = NULL;
-	POSITION pPos = m_pListTestType.GetHeadPosition();
-
-	while(pPos && m_pListTestType.GetSize()>0)
-	{
-		pTemp = pPos;
-
-		TestType* temp = m_pListTestType.GetNext(pPos);
-		delete temp;
-		m_pListTestType.RemoveAt(pTemp);
-	}
-}
 
 void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 {
@@ -148,7 +120,7 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{
 		CString strTemp = (CString)pNode->Value();
-		if (strTemp == "BaseFile" || strTemp == "File")
+		if (strTemp == "BaseFile" || strTemp == "BaseInfo")
 		{
 			continue;
 		}
@@ -159,9 +131,9 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 				if(inIndex==1)
 				{
 					TestType* cNewTest = new TestType;
-
+					
 					cNewTest->SetTestName((CString)pElent->Value());
-					CString strTempValue = pElent->Value();
+					CString strTempValue = (CString)pElent->Value();
 
 					m_vTestName.push_back(strTempValue);
 
@@ -220,10 +192,10 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 			pTarget = pListTargetTest.GetNext(pTargetListPos);
 			CString strTargetName = pTarget->GetTestName();
 			strTargetName.Replace(':','\\');
-			if(pThis->GetTestName()==strTargetName)
+			if(pThis->GetTestName() == strTargetName)
 			{
 				CString strTestLog;
-				strTestLog.Format("=====================  %s Compare Start =====================", strTargetName);
+				strTestLog.Format(_T("=====================  %s Compare Start ====================="), strTargetName);
 				outFail.push_back(strTestLog);
 				pThis->CompareTest(pTarget, outFail);
 				break;
@@ -253,4 +225,9 @@ void ConfigType::GetDataList(CList<TestType*>& outData)
 void ConfigType::SetRootPath(CString inPath)
 {
 	m_strInputDirPath = inPath;
+}
+
+void ConfigType::SetListLog(ListLog* inData)
+{
+	m_ListLog = inData;
 }

@@ -70,9 +70,10 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 
 	for (int i = 0; i< vFilePath.size(); i++)
 	{
+		bInputResult = false;
 		FileType* cNewFile = new FileType();				// 객체 생성
 		CString strFilePath;
-		strFilePath.Format("%s",vFilePath[i] );
+		strFilePath.Format(_T("%s"),vFilePath[i]);
 		int nIndex = strFilePath.ReverseFind('\\');			// 파일 이름 인덱스
 		
 		cNewFile->SetFileName(strFilePath.Mid(nIndex+1));	// 파일 이름 분류
@@ -100,6 +101,7 @@ void TestType::AddNewTest(CString inPath, std::vector<CString> invBasicFile, int
 			delete cNewFile;
 		}
 	}
+	
 
 	vFilePath.clear();
 }
@@ -112,8 +114,8 @@ void TestType::GetFilePathInDir(CString inPath, std::vector<CString>& outvData)
 	CString tpath;
 	BOOL bWorking;
 
-	fileName.Format("");
-	tpath.Format("");
+	fileName.Format(_T(""));
+	tpath.Format(_T(""));
 
 	tpath.Format(inPath +"\\*.*");
 
@@ -218,10 +220,12 @@ void TestType::LoadDataFromXML(tinyxml2::XMLNode* pParent, CString inStrFileName
 			}
 			else
 			{
-				pNewTest = new FileType;
+				if(pNewTest==nullptr)
+					pNewTest = new FileType;
 				
-				LoadDataFromXML(pElent,(CString)pNode->Value(), pNewTest);
+				LoadDataFromXML(pElent, (CString)pNode->Value(), pNewTest);
 				m_pFIleList.AddTail(pNewTest);
+				pNewTest = nullptr;
 			}
 		}
 	}
@@ -232,7 +236,7 @@ void TestType::GetFileNames(CString inTestName ,std::vector<CString>& outvFileNa
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
-	strFileName.Format("");
+	strFileName.Format(_T(""));
 	while(pPos)
 	{
 		FileType* temp = m_pFIleList.GetNext(pPos);
@@ -247,7 +251,7 @@ bool TestType::SearchFileInList(CString inStrTargetFile, FileType& outData)
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
-	strFileName.Format("");
+	strFileName.Format(_T(""));
 	bool bResult=false;
 
 	while(pPos)
@@ -270,7 +274,7 @@ void TestType::ModifyData(CString inTargetFileName, BasicData* inTarget)
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
-	strFileName.Format("");
+	strFileName.Format(_T(""));
 	bool bResult=false;
 
 	while(pPos)
@@ -291,7 +295,7 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 {
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
-	strFileName.Format("");
+	strFileName.Format(_T(""));
 	bool bResult=false;
 
 	while(pPos)
@@ -318,10 +322,10 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
 	std::vector<CString> vBaseFileName;
 	CString strTargetRef, strTargetRegister;
 	CString strBaseRef, strBaseRegister;
-	strTargetRef.Format("");
-	strTargetRegister.Format("");
-	strBaseRef.Format("");
-	strBaseRegister.Format("");
+	strTargetRef.Format(_T(""));
+	strTargetRegister.Format(_T(""));
+	strBaseRef.Format(_T(""));
+	strBaseRegister.Format(_T(""));
 
 	inTarget->GetFileNames(m_strTestName,vTargetFileName);
 	this->GetFileNames(m_strTestName,vBaseFileName);
@@ -331,12 +335,12 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
 	//////////////////////////////////////////////////////////////////////////
 	for(int i=0; i<vTargetFileName.size(); i++)
 	{
-		if (vTargetFileName[i].Find("_Register") != -1)
+		if (vTargetFileName[i].Find(_T("_Register")) != -1)
 		{
 			CString strRefFile;
-			strRefFile.Format("");
+			strRefFile.Format(_T(""));
 			strRefFile = vTargetFileName[i];
-			strRefFile.Replace("_Register","");
+			strRefFile.Replace(_T("_Register"),_T(""));
 
 			strTargetRef = strRefFile;
 			strTargetRegister = vTargetFileName[i];
@@ -345,12 +349,12 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
 	}
 	for(int i=0; i<vBaseFileName.size(); i++)
 	{
-		if (vBaseFileName[i].Find("_Register") != -1)
+		if (vBaseFileName[i].Find(_T("_Register")) != -1)
 		{
 			CString strRefFile;
-			strRefFile.Format("");
+			strRefFile.Format(_T(""));
 			strRefFile = vBaseFileName[i];
-			strRefFile.Replace("_Register","");
+			strRefFile.Replace(_T("_Register"),_T(""));
 
 			strBaseRef = strRefFile;
 			strBaseRegister = vBaseFileName[i];

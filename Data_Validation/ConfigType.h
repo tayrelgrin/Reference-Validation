@@ -4,6 +4,7 @@
 #include <afxtempl.h>
 #include <vector>
 #include "tinyxml2.h"
+#include "ListLog.h"
 
 class ConfigType
 {
@@ -22,7 +23,7 @@ public:
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitList();
-	void InitListAndVectors();
+	/*void InitListAndVectors();*/
 	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail);
 	void GetDataList(CList<TestType*>& outData);
 	CString GetProject(){return m_strPrj;};
@@ -30,6 +31,7 @@ public:
 	CString GetConfigNum(){return m_strConfigNum;};
 	CString GetDOE(){return m_strDOE;};
 	void SetRootPath(CString inPath);
+	void SetListLog(ListLog* inData);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;
@@ -40,8 +42,8 @@ private:
 	std::vector<CString> m_vFilePath;
 	std::vector<CString> m_vTestDirPath;
 	std::vector<CString> m_vBaseFiles;
-	CList<BasicData*> m_pListBaseInfo;
 	CList<TestType*> m_pListTestType;
 	bool m_bNewData;
+	ListLog* m_ListLog;
 };
 
