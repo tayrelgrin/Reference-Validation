@@ -3,6 +3,7 @@
 #include <afxtempl.h>
 #include <vector>
 #include "ListLog.h"
+#include "CompareResult.h"
 
 class FileType
 {
@@ -21,7 +22,7 @@ public:
 	void SetListCountZero();
 	void ModifyData(BasicData* inTarget);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
-	BOOL CompareFile(FileType* inTarget, std::vector<CString>& outFail);
+	BOOL CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
 	
 private:
 	CList<BasicData*> m_pDataList;

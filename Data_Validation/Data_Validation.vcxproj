@@ -109,7 +109,7 @@
     <ClInclude Include="DataController.h" />
     <ClInclude Include="Data_Validation.h" />
     <ClInclude Include="Data_ValidationDlg.h" />
-    <ClInclude Include="DifferentItem.h" />
+    <ClInclude Include="CompareResult.h" />
     <ClInclude Include="FailItem.h" />
     <ClInclude Include="FileType.h" />
     <ClInclude Include="ListLog.h" />
@@ -128,7 +128,7 @@
     <ClCompile Include="DataController.cpp" />
     <ClCompile Include="Data_Validation.cpp" />
     <ClCompile Include="Data_ValidationDlg.cpp" />
-    <ClCompile Include="DifferentItem.cpp" />
+    <ClCompile Include="CompareResult.cpp" />
     <ClCompile Include="FailItem.cpp" />
     <ClCompile Include="FileType.cpp" />
     <ClCompile Include="ListLog.cpp" />

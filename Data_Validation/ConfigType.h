@@ -5,6 +5,7 @@
 #include <vector>
 #include "tinyxml2.h"
 #include "ListLog.h"
+#include "CompareResult.h"
 
 class ConfigType
 {
@@ -24,7 +25,7 @@ public:
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitList();
 	/*void InitListAndVectors();*/
-	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail);
+	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
 	void GetDataList(CList<TestType*>& outData);
 	CString GetProject(){return m_strPrj;};
 	CString GetBuildNum(){return m_strBuildNum;};

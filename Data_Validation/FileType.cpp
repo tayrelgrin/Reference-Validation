@@ -337,7 +337,7 @@ void FileType::ModifyData(BasicData* inTarget)
 }
 
 
-BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
+BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outResult)
 {
 	CList<BasicData*> pListTargetData;
 
@@ -356,8 +356,14 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 		pTargetListPos = pListTargetData.GetHeadPosition();
 		CString strFail;
 		CString strPreSection;
+		CString strTemp;
+		CString strItemName,strBaseInfo,strCurrentInfo;
 		bFlagSection = false;
 		bFlagItem = false;
+		strItemName.Format(_T(""));
+		strBaseInfo.Format(_T(""));
+		strCurrentInfo.Format(_T(""));
+
 		while(pTargetListPos)
 		{
 			pTarget = pListTargetData.GetNext(pTargetListPos);
@@ -367,16 +373,53 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail)
 				strPreSection = pThis->getSection();
 				if (pThis->getItem()==pTarget->getItem())
 				{
+					CompareResult* cNewResult = new CompareResult;
+
+					strTemp.Format("");
+					strTemp = pThis->getItem();
+
+					if (strTemp.Find('/') != -1)
+					{
+						AfxExtractSubString(strItemName, strTemp,0,'/');
+					}
+					else
+						strItemName = strTemp;
+
+					cNewResult->SetItemName(strItemName);
+
+					strTemp = pThis->getValue();
+
+					if (strTemp.Find('/') != -1)
+					{
+						AfxExtractSubString(strBaseInfo, strTemp,0,'/');
+					}
+					else
+						strBaseInfo = strTemp;
+					cNewResult->SetBaseInfoValue(strBaseInfo);
+
+					strTemp = pTarget->getValue();
+
+					if (strTemp.Find('/') != -1)
+					{
+						AfxExtractSubString(strCurrentInfo, strTemp,0,'/');
+					}
+					else
+						strCurrentInfo = strTemp;
+					cNewResult->SetCurrentInfoValue(strCurrentInfo);
+
 					if (pThis->getValue()!=pTarget->getValue())
 					{
 						strFail.Format(_T("%s : %s %s %s %s : %s"),_T("Fail Item"),m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
+						cNewResult->SetCompareResult(FALSE);
+						outResult.AddTail(cNewResult);
 					}
-// 					else if (pThis->getValue()==pTarget->getValue())
-// 					{
-// 						strFail.Format("%s : %s %s %s %s : %s","Pass Item",m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
-// 						outFail.push_back(strFail);
-// 					}
+ 					else if (pThis->getValue()==pTarget->getValue())
+ 					{
+
+						cNewResult->SetCompareResult(TRUE);
+ 						outResult.AddTail(cNewResult);
+ 					}
 					bFlagItem = true;
 					break;
 				}

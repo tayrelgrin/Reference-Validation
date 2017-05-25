@@ -296,7 +296,6 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 	POSITION pPos = m_pFIleList.GetHeadPosition();
 	CString strFileName;
 	strFileName.Format(_T(""));
-	bool bResult=false;
 
 	while(pPos)
 	{
@@ -305,12 +304,12 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 
 		if (strFileName.Find(inTargetFileName) != -1)
 		{
-			temp->SetFileName(inNewFileName);			
+			temp->SetFileName(inNewFileName);
 		}
 	}
 }
 
-BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
+BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outResult)
 {
 	BOOL bResult = FALSE;
 	BOOL bFileCount = FALSE;
@@ -410,20 +409,32 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail)
 
 			if(strTargetRef.Find(pTarget->GetFileName()) != -1 &&  strBaseRef.Find(pThis->GetFileName()) != -1 )
 			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(pTarget->GetFileName());
+				outResult.AddTail(cNewConfig);
+
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail);
+				pThis->CompareFile(pTarget, outFail,outResult);
 				break;
 			}
 			else if (strTargetRegister.Find(pTarget->GetFileName()) != -1 &&  strBaseRegister.Find(pThis->GetFileName()) != -1 )
 			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(pTarget->GetFileName());
+				outResult.AddTail(cNewConfig);
+
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail);
+				pThis->CompareFile(pTarget, outFail, outResult);
 				break;
 			}
 			else if(pThis->GetFileName()==pTarget->GetFileName())
 			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(pTarget->GetFileName());
+				outResult.AddTail(cNewConfig);
+
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail);
+				pThis->CompareFile(pTarget, outFail, outResult);
 				break;
 			}
 		}

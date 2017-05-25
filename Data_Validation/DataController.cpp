@@ -4,6 +4,7 @@
 
 DataController::DataController()
 {
+	m_strLogPath.Format("");
 }
 
 DataController::~DataController(void)
@@ -307,7 +308,6 @@ void DataController::ReadReference()
 
 	std::vector<CString> vConfig;
 
-	int nIndex = 0;
 	int nRootIndex = 0;
 
 	// m_vTestDir에서 컨피그 별로 분류
@@ -444,7 +444,7 @@ BOOL DataController::Validation(CString inData)
 	std::vector<CString> vTemp;
 	// Compare
 	m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
-	CompareReference(vTemp);
+	CompareReference(vTemp, m_pListCompareResult);
 	m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
 	// Ref Naming rule checking
@@ -452,6 +452,9 @@ BOOL DataController::Validation(CString inData)
 	// CRC 계산
 	
 	// 공동 데이터 확인
+
+	// Result Log 쓰기
+	WriteResultLog();
 
 	return TRUE;
 }
@@ -557,15 +560,15 @@ void DataController::InitAllData()
 
 	
 	pTemp = NULL;
-	pPos = m_pListDirrentItems.GetHeadPosition();
+	pPos = m_pListCompareResult.GetHeadPosition();
 
-	while(pPos && m_pListDirrentItems.GetSize()>0)
+	while(pPos && m_pListCompareResult.GetSize()>0)
 	{
 		pTemp = pPos;
 
-		DifferentItem* temp = m_pListDirrentItems.GetNext(pPos);
+		CompareResult* temp = m_pListCompareResult.GetNext(pPos);
 		delete temp;
-		m_pListDirrentItems.RemoveAt(pTemp);
+		m_pListCompareResult.RemoveAt(pTemp);
 	}
 }
 
@@ -578,7 +581,7 @@ void DataController::GetValueXMLFileList(std::vector<CString>& outData)
 }
 
 
-BOOL DataController::CompareReference(std::vector<CString> outResult)
+BOOL DataController::CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent)
 {
 	BOOL bResult = FALSE;
 	POSITION pBaseRefPos = m_pListConfig.GetHeadPosition();
@@ -599,8 +602,16 @@ BOOL DataController::CompareReference(std::vector<CString> outResult)
 			vFailList.push_back(strBase);
 			vFailList.push_back(strTarget);
 			vFailList.push_back(_T("==================================================================="));
+			
+			CompareResult* cNewConfig = new CompareResult;
+			cNewConfig->SetConfigInfo(_T("Base Config"));
+			cNewConfig->SetTestName(strBase);
+			cNewConfig->SetFileName(_T("Target Config"));
+			cNewConfig->SetItemName(strTarget);
+			
+			outDifferent.AddTail(cNewConfig);
 
-			pTargetRef->ConfigCompare(pBaseRef, vFailList);
+			pTargetRef->ConfigCompare(pBaseRef, vFailList, outDifferent);
 		}
 	}
 
@@ -615,4 +626,237 @@ BOOL DataController::CompareReference(std::vector<CString> outResult)
 void DataController::SetListLog(ListLog* inData)
 {
 	m_ListLog = inData;
+}
+
+
+void DataController::GetResultList(CList<CompareResult*>& outData)
+{
+	POSITION pTemp = NULL;
+	POSITION pPos = outData.GetHeadPosition();
+
+	while(pPos && outData.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		CompareResult* temp = outData.GetNext(pPos);
+		delete temp;
+		outData.RemoveAt(pTemp);
+	}
+
+	pTemp = NULL;
+	pPos = m_pListCompareResult.GetHeadPosition();
+	while(pPos && outData.GetSize()>0)
+	{
+		pTemp = pPos;
+
+		CompareResult* temp = m_pListCompareResult.GetNext(pPos);
+		outData.AddTail(temp);
+	}
+}
+
+void DataController::WriteResultLog()
+{
+	CString strExePath = GetEXEDirectoryPath();
+	CString strLogDirPath;
+	strLogDirPath.Format("%s%s", strExePath,_T("\\ResultLog"));
+	CString strLogPath;
+	FILE* file;
+
+	m_ListLog->WriteLogFile(_T("===============Start Writing Log==============="));
+
+	CreateDirectory(strLogDirPath,NULL);
+	do 
+	{
+		COleDateTime currentTime;
+		currentTime = COleDateTime::GetCurrentTime();
+		
+		strLogPath.Format(_T("%s\\Result_%04d%02d%02d_%02d%02d%02d.csv"),strLogDirPath, currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay(), currentTime.GetHour(), currentTime.GetMinute(), currentTime.GetSecond() );
+		
+		m_ListLog->WriteLogFile(strLogPath);
+
+		file = fopen(strLogPath,"w+");
+
+		POSITION pTemp = NULL;
+		POSITION pPos = m_pListCompareResult.GetHeadPosition();
+		CString strComma,strReturn;
+		strComma.Format(",");
+		strReturn.Format("\n");
+		CString strLogData;
+		strLogData.Format("");
+
+		std::vector<CString> vHeader;
+		std::vector<CString> vBase;
+		std::vector<CString> vCurrent;
+		std::vector<CString> vResult;
+
+		while(pPos && m_pListCompareResult.GetSize()>0)
+		{
+			pTemp = pPos;
+			CompareResult* temp = m_pListCompareResult.GetNext(pPos);
+
+			if (temp->GetConfigInfo() != _T(""))
+			{
+				strLogData = temp->GetConfigInfo();
+				vHeader.push_back(strLogData);
+
+				strLogData = temp->GetTestName();
+				vBase.push_back(strLogData);
+
+				strLogData = temp->GetFileName();
+				vCurrent.push_back(strLogData);
+
+				strLogData = temp->GetItemName();
+				vResult.push_back(strLogData);
+			}
+			else if (temp->GetTestName() != _T(""))
+			{
+				vHeader.push_back(strReturn);
+				vBase.push_back(strReturn);
+				vCurrent.push_back(strReturn);
+				vResult.push_back(strReturn);
+
+				strLogData.Format("%s,",temp->GetTestName());
+				vHeader.push_back(strLogData);
+				vBase.push_back(strLogData);
+				vCurrent.push_back(strLogData);
+				vResult.push_back(strLogData);
+			}
+			else if (temp->GetFileName() != _T(""))
+			{
+				strLogData.Format("%s,",temp->GetFileName());
+				
+				vHeader.push_back(strLogData);
+				vBase.push_back(strLogData);
+				vCurrent.push_back(strLogData);
+				vResult.push_back(strLogData);
+			}
+			else if (temp->GetItemName() != _T(""))
+			{
+				int nCountComma = 0;
+
+				CString strValue;
+				strValue.Format(_T(""));
+				strValue = temp->GetBaseInfoValue();
+				if (strValue.Find(',') != -1)
+				{
+					nCountComma = strValue.Remove(',');
+				}
+				for (int i = 0; i<= nCountComma; i++)
+				{
+					strLogData.Format(_T("%s,"),temp->GetItemName());
+					vHeader.push_back(strLogData);
+				}
+				
+				strLogData.Format(_T("%s,"),temp->GetBaseInfoValue());
+				vBase.push_back(strLogData);
+
+				strLogData.Format(_T("%s,"),temp->GetCurrentInfoValue());
+				vCurrent.push_back(strLogData);
+
+				CString strResult;
+				if (temp->GetCompareResult())
+				{
+					strResult.Format(_T("PASS"));
+				}
+				else
+				{
+					strResult.Format(_T("FAIL"));
+				}
+				for (int i = 0; i<= nCountComma; i++)
+				{
+					strLogData.Format(_T("%s,"),strResult);		
+					vResult.push_back(strLogData);
+				}				
+			}
+		}
+
+		int nHeaderCount	= 1;
+		int nBaseCount		= 1;
+		int nCurrentCount	= 1;
+		int nResultCount	= 1;
+
+		bool bHeaderEnd, bBaseEnd, bCurrentEnd, bResultEnd, bWorking;
+		bHeaderEnd = false;
+		bBaseEnd = false;
+		bCurrentEnd = false;
+		bResultEnd = false;
+		bWorking = true;
+
+		fprintf_s(file,vHeader[0]);
+		fprintf_s(file,strReturn);
+		fprintf_s(file,vBase[0]);
+		fprintf_s(file,strReturn);
+		fprintf_s(file,vCurrent[0]);
+		fprintf_s(file,strReturn);
+		fprintf_s(file,vResult[0]);
+		
+		do{
+			for (int i = nHeaderCount; i < vHeader.size(); i++)
+			{
+				fprintf_s(file,vHeader[i]);
+				if (vHeader[i].Find("\n") != -1)
+				{
+					nHeaderCount = ++i;
+					break;
+				}
+				if (i == vHeader.size()-1)
+				{
+					bHeaderEnd = true;
+				}
+			}
+
+			for (int i = nBaseCount; i < vBase.size(); i++)
+			{
+				fprintf_s(file,vBase[i]);
+				if (vBase[i].Find("\n") != -1)
+				{
+					nBaseCount = ++i;
+					break;
+				}
+				if (i == vBase.size()-1)
+				{
+					bBaseEnd = true;
+				}
+			}
+
+			for (int i = nCurrentCount; i < vCurrent.size(); i++)
+			{
+				fprintf_s(file,vCurrent[i]);
+				if (vCurrent[i].Find("\n") != -1)
+				{
+					nCurrentCount = ++i;
+					break;
+				}
+				if (i == vCurrent.size()-1)
+				{
+					bCurrentEnd = true;
+				}
+			}
+
+			for (int i = nResultCount; i < vResult.size(); i++)
+			{
+				fprintf_s(file,vResult[i]);
+				if (vResult[i].Find("\n") != -1)
+				{
+					fprintf_s(file,vResult[i]);
+					nResultCount = ++i;
+					break;
+				}
+				if (i == vResult.size()-1)
+				{
+					bResultEnd = true;
+				}
+			}
+					
+
+			if(bHeaderEnd && bBaseEnd && bCurrentEnd && bResultEnd)
+			{
+				bWorking = false;
+			}
+		}while(bWorking);
+
+		fclose(file);
+	} while (FALSE);
+
+	m_ListLog->WriteLogFile(_T("===============End Writing Log==============="));
 }

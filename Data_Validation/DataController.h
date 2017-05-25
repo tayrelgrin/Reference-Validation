@@ -1,6 +1,6 @@
 #pragma once
 #include "ConfigType.h"
-#include "DifferentItem.h"
+#include "CompareResult.h"
 #include "resource.h"
 #include "ListLog.h"
 
@@ -36,16 +36,18 @@ public:
 	void GetValueXMLFileList(std::vector<CString>& outData);
 	void LoadXMLDataFiles(CString inData);
 	CString GetEXEDirectoryPath();
-	BOOL CompareReference(std::vector<CString> outResult);
-
+	BOOL CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent);
+	void GetResultList(CList<CompareResult*>& outData);
+	void WriteResultLog();
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
 	CList<ConfigType*> m_pListSetting;
 	CList<ConfigType*> m_pListTargetRefConfig;
-	CList<DifferentItem*> m_pListDirrentItems;
+	CList<CompareResult*> m_pListCompareResult;
 	std::vector<CString> m_vFileVector;
 	std::vector<CString> m_vDirVector;
 	std::vector<CString> m_vRootDIr;
 	ListLog* m_ListLog;
+	CString m_strLogPath;
 };

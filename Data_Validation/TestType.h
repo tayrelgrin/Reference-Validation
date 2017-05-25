@@ -4,6 +4,7 @@
 #include <vector>
 #include "tinyxml2.h"
 #include "ListLog.h"
+#include "CompareResult.h"
 
 class TestType
 {
@@ -24,7 +25,7 @@ public:
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 	void ModifyData(CString inTargetFileName, BasicData* inTarget);
 	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
-	BOOL CompareTest(TestType* inTarget, std::vector<CString>& outFail);
+	BOOL CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
 	void GetDataList(CList<FileType*>& outData);
 
 private:

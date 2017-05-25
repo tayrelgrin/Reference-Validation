@@ -67,4 +67,6 @@ public:
 	CListCtrl m_ListCtrl_Main;
 	CTreeCtrl m_TreeMain;
 	virtual void PostNcDestroy();
+	afx_msg void OnBnClickedButtonListlog();
+	afx_msg void OnBnClickedButtonResultlog();
 };

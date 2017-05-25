@@ -73,6 +73,8 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB1, &CData_ValidationDlg::OnTcnSelchangeTab1)
 	ON_NOTIFY(NM_RCLICK, IDC_TREE_MAIN, &CData_ValidationDlg::OnNMRClickTreeMain)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CData_ValidationDlg::OnBnClickedButtonDelete)
+	ON_BN_CLICKED(IDC_BUTTON_LISTLOG, &CData_ValidationDlg::OnBnClickedButtonListlog)
+	ON_BN_CLICKED(IDC_BUTTON_RESULTLOG, &CData_ValidationDlg::OnBnClickedButtonResultlog)
 END_MESSAGE_MAP()
 
 
@@ -134,6 +136,21 @@ BOOL CData_ValidationDlg::OnInitDialog()
 
 	m_FailItemDlg.Create(IDD_DIALOG_FAILITEM, &m_TabCtrl_Main);
 	m_FailItemDlg.SetWindowPos(NULL, 0, 25, rect.Width()-30, rect.Height()-30, SWP_NOZORDER);
+
+
+	//////////////////////////////////////////////////////////////////////////
+	TCHAR path[_MAX_PATH];
+
+	GetModuleFileName(NULL, path, sizeof path);
+
+	CString strPath = path;
+
+	int i = strPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
+
+	CString strTemp = strPath.Left(i);//뒤에 있는 현재 실행 파일 이름을 지운다.
+
+	strPath.Format(_T("%s%s"),strTemp,"\\ResultLog");
+	CreateDirectory(strPath,NULL);
 
 	//////////////////////////////////////////////////////////////////////////
 	
@@ -554,4 +571,25 @@ void CData_ValidationDlg::PostNcDestroy()
 	delete m_ListLog;
 
 	CDialogEx::PostNcDestroy();
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonListlog()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	CString strEXEPath = m_TotalData.GetEXEDirectoryPath();
+	CString strPath;
+	strPath.Format(_T("%s%s"), strEXEPath,_T("\\ListLog"));
+	ShellExecute(NULL, _T("open"), strPath, NULL, NULL, SW_SHOW);
+}
+
+
+void CData_ValidationDlg::OnBnClickedButtonResultlog()
+{
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	CString strEXEPath = m_TotalData.GetEXEDirectoryPath();
+	CString strPath;
+	strPath.Format(_T("%s%s"), strEXEPath,_T("\\ResultLog"));
+	ShellExecute(NULL, _T("open"), strPath, NULL, NULL, SW_SHOW);
 }
