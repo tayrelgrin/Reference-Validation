@@ -450,11 +450,14 @@ BOOL DataController::Validation(CString inData)
 	// Ref Naming rule checking
 	
 	// CRC 계산
+	m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
+	CheckCRC(vTemp);
+	m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
 	
 	// 공동 데이터 확인
 
 	// Result Log 쓰기
-	WriteResultLog();
+	WriteResultLog(vTemp);
 
 	return TRUE;
 }
@@ -654,7 +657,7 @@ void DataController::GetResultList(CList<CompareResult*>& outData)
 	}
 }
 
-void DataController::WriteResultLog()
+void DataController::WriteResultLog(std::vector<CString> inData)
 {
 	CString strExePath = GetEXEDirectoryPath();
 	CString strLogDirPath;
@@ -749,20 +752,26 @@ void DataController::WriteResultLog()
 					vHeader.push_back(strLogData);
 				}
 
-				for (int i = 0; i<= nCountComma; i++)
-				{
-					strTemp = temp->GetBaseInfoValue();
-					AfxExtractSubString(strValue, strTemp, i,',');
-					strLogData.Format(_T("%s,"),strValue);
-					vBase.push_back(strLogData);
-				}  
-				for (int i = 0; i<= nCountComma; i++)
-				{
-					strTemp = temp->GetCurrentInfoValue();
-					AfxExtractSubString(strValue, strTemp, i,',');
-					strLogData.Format(_T("%s,"),strValue);
-					vCurrent.push_back(strLogData);
-				}
+// 				for (int i = 0; i<= nCountComma; i++)
+// 				{
+// 					strTemp = temp->GetBaseInfoValue();
+// 					AfxExtractSubString(strValue, strTemp, i,',');
+// 					strLogData.Format(_T("%s,"),strValue);
+// 					vBase.push_back(strLogData);
+// 				}  
+// 				for (int i = 0; i<= nCountComma; i++)
+// 				{
+// 					strTemp = temp->GetCurrentInfoValue();
+// 					AfxExtractSubString(strValue, strTemp, i,',');
+// 					strLogData.Format(_T("%s,"),strValue);
+// 					vCurrent.push_back(strLogData);
+// 				}
+
+				strLogData.Format(_T("%s,"),temp->GetBaseInfoValue());
+				vBase.push_back(strLogData);
+
+				strLogData.Format(_T("%s,"),temp->GetCurrentInfoValue());
+				vCurrent.push_back(strLogData);
 
 				CString strResult;
 				if (temp->GetCompareResult())
@@ -874,4 +883,38 @@ void DataController::WriteResultLog()
 	} while (FALSE);
 
 	m_ListLog->WriteLogFile(_T("===============End Writing Log==============="));
+}
+
+
+BOOL DataController::CheckCRC(std::vector<CString> outData)
+{
+	BOOL bResult = FALSE;
+	CString strIniFIle;
+	int nCRCResult = 0;
+	int nCRCValue = 0;
+	for (int i=0; i<m_vFileVector.size(); i++)
+	{
+		strIniFIle.Format("%s",m_vFileVector[i]);
+
+		if (strIniFIle.Find("ItemVersion.ini") != -1)
+		{
+			TCHAR sDir[MAX_PATH];		
+			nCRCValue = GetPrivateProfileInt(_T("SPEC"), _T("CRC"),  0, strIniFIle);
+
+			strIniFIle.Replace("ItemVersion.ini","Spec.ini");
+			m_cCRC.GetFileCRC32(strIniFIle,nCRCResult);
+
+			if (nCRCResult != nCRCValue)
+			{
+				CString strFailListLog;
+				strFailListLog.Format("%s%s,Itemversion: %d :Calculated: %d", strIniFIle, _T(" : CRC Dismatched"),nCRCValue, nCRCResult);
+				m_ListLog->WriteLogFile(strFailListLog);
+				bResult = FALSE;
+			}
+			else
+				bResult = TRUE;
+		}
+	}
+
+	return bResult;
 }

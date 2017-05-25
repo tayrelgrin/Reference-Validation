@@ -106,6 +106,7 @@
     <ClInclude Include="BasicData.h" />
     <ClInclude Include="ConfigType.h" />
     <ClInclude Include="Config_Select_Dlg.h" />
+    <ClInclude Include="CRC.h" />
     <ClInclude Include="DataController.h" />
     <ClInclude Include="Data_Validation.h" />
     <ClInclude Include="Data_ValidationDlg.h" />
@@ -125,6 +126,7 @@
     <ClCompile Include="BasicData.cpp" />
     <ClCompile Include="ConfigType.cpp" />
     <ClCompile Include="Config_Select_Dlg.cpp" />
+    <ClCompile Include="CRC.cpp" />
     <ClCompile Include="DataController.cpp" />
     <ClCompile Include="Data_Validation.cpp" />
     <ClCompile Include="Data_ValidationDlg.cpp" />

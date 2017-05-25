@@ -3,7 +3,7 @@
 #include "CompareResult.h"
 #include "resource.h"
 #include "ListLog.h"
-
+#include "CRC.h"
 
 class DataController
 {
@@ -38,7 +38,8 @@ public:
 	CString GetEXEDirectoryPath();
 	BOOL CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent);
 	void GetResultList(CList<CompareResult*>& outData);
-	void WriteResultLog();
+	void WriteResultLog(std::vector<CString> inData);
+	BOOL CheckCRC(std::vector<CString> outData);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
@@ -50,4 +51,5 @@ private:
 	std::vector<CString> m_vRootDIr;
 	ListLog* m_ListLog;
 	CString m_strLogPath;
+	CCRC m_cCRC;
 };
