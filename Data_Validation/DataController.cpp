@@ -734,9 +734,11 @@ void DataController::WriteResultLog()
 			{
 				int nCountComma = 0;
 
-				CString strValue;
+				CString strValue,strTemp;
 				strValue.Format(_T(""));
+				strTemp.Format(_T(""));
 				strValue = temp->GetBaseInfoValue();
+
 				if (strValue.Find(',') != -1)
 				{
 					nCountComma = strValue.Remove(',');
@@ -746,12 +748,21 @@ void DataController::WriteResultLog()
 					strLogData.Format(_T("%s,"),temp->GetItemName());
 					vHeader.push_back(strLogData);
 				}
-				
-				strLogData.Format(_T("%s,"),temp->GetBaseInfoValue());
-				vBase.push_back(strLogData);
 
-				strLogData.Format(_T("%s,"),temp->GetCurrentInfoValue());
-				vCurrent.push_back(strLogData);
+				for (int i = 0; i<= nCountComma; i++)
+				{
+					strTemp = temp->GetBaseInfoValue();
+					AfxExtractSubString(strValue, strTemp, i,',');
+					strLogData.Format(_T("%s,"),strValue);
+					vBase.push_back(strLogData);
+				}  
+				for (int i = 0; i<= nCountComma; i++)
+				{
+					strTemp = temp->GetCurrentInfoValue();
+					AfxExtractSubString(strValue, strTemp, i,',');
+					strLogData.Format(_T("%s,"),strValue);
+					vCurrent.push_back(strLogData);
+				}
 
 				CString strResult;
 				if (temp->GetCompareResult())
@@ -764,7 +775,7 @@ void DataController::WriteResultLog()
 				}
 				for (int i = 0; i<= nCountComma; i++)
 				{
-					strLogData.Format(_T("%s,"),strResult);		
+					strLogData.Format(_T("%s,"),strResult);
 					vResult.push_back(strLogData);
 				}				
 			}
@@ -802,6 +813,7 @@ void DataController::WriteResultLog()
 				if (i == vHeader.size()-1)
 				{
 					bHeaderEnd = true;
+					fprintf_s(file,strReturn);
 				}
 			}
 
@@ -816,6 +828,7 @@ void DataController::WriteResultLog()
 				if (i == vBase.size()-1)
 				{
 					bBaseEnd = true;
+					fprintf_s(file,strReturn);
 				}
 			}
 
@@ -830,6 +843,7 @@ void DataController::WriteResultLog()
 				if (i == vCurrent.size()-1)
 				{
 					bCurrentEnd = true;
+					fprintf_s(file,strReturn);
 				}
 			}
 
@@ -845,6 +859,7 @@ void DataController::WriteResultLog()
 				if (i == vResult.size()-1)
 				{
 					bResultEnd = true;
+					fprintf_s(file,strReturn);
 				}
 			}
 					
