@@ -39,7 +39,7 @@ public:
 	BOOL CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent);
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
-	BOOL CheckCRC(std::vector<CString> outData);
+	BOOL CheckCRC(std::vector<CString>& outData);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;

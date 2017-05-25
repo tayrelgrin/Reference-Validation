@@ -871,13 +871,17 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 					fprintf_s(file,strReturn);
 				}
 			}
-					
-
+			
 			if(bHeaderEnd && bBaseEnd && bCurrentEnd && bResultEnd)
 			{
 				bWorking = false;
 			}
 		}while(bWorking);
+
+		for (int i = 0; i < inData.size(); i++)
+		{
+			fprintf_s(file,inData[i]);
+		}
 
 		fclose(file);
 	} while (FALSE);
@@ -903,16 +907,24 @@ BOOL DataController::CheckCRC(std::vector<CString> outData)
 
 			strIniFIle.Replace("ItemVersion.ini","Spec.ini");
 			m_cCRC.GetFileCRC32(strIniFIle,nCRCResult);
-
+			
+			CString strFailListLog;
+			
 			if (nCRCResult != nCRCValue)
 			{
-				CString strFailListLog;
-				strFailListLog.Format("%s%s,Itemversion: %d :Calculated: %d", strIniFIle, _T(" : CRC Dismatched"),nCRCValue, nCRCResult);
-				m_ListLog->WriteLogFile(strFailListLog);
+				strFailListLog.Format("%s%s\n\t Itemversion: %d :Calculated: %d", strIniFIle, _T(" : CRC Dismatched"),nCRCValue, nCRCResult);
+				outData.push_back(strFailListLog);
+			
 				bResult = FALSE;
 			}
 			else
+			{
+				strFailListLog.Format("%s\n\t Itemversion: %d :Calculated: %d", strIniFIle,nCRCValue, nCRCResult);
+				outData.push_back(strFailListLog);
+				
 				bResult = TRUE;
+			}
+			m_ListLog->WriteLogFile(strFailListLog);
 		}
 	}
 
