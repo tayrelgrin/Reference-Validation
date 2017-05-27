@@ -51,8 +51,8 @@ void ConfigType::AddNewTest(std::vector<CString> invPath, int inNInput)
 		{
 			int nIndex = strDir.Find('\\');
 			strSubDir = strDir.Left(nIndex);
-			CString strTemp = strTestName;
-			strTestName.Format(_T("%s\\%s"),strSubDir, strTemp);
+			CString strTempTest = strTestName;
+			strTestName.Format(_T("%s\\%s"),strSubDir, strTempTest);
 		}
 
 		cAddData->SetTestName(strTestName);
@@ -195,7 +195,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 			if(pThis->GetTestName() == strTargetName)
 			{
 				CString strTestLog;
-				strTestLog.Format(_T("=====================  %s Compare Start ====================="), strTargetName);
+				strTestLog.Format(_T("======================  %s Compare Start ====================="), strTargetName);
 				outFail.push_back(strTestLog);
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetTestName(strTargetName);

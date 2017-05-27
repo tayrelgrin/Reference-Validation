@@ -116,9 +116,9 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
 
-	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 90,  -1);
-	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 100, -1);
-	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 120, -1);
+	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 80,  -1);
+	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 130, -1);
+	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 100, -1);
 	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 200, -1);
 
 	m_TabCtrl_Main.InsertItem(1,_T("List Log"));
@@ -239,13 +239,13 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{
-			// 마우스 wait start
-			BeginWaitCursor();
-
-			m_ButtonStop.EnableWindow(TRUE);
-			m_ButtonStop.ShowWindow(TRUE);
 			m_ButtonStart.EnableWindow(FALSE);
 			m_ButtonStart.ShowWindow(FALSE);
+			m_ButtonStop.EnableWindow(TRUE);
+			m_ButtonStop.ShowWindow(TRUE);
+
+			// 마우스 wait start
+			BeginWaitCursor();
 
 			CString strPrj		= m_ConfigSelectDlg.GetProject();
 			CString strBuild	= m_ConfigSelectDlg.GetBuild();
@@ -327,7 +327,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 			// file, directory check
 			m_TotalData.GetDirList((LPTSTR)Pathname,vTestDir, vFileNames);
 			m_ListLog->WriteLogFile((LPTSTR)Pathname);
-			m_ListLog->WriteLogFile(_T("Check Base Info In All Data"));
+			m_ListLog->WriteLogFile(_T("Check Base File In All Data"));
 
 			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData((LPTSTR)Pathname, vTestDir);
 			if(bCheckResult == false)
@@ -340,7 +340,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 			else
 			{
 				m_TotalData.AddRootPath((LPTSTR)Pathname);
-				m_ListLog->WriteLogFile(_T("Check Base Info In All Data : PASS"));
+				m_ListLog->WriteLogFile(_T("Check Base File In All Data : PASS"));
 				CString strRefName, strTemp;
 				strRefName.Format(_T(""));
 				strTemp.Format(_T(""));
@@ -349,9 +349,9 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 				strRefName = strTemp.Mid(nIndex+1);
 				
 				// check same item in tree
-				BOOL bCheckResult = CheckExistDataInTree(strRefName);
+				BOOL bCheckTreeResult = CheckExistDataInTree(strRefName);
 				// Add To Tree
-				if(bCheckResult == FALSE)
+				if(bCheckTreeResult == FALSE)
 				{
 					AddToTreeRefName(strRefName);
 
@@ -481,7 +481,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 				{
 					m_TotalData.DeleteTestDirectoryPath(strSelectedConfigName);
 
-					if(strTemp == "")
+					if(strTemp == _T(""))
 					{
 						int nTemp = vTestDIrPath[i].ReverseFind('\\');
 						strTemp =  vTestDIrPath[i].Mid(nTemp+1);
@@ -493,7 +493,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 					nDelCount++;
 			}
 			
-			m_TotalData.DeleteFilPath(strSelectedConfigName);			
+			m_TotalData.DeleteFilePath(strSelectedConfigName);			
 
 			nDelCount = 0;
 			int nItemCount = m_ListCtrl_Main.GetItemCount();
@@ -523,11 +523,26 @@ BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
 
 void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::vector<CString> vTestName)
 {
-	for (int i=0; i<vTestName.size(); i++)
+	m_ListCtrl_Main.DeleteAllItems();
+
+	m_ListCtrl_Main.InsertItem(0, _T(""));
+	m_ListCtrl_Main.SetItem(0, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(0, 1,LVIF_TEXT,  _T("Reference File Check"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(0, 2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(0, 3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+
+
+	m_ListCtrl_Main.InsertItem(1, _T(""));
+	m_ListCtrl_Main.SetItem(1, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(1, 1,LVIF_TEXT,  _T("Naming Rule"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(1, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(1, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+
+	for (int i=2; i<vTestName.size()+2; i++)
 	{
 		m_ListCtrl_Main.InsertItem(i, _T(""));
 		m_ListCtrl_Main.SetItem(i, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i],0,0,0,NULL );
+		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i-2],0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 		m_ListCtrl_Main.SetItem(i, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
 		//CreateProgressBar(i,3);

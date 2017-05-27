@@ -27,7 +27,7 @@ public:
 	void AddTestDirectoryPath(std::vector<CString> invData);
 	void AddFilePath(std::vector<CString> invData);
 	void DeleteTestDirectoryPath(CString inTarget);
-	void DeleteFilPath(CString inTarget);
+	void DeleteFilePath(CString inTarget);
 	void GetTestDirectoryPath(std::vector<CString>& outvData);
 	void GetFilePath(std::vector<CString>& outvData);
 	void AddNewConfigData(std::vector<CString> inData);
@@ -40,6 +40,9 @@ public:
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
 	BOOL CheckCRC(std::vector<CString>& outData);
+	BOOL CheckCommonInformation();
+	bool CheckNamingRule();
+	BOOL ComparePreAndNew(CString inFilePath, CString inPre, CString inNew);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;

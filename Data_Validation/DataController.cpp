@@ -73,21 +73,21 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 					strFileName == _T("Thumbs.db") ) continue;
 
 				if (strFileName == strRefFile)
-				{
-					bRefFile = true;					
+				{					
 					strListLog.Format(_T("%s%s"),strRefFile, _T(": OK"));
-					//m_ListLogDlg.AddListLog(strListLog);
+					m_ListLog->WriteLogFile(strListLog);
+					bRefFile = true;
 				}
 				else if(strFileName == strRegister)
 				{
 					strListLog.Format(_T("%s%s"),strRegister, _T(": OK"));
-					//m_ListLogDlg.AddListLog(strListLog);
+					m_ListLog->WriteLogFile(strListLog);
 					bRegister = true;
 				}
 				else if(strFileName == _T("Spec.ini"))
 				{
 					strListLog.Format(_T("%s%s"),strFileName, _T(": OK"));
-					//m_ListLogDlg.AddListLog(strListLog);
+					m_ListLog->WriteLogFile(strListLog);
 					bSpec = true;
 				}
 
@@ -111,7 +111,7 @@ bool DataController::CheckBaseInfoInAllData(CString instrPath, std::vector<CStri
 			else
 			{
 				strListLog.Format(_T("%s%s"),strFileName, _T(": Fail"));
-				//m_ListLogDlg.AddListLog(strListLog);
+				m_ListLog->WriteLogFile(strListLog);
 				vResult.push_back(false);
 			}
 		}
@@ -351,7 +351,7 @@ void DataController::AddFilePath(std::vector<CString> invData)
 	}
 }
 
-void DataController::DeleteFilPath(CString inTarget)
+void DataController::DeleteFilePath(CString inTarget)
 {
 	int nDelCount = 0;
 	int nIndex = m_vFileVector.size();
@@ -432,14 +432,24 @@ BOOL DataController::Validation(CString inData)
 	InitAllData();
 
 	// Read Target Reference 
-	m_ListLog->WriteLogFile(_T("Read Target Reference Start"));
+	m_ListLog->WriteLogFile(_T("====================== Read Target Reference Start ======================"));
 	ReadReference();
-	m_ListLog->WriteLogFile(_T("Read Target Reference End"));
+	m_ListLog->WriteLogFile(_T("====================== Read Target Reference End ======================"));
 
 	// Read Base Reference
-	m_ListLog->WriteLogFile(_T("Read Base Reference Start"));
+	m_ListLog->WriteLogFile(_T("====================== Read Base Reference Start ======================"));
 	LoadXMLDataFiles(inData);
-	m_ListLog->WriteLogFile(_T("Read Base Reference End"));
+	m_ListLog->WriteLogFile(_T("====================== Read Base Reference End ======================"));
+
+	// 공동 데이터 확인
+	m_ListLog->WriteLogFile(_T("====================== Check Common Information Start ======================"));
+	CheckCommonInformation();
+	m_ListLog->WriteLogFile(_T("====================== Check Common Information End ======================"));
+
+	// Ref Naming rule checking
+	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
+	CheckNamingRule();
+	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End ======================"));
 
 	std::vector<CString> vTemp;
 	// Compare
@@ -447,18 +457,15 @@ BOOL DataController::Validation(CString inData)
 	CompareReference(vTemp, m_pListCompareResult);
 	m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
-	// Ref Naming rule checking
-	
 	// CRC 계산
 	m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
 	CheckCRC(vTemp);
 	m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
-	
-	// 공동 데이터 확인
 
 	// Result Log 쓰기
+	m_ListLog->WriteLogFile(_T("====================== Start Writing Log ======================"));
 	WriteResultLog(vTemp);
-
+	m_ListLog->WriteLogFile(_T("====================== End Writing Log ======================"));
 	return TRUE;
 }
 
@@ -664,8 +671,6 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 	strLogDirPath.Format("%s%s", strExePath,_T("\\ResultLog"));
 	CString strLogPath;
 	FILE* file;
-
-	m_ListLog->WriteLogFile(_T("===============Start Writing Log==============="));
 
 	CreateDirectory(strLogDirPath,NULL);
 	do 
@@ -885,12 +890,10 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 
 		fclose(file);
 	} while (FALSE);
-
-	m_ListLog->WriteLogFile(_T("===============End Writing Log==============="));
 }
 
 
-BOOL DataController::CheckCRC(std::vector<CString> outData)
+BOOL DataController::CheckCRC(std::vector<CString>& outData)
 {
 	BOOL bResult = FALSE;
 	CString strIniFIle;
@@ -927,6 +930,502 @@ BOOL DataController::CheckCRC(std::vector<CString> outData)
 			m_ListLog->WriteLogFile(strFailListLog);
 		}
 	}
+
+	return bResult;
+}
+
+
+BOOL DataController::CheckCommonInformation()
+{
+	BOOL bResult = FALSE;
+
+	CString strIniFIle;
+	CString strVERSION;
+	CString strers_ver;
+	CString strvsr_ver;
+	CString strbuild_num;
+	CString strBuild_Config;	
+	CString strFlex_Config;
+	CString strLens_Config;
+	CString strSubstrate_Config;
+	CString strIRCF_Config;
+	CString strStiffener_Config;
+	CString strAA_Machine;
+	CString strTemp;
+
+	strIniFIle.Format(_T(""));
+	strVERSION.Format(_T(""));
+	strers_ver.Format(_T(""));
+	strvsr_ver.Format(_T(""));
+	strbuild_num.Format(_T(""));
+	strBuild_Config.Format(_T(""));	
+	strFlex_Config.Format(_T(""));
+	strLens_Config.Format(_T(""));
+	strSubstrate_Config.Format(_T(""));
+	strIRCF_Config.Format(_T(""));
+	strStiffener_Config.Format(_T(""));
+	strAA_Machine.Format(_T(""));
+	strTemp.Format(_T(""));
+
+	CString strNVM;
+	CString	strProjectID;
+	CString strProject_Version;
+	CString	strIntegrator;
+	CString	strCameraBuild;
+	CString	strConfig;
+	CString	strIRCF;
+	CString	strSubstrate;
+	CString	strSensorType;
+	CString	strLens;
+	CString	strFlex;
+	CString	strStiffener;
+	CString strCarrier;
+	CString strSotfware;
+	CString strLensComponent_Revision_Major;
+	CString strLensComponent_Revision_Minor;
+	CString strColorShading_Revision;
+	CString strCISMaskID;
+	CString strLAST_STRING;
+	strNVM.Format(_T(""));
+	strProjectID.Format(_T(""));
+	strProject_Version.Format(_T(""));
+	strIntegrator.Format(_T(""));
+	strCameraBuild.Format(_T(""));
+	strConfig.Format(_T(""));
+	strIRCF.Format(_T(""));
+	strSubstrate.Format(_T(""));
+	strSensorType.Format(_T(""));
+	strLens.Format(_T(""));
+	strFlex.Format(_T(""));
+	strStiffener.Format(_T(""));
+	strCarrier.Format(_T(""));
+	strSotfware.Format(_T(""));
+	strLensComponent_Revision_Major.Format(_T(""));
+	strLensComponent_Revision_Minor.Format(_T(""));
+	strColorShading_Revision.Format(_T(""));
+	strCISMaskID.Format(_T(""));
+	strLAST_STRING.Format(_T(""));
+
+	CString strListLog;
+
+	TCHAR szBuf[MAX_PATH] = {0,};
+
+	for (int i=0; i<m_vFileVector.size(); i++)
+	{
+		if (m_vFileVector[i].Find("ItemVersion.ini") != -1)
+		{
+			strIniFIle = m_vFileVector[i];
+
+			GetPrivateProfileString(_T("LOG"), _T("VERSION"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strVERSION ==_T(""))
+			{
+				strVERSION.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strVERSION, strTemp);
+
+			GetPrivateProfileString(_T("LOG"), _T("ers_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strers_ver == _T(""))
+			{
+				strers_ver.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strers_ver, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("vsr_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strvsr_ver == _T(""))
+			{
+				strvsr_ver.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strvsr_ver, strTemp);
+
+			GetPrivateProfileString(_T("LOG"), _T("build_num"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strbuild_num == _T(""))
+			{
+				strbuild_num.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strbuild_num, strTemp);
+
+			GetPrivateProfileString(_T("LOG"), _T("Build_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strBuild_Config == _T(""))
+			{
+				strBuild_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strBuild_Config, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strFlex_Config == _T(""))
+			{
+				strFlex_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strFlex_Config, strTemp);
+
+			GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strLens_Config == _T(""))
+			{
+				strLens_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strLens_Config, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strSubstrate_Config == _T(""))
+			{
+				strSubstrate_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strSubstrate_Config, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strIRCF_Config == _T(""))
+			{
+				strIRCF_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strIRCF_Config, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strStiffener_Config == _T(""))
+			{
+				strStiffener_Config.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strStiffener_Config, strTemp);
+			
+			GetPrivateProfileString(_T("LOG"), _T("AA_Machine"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strAA_Machine == _T(""))
+			{
+				strAA_Machine.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strAA_Machine, strTemp);
+			
+		}
+		else if (m_vFileVector[i].Find("_Register.ini") != -1)
+		{
+			strIniFIle = m_vFileVector[i];
+			strIniFIle.Replace("_Register","");
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("ProjectID"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strProjectID == _T(""))
+			{
+				strProjectID.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strProjectID, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("Project_Version"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strProject_Version == _T(""))
+			{
+				strProject_Version.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strProject_Version, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("Integrator"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strIntegrator == _T(""))
+			{
+				strIntegrator.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strIntegrator, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("CameraBuild"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strCameraBuild == _T(""))
+			{
+				strCameraBuild.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strCameraBuild, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strConfig == _T(""))
+			{
+				strConfig.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strConfig, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("IRCF"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strIRCF == _T(""))
+			{
+				strIRCF.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strIRCF, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("Substrate"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strSubstrate == _T(""))
+			{
+				strSubstrate.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strSubstrate, strTemp);
+			//////////////////////////////////////////////////////////////////////////
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+
+			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strTemp.Format(_T("%s"), szBuf);
+			if (strNVM == _T(""))
+			{
+				strNVM.Format(_T("%s"), szBuf);
+			}
+			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+		}
+	}
+
+	return bResult;
+}
+
+BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString inNew)
+{
+	BOOL bResult = TRUE;
+	CString strListLog;
+
+	if (inNew.Find(inPre) == -1)
+	{
+		strListLog.Format("%s : %s Mismatch!",inFilePath, inNew);
+		m_ListLog->WriteLogFile(strListLog);
+		bResult = FALSE;
+	}
+	return bResult;
+}
+
+bool DataController::CheckNamingRule()
+{
+	bool bResult = FALSE;
+	CString strIniFIle;
+	CString strIniFlex;
+	CString strIniLens;
+	CString strIniSubstrate;
+	CString strIniIRCF;
+	CString strIniStiffener;
+	CString strIniCarrier;
+
+	strIniFlex.Format(_T(""));	
+	strIniLens.Format(_T(""));	
+	strIniSubstrate.Format(_T(""));
+	strIniIRCF.Format(_T(""));	
+	strIniStiffener.Format(_T(""));	
+	strIniCarrier.Format(_T(""));
+	
+	TCHAR szBuf[MAX_PATH] = {0,};
+
+	for (int i=0; i<m_vFileVector.size(); i++)
+	{
+		strIniFIle.Format("%s",m_vFileVector[i]);
+
+		if (strIniFIle.Find("ItemVersion.ini") != -1)
+		{	
+			GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniFlex.Format(_T("%s"), szBuf);
+			GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniLens.Format(_T("%s"), szBuf);
+			GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniSubstrate.Format(_T("%s"), szBuf);
+			GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniIRCF.Format(_T("%s"), szBuf);
+			GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniStiffener.Format(_T("%s"), szBuf);
+			GetPrivateProfileString(_T("LOG"), _T("Carrier_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strIniCarrier.Format(_T("%s"), szBuf);
+			break;
+		}
+	}
+	CString strListLog;
+	strListLog.Format(_T("Flex : %s"), strIniFlex);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("Lens : %s"), strIniLens);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("Substrate : %s"), strIniSubstrate);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("IRCF : %s"), strIniIRCF	);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("Stiffener : %s"), strIniStiffener);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("Carrier : %s"), strIniCarrier);
+	m_ListLog->WriteLogFile(strListLog);
+
+	// 현재 디렉토리 가져오기
+	CString strEXEPath;
+	strEXEPath.Format("");	
+	CString strINIPath;
+	strINIPath.Format("");	
+
+	strEXEPath = GetEXEDirectoryPath();
+
+	strINIPath.Format(_T("%s%s"), strEXEPath,_T("\\Data\\NamingRule.ini"));
+
+	CString strFlexInitial;
+	CString strLensInitial;
+	CString strSubstrateInitial;
+	CString strIRCFInitial;
+	CString strStiffnerInitial;
+	CString strCarrierInitial;
+
+	strFlexInitial.Format(_T(""));
+	strLensInitial.Format(_T(""));
+	strSubstrateInitial.Format(_T(""));
+	strIRCFInitial.Format(_T(""));
+	strStiffnerInitial.Format(_T(""));
+	strCarrierInitial.Format(_T(""));
+
+	// ini 파일에 적힌 이니셜 읽어오기
+	
+	GetPrivateProfileString(_T("Flex_Config"),		LPSTR(LPCTSTR(strIniFlex)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+	strFlexInitial.Format(_T("%s"), szBuf);
+
+	GetPrivateProfileString(_T("Lens_Config"),		LPSTR(LPCTSTR(strIniLens)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+	strLensInitial.Format(_T("%s"), szBuf);
+
+	GetPrivateProfileString(_T("Substrate_Config"),	LPSTR(LPCTSTR(strIniSubstrate)),_T(""), szBuf,	MAX_PATH, strINIPath);
+	strSubstrateInitial.Format(_T("%s"), szBuf);
+
+	GetPrivateProfileString(_T("IRCF_Config"),		LPSTR(LPCTSTR(strIniIRCF)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+	strIRCFInitial.Format(_T("%s"), szBuf);
+
+	GetPrivateProfileString(_T("Stiffener_Config"),	LPSTR(LPCTSTR(strIniStiffener)),_T(""), szBuf,	MAX_PATH, strINIPath);
+	strStiffnerInitial.Format(_T("%s"), szBuf);
+
+	GetPrivateProfileString(_T("Carrier_Config"),	LPSTR(LPCTSTR(strIniCarrier)),	_T(""), szBuf,	MAX_PATH, strINIPath);
+	strCarrierInitial.Format(_T("%s"), szBuf);
+	
+
+	strListLog.Format(_T("%s : %s"), strIniFlex , strFlexInitial);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("%s : %s"), strIniLens, 	strLensInitial);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("%s : %s"), strIniSubstrate, strSubstrateInitial);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("%s : %s"), strIniIRCF, strIRCFInitial	);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("%s : %s"), strIniStiffener, strStiffnerInitial);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("%s : %s"), strIniCarrier, strCarrierInitial);
+	m_ListLog->WriteLogFile(strListLog);
+
+
+	// Ref Name combination
+	CString strReferenceName;
+	strReferenceName.Format("%s%s%s_%s%s%s",strFlexInitial, strLensInitial, strSubstrateInitial, strCarrierInitial, strIRCFInitial, strStiffnerInitial);
+	CString strRefDirName;
+	strRefDirName.Format(_T(""));
+	
+	CString strRefTemp;
+
+	int nCount = 0;
+
+	CFileFind pFind;
+
+	for(int i=0; i<m_vDirVector.size();i++)
+	{
+		strRefDirName = m_vDirVector[i];
+		nCount = strRefDirName.ReverseFind('\\');
+		strRefDirName = strRefDirName.Mid(nCount+1);
+
+		if(strRefDirName.Find(strReferenceName) != -1)
+		{
+			strListLog.Format(_T("Naming Rule Check PASS %s : %s"), strRefDirName, strReferenceName);
+			m_ListLog->WriteLogFile(strListLog);
+			bResult = TRUE;
+		}
+		else
+		{
+			CString strTempFilePath;
+			strTempFilePath.Format(_T("%s\\%s%s"),m_vDirVector[i],strRefDirName,_T(".ini"));
+			if(pFind.FindFile(strTempFilePath))
+			{
+				strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
+				m_ListLog->WriteLogFile(strListLog);
+				bResult = FALSE;
+			}			
+		}
+	}
+	
 
 	return bResult;
 }
