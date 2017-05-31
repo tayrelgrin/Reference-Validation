@@ -6,6 +6,7 @@
 #include "tinyxml2.h"
 #include "ListLog.h"
 #include "CompareResult.h"
+#include "FailItem.h"
 
 class ConfigType
 {
@@ -33,6 +34,10 @@ public:
 	CString GetDOE(){return m_strDOE;};
 	void SetRootPath(CString inPath);
 	void SetListLog(ListLog* inData);
+	void SetListCtrl(CListCtrl* inData);
+	void SetProgressBar(CProgressCtrl* inData);
+	void SetFailItemPointer(FailItem* inData);
+	void SetTestDir(std::vector<CString> invData);
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;
@@ -46,5 +51,8 @@ private:
 	CList<TestType*> m_pListTestType;
 	bool m_bNewData;
 	ListLog* m_ListLog;
+	CListCtrl* m_ListCtrl;
+	CProgressCtrl* m_ProgressBar;
+	FailItem* m_pFailItems;
 };
 

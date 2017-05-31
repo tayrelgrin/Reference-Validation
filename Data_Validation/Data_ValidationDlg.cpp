@@ -60,6 +60,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST_MAIN, m_ListCtrl_Main);
 	DDX_Control(pDX, IDC_TAB1, m_TabCtrl_Main);
 	DDX_Control(pDX, IDC_TREE_MAIN, m_TreeMain);
+	DDX_Control(pDX, IDC_PROGRESS1, m_Progressctrl);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -116,10 +117,10 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
 
-	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 80,  -1);
-	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 130, -1);
-	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 100, -1);
-	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 200, -1);
+	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 100,  -1);
+	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 180, -1);
+	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 200, -1);
+	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 260, -1);
 
 	m_TabCtrl_Main.InsertItem(1,_T("List Log"));
 	m_TabCtrl_Main.InsertItem(2,_T("Fail Item"));
@@ -159,7 +160,11 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	m_ListLog->CreateLogFile();
 	m_ListLog->WriteLogFile(_T("Start Validation SW"));
 	m_TotalData.SetListLog(m_ListLog);
+	m_TotalData.SetListCtrl(&m_ListCtrl_Main);
 	
+	m_Progressctrl.SetRange(0,100);
+	m_TotalData.SetProgressBar(&m_Progressctrl);
+	m_TotalData.SetFailItemPointer(&m_FailItemDlg);
 	m_TotalData.LoadXMLFileListInValue();
 	m_ListLog->WriteLogFile(_T("Load XML File List From Value Directory"));
 
@@ -244,6 +249,8 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			m_ButtonStop.EnableWindow(TRUE);
 			m_ButtonStop.ShowWindow(TRUE);
 
+			UpdateWindow();
+
 			// ¸¶¿ì½º wait start
 			BeginWaitCursor();
 
@@ -259,7 +266,6 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			// Validation start
 			m_TotalData.Validation(strConfigName);
-
 			m_ListLog->WriteLogFile(_T("Reference Validation is done"));
 
 			m_ButtonStop.EnableWindow(FALSE);
@@ -518,6 +524,23 @@ BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
 {
 	BOOL bResult = FALSE;
 
+	int nItemCount = m_TreeMain.GetCount();
+	HTREEITEM hTemp, hNext;
+
+
+	hNext = m_TreeMain.GetRootItem();
+	hTemp = hNext;
+
+	for (int i = 0; i < nItemCount; i++)
+	{
+		if(strRefName == m_TreeMain.GetItemText(hNext))
+		{
+			bResult = TRUE;
+			break;
+		}
+		hNext = m_TreeMain.GetNextSiblingItem(hTemp);
+
+	}
 	return bResult;
 }
 
@@ -531,18 +554,23 @@ void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::v
 	m_ListCtrl_Main.SetItem(0, 2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
 	m_ListCtrl_Main.SetItem(0, 3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
 
-
 	m_ListCtrl_Main.InsertItem(1, _T(""));
 	m_ListCtrl_Main.SetItem(1, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(1, 1,LVIF_TEXT,  _T("Naming Rule"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(1, 1,LVIF_TEXT,  _T("Common Value Check"),0,0,0,NULL );
 	m_ListCtrl_Main.SetItem(1, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 	m_ListCtrl_Main.SetItem(1, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
 
-	for (int i=2; i<vTestName.size()+2; i++)
+	m_ListCtrl_Main.InsertItem(2, _T(""));
+	m_ListCtrl_Main.SetItem(2, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(2, 1,LVIF_TEXT,  _T("Naming Rule"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(2, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(2, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+
+	for (int i=3; i<vTestName.size()+3; i++)
 	{
 		m_ListCtrl_Main.InsertItem(i, _T(""));
 		m_ListCtrl_Main.SetItem(i, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i-2],0,0,0,NULL );
+		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i-3],0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 		m_ListCtrl_Main.SetItem(i, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
 		//CreateProgressBar(i,3);

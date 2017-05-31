@@ -21,5 +21,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
+	void AddFailItem(CString inItem, CString inPath);
+public:
 	CListCtrl m_ListCtrl_FailItem;
+	
 };

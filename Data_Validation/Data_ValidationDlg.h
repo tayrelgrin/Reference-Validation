@@ -69,4 +69,5 @@ public:
 	virtual void PostNcDestroy();
 	afx_msg void OnBnClickedButtonListlog();
 	afx_msg void OnBnClickedButtonResultlog();
+	CProgressCtrl m_Progressctrl;
 };

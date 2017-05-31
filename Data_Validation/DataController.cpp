@@ -435,20 +435,37 @@ BOOL DataController::Validation(CString inData)
 	m_ListLog->WriteLogFile(_T("====================== Read Target Reference Start ======================"));
 	ReadReference();
 	m_ListLog->WriteLogFile(_T("====================== Read Target Reference End ======================"));
+	m_ProgressBar->SetStep(3);
+	m_ProgressBar->StepIt();
 
 	// Read Base Reference
 	m_ListLog->WriteLogFile(_T("====================== Read Base Reference Start ======================"));
 	LoadXMLDataFiles(inData);
 	m_ListLog->WriteLogFile(_T("====================== Read Base Reference End ======================"));
+	m_ProgressBar->StepIt();
 
 	// 공동 데이터 확인
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information Start ======================"));
-	CheckCommonInformation();
+	BOOL bResult = CheckCommonInformation();
+	if (bResult)
+		m_ListCtrl->SetItem(1,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);	
+	else
+		m_ListCtrl->SetItem(1,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+	m_ListCtrl->SetItem(1,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+	m_ListCtrl->Update(1);
+	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information End ======================"));
 
 	// Ref Naming rule checking
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
-	CheckNamingRule();
+	bool bCheckResult = CheckNamingRule();
+	if (bCheckResult)	
+		m_ListCtrl->SetItem(2,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);	
+	else
+		m_ListCtrl->SetItem(2,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+	m_ListCtrl->SetItem(2,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+	m_ListCtrl->Update(2);
+	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End ======================"));
 
 	std::vector<CString> vTemp;
@@ -460,11 +477,15 @@ BOOL DataController::Validation(CString inData)
 	// CRC 계산
 	m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
 	CheckCRC(vTemp);
+	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
 
 	// Result Log 쓰기
 	m_ListLog->WriteLogFile(_T("====================== Start Writing Log ======================"));
 	WriteResultLog(vTemp);
+	int nProgressValue = m_ProgressBar->GetPos();
+	m_ProgressBar->SetStep(100-nProgressValue);
+	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== End Writing Log ======================"));
 	return TRUE;
 }
@@ -489,10 +510,12 @@ void DataController::LoadXMLDataFiles(CString inData)
 	
 	m_ListLog->WriteLogFile(_T("Load Data Files"));
 	pAddValue->SetListLog(m_ListLog);
+	pAddValue->SetListCtrl(m_ListCtrl);
 	pAddValue->LoadDataFiles(strValuePath);
 
 	m_ListLog->WriteLogFile(_T("LoadDataFiles") + strSettingPath);
 	pAddSetting->SetListLog(m_ListLog);
+	pAddSetting->SetListCtrl(m_ListCtrl);
 	pAddSetting->LoadDataFiles(strSettingPath);
 
 	pAddValue->SetProject(strPrj);
@@ -618,7 +641,10 @@ BOOL DataController::CompareReference(std::vector<CString> outResult, CList<Comp
 			cNewConfig->SetTestName(strBase);
 			cNewConfig->SetFileName(_T("Target Config"));
 			cNewConfig->SetItemName(strTarget);
-			
+			pTargetRef->SetListCtrl(m_ListCtrl);
+			pTargetRef->SetProgressBar(m_ProgressBar);
+			pTargetRef->SetFailItemPointer(m_pFailItems);
+			pTargetRef->SetTestDir(m_vDirVector);
 			outDifferent.AddTail(cNewConfig);
 
 			pTargetRef->ConfigCompare(pBaseRef, vFailList, outDifferent);
@@ -636,6 +662,11 @@ BOOL DataController::CompareReference(std::vector<CString> outResult, CList<Comp
 void DataController::SetListLog(ListLog* inData)
 {
 	m_ListLog = inData;
+}
+
+void DataController::SetListCtrl(CListCtrl* inData)
+{
+	m_ListCtrl = inData;
 }
 
 
@@ -938,6 +969,7 @@ BOOL DataController::CheckCRC(std::vector<CString>& outData)
 BOOL DataController::CheckCommonInformation()
 {
 	BOOL bResult = FALSE;
+	BOOL bTotalResult = TRUE;
 
 	CString strIniFIle;
 	CString strVERSION;
@@ -1022,88 +1054,190 @@ BOOL DataController::CheckCommonInformation()
 			{
 				strVERSION.Format(_T("%s"), szBuf);
 			}
-			bResult = ComparePreAndNew(strListLog, strVERSION, strTemp);
+			bResult = ComparePreAndNew(strIniFIle, strVERSION, strTemp);
+			if (!bResult)
+			{
+				strListLog.Format(_T("%s Base Data Fail"), szBuf);
+				m_ListLog->WriteLogFile(strListLog);
+				bTotalResult = FALSE;
+			}
 
-			GetPrivateProfileString(_T("LOG"), _T("ers_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strers_ver == _T(""))
+			if (bResult)
 			{
-				strers_ver.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("ers_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strers_ver == _T(""))
+				{
+					strers_ver.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strers_ver, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strers_ver, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("vsr_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strvsr_ver == _T(""))
+			if (bResult)
 			{
-				strvsr_ver.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("vsr_ver"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strvsr_ver == _T(""))
+				{
+					strvsr_ver.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strvsr_ver, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strvsr_ver, strTemp);
+			
 
-			GetPrivateProfileString(_T("LOG"), _T("build_num"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strbuild_num == _T(""))
+			if (bResult)
 			{
-				strbuild_num.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("build_num"),			_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strbuild_num == _T(""))
+				{
+					strbuild_num.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strbuild_num, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strbuild_num, strTemp);
+			
 
-			GetPrivateProfileString(_T("LOG"), _T("Build_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strBuild_Config == _T(""))
+			if (bResult)
 			{
-				strBuild_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Build_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strBuild_Config == _T(""))
+				{
+					strBuild_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strBuild_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strBuild_Config, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strFlex_Config == _T(""))
+			
+			if (bResult)
 			{
-				strFlex_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strFlex_Config == _T(""))
+				{
+					strFlex_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strFlex_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strFlex_Config, strTemp);
+			
 
-			GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strLens_Config == _T(""))
+			if (bResult)
 			{
-				strLens_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strLens_Config == _T(""))
+				{
+					strLens_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strLens_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strLens_Config, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strSubstrate_Config == _T(""))
+			
+			if (bResult)
 			{
-				strSubstrate_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strSubstrate_Config == _T(""))
+				{
+					strSubstrate_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strSubstrate_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strSubstrate_Config, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strIRCF_Config == _T(""))
+			if (bResult)
 			{
-				strIRCF_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strIRCF_Config == _T(""))
+				{
+					strIRCF_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strIRCF_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strIRCF_Config, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strStiffener_Config == _T(""))
+			
+			if (bResult)
 			{
-				strStiffener_Config.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strStiffener_Config == _T(""))
+				{
+					strStiffener_Config.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strStiffener_Config, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strStiffener_Config, strTemp);
 			
-			GetPrivateProfileString(_T("LOG"), _T("AA_Machine"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strAA_Machine == _T(""))
+			
+			if (bResult)
 			{
-				strAA_Machine.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("AA_Machine"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strAA_Machine == _T(""))
+				{
+					strAA_Machine.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strAA_Machine, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strAA_Machine, strTemp);
-			
 		}
 		else if (m_vFileVector[i].Find("_Register.ini") != -1)
 		{
@@ -1116,139 +1250,290 @@ BOOL DataController::CheckCommonInformation()
 			{
 				strNVM.Format(_T("%s"), szBuf);
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
-
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("ProjectID"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strProjectID == _T(""))
+			bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+			if (!bResult)
 			{
-				strProjectID.Format(_T("%s"), szBuf);
+				strListLog.Format(_T("%s Base Data Fail"), szBuf);
+				m_ListLog->WriteLogFile(strListLog);
+				bTotalResult = FALSE;
 			}
-			bResult = ComparePreAndNew(strListLog, strProjectID, strTemp);
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("Project_Version"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strProject_Version == _T(""))
+			if(bResult)
 			{
-				strProject_Version.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("ProjectID"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strProjectID == _T(""))
+				{
+					strProjectID.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strProjectID, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strProject_Version, strTemp);
+		
+			if (bResult)
+			{
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("Project_Version"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strProject_Version == _T(""))
+				{
+					strProject_Version.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strProject_Version, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}
+			
+			if(bResult)
+			{
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("Integrator"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strIntegrator == _T(""))
+				{
+					strIntegrator.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strIntegrator, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}
+			
+			if(bResult)
+			{
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("CameraBuild"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strCameraBuild == _T(""))
+				{
+					strCameraBuild.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strCameraBuild, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}
+			
+			if (bResult)
+			{
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strConfig == _T(""))
+				{
+					strConfig.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strConfig, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("Integrator"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strIntegrator == _T(""))
+			if (bResult)
 			{
-				strIntegrator.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strIntegrator, strTemp);
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("CameraBuild"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strCameraBuild == _T(""))
+			if (bResult)
 			{
-				strCameraBuild.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strCameraBuild, strTemp);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("IRCF"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strIRCF == _T(""))
+				{
+					strIRCF.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strIRCF, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}			
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strConfig == _T(""))
+			if (bResult)
 			{
-				strConfig.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("Substrate"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strSubstrate == _T(""))
+				{
+					strSubstrate.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strSubstrate, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strConfig, strTemp);
-
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
-			{
-				strNVM.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
-
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("IRCF"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strIRCF == _T(""))
-			{
-				strIRCF.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strIRCF, strTemp);
-
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("Substrate"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strSubstrate == _T(""))
-			{
-				strSubstrate.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strSubstrate, strTemp);
+			
 			//////////////////////////////////////////////////////////////////////////
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}			
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}			
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
+			
+			if (bResult)
+			{
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
+			}			
 
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
+			if (bResult)
 			{
-				strNVM.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strNVM == _T(""))
+				{
+					strNVM.Format(_T("%s"), szBuf);
+				}
+				bResult = ComparePreAndNew(strIniFIle, strNVM, strTemp);
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = FALSE;
+				}
 			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
-
-			GetPrivateProfileString(_T("OTP_WRITE"), _T("NVM"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strTemp.Format(_T("%s"), szBuf);
-			if (strNVM == _T(""))
-			{
-				strNVM.Format(_T("%s"), szBuf);
-			}
-			bResult = ComparePreAndNew(strListLog, strNVM, strTemp);
 		}
 	}
 
-	return bResult;
+	return bTotalResult;
 }
 
 BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString inNew)
@@ -1258,8 +1543,9 @@ BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 
 	if (inNew.Find(inPre) == -1)
 	{
-		strListLog.Format("%s : %s Mismatch!",inFilePath, inNew);
+		strListLog.Format("%s : %s, %s Mismatch!",inFilePath, inPre, inNew);
 		m_ListLog->WriteLogFile(strListLog);
+		m_pFailItems->AddFailItem(inNew, inFilePath);
 		bResult = FALSE;
 	}
 	return bResult;
@@ -1400,6 +1686,8 @@ bool DataController::CheckNamingRule()
 	int nCount = 0;
 
 	CFileFind pFind;
+	
+	bool bFailFlag = false;
 
 	for(int i=0; i<m_vDirVector.size();i++)
 	{
@@ -1411,7 +1699,6 @@ bool DataController::CheckNamingRule()
 		{
 			strListLog.Format(_T("Naming Rule Check PASS %s : %s"), strRefDirName, strReferenceName);
 			m_ListLog->WriteLogFile(strListLog);
-			bResult = TRUE;
 		}
 		else
 		{
@@ -1421,11 +1708,28 @@ bool DataController::CheckNamingRule()
 			{
 				strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
 				m_ListLog->WriteLogFile(strListLog);
-				bResult = FALSE;
+				m_pFailItems->AddFailItem(strReferenceName,strRefDirName);
+				bFailFlag = true;
 			}			
 		}
 	}
 	
+	if (bFailFlag)
+	{
+		bResult = false;
+	}
+	else
+		bResult = true;
 
 	return bResult;
+}
+
+void DataController::SetProgressBar(CProgressCtrl* inData)
+{
+	m_ProgressBar = inData;
+}
+
+void DataController:: SetFailItemPointer(FailItem* inData)
+{
+	m_pFailItems = inData;
 }

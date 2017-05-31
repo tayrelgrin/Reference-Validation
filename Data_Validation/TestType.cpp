@@ -397,11 +397,15 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 	POSITION pTargetListPos = pListTargetFile.GetHeadPosition();
 	FileType* pThis;
 	FileType* pTarget;
+	bool bFailFlag = false;
+	bool bCompareRusult = false;
+	int nIndex = 0;
 
 	while(pThisListPos)
 	{
 		pThis = m_pFIleList.GetNext(pThisListPos);
 		pTargetListPos = pListTargetFile.GetHeadPosition();
+		nIndex = 0;
 
 		while (pTargetListPos)
 		{
@@ -414,7 +418,11 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outResult.AddTail(cNewConfig);
 
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail,outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail,outResult);
+				if (!bCompareRusult)
+				{
+					bFailFlag = true;
+				}
 				break;
 			}
 			else if (strTargetRegister.Find(pTarget->GetFileName()) != -1 &&  strBaseRegister.Find(pThis->GetFileName()) != -1 )
@@ -424,7 +432,11 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outResult.AddTail(cNewConfig);
 
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail, outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail, outResult);
+				if (!bCompareRusult)
+				{
+					bFailFlag = true;
+				}
 				break;
 			}
 			else if(pThis->GetFileName()==pTarget->GetFileName())
@@ -434,10 +446,20 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outResult.AddTail(cNewConfig);
 
 				outFail.push_back(pThis->GetFileName());
-				pThis->CompareFile(pTarget, outFail, outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail, outResult);
+				if (!bCompareRusult)
+				{
+					bFailFlag = true;
+				}
 				break;
 			}
+			nIndex++;
 		}
+	}
+
+	if (bFileCount && !bFailFlag)
+	{
+		bResult = TRUE;
 	}
 
 	return bResult;
@@ -456,4 +478,9 @@ void TestType::GetDataList(CList<FileType*>& outData)
 		pTemp = m_pFIleList.GetNext(pPos);
 		outData.AddTail(pTemp);
 	}
+}
+
+void TestType:: SetFailItemPointer(FailItem* inData)
+{
+	m_pFailItems = inData;
 }

@@ -5,6 +5,7 @@
 #include "tinyxml2.h"
 #include "ListLog.h"
 #include "CompareResult.h"
+#include "FailItem.h"
 
 class TestType
 {
@@ -27,9 +28,10 @@ public:
 	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
 	BOOL CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
 	void GetDataList(CList<FileType*>& outData);
-
+	void SetFailItemPointer(FailItem* inData);
 private:
 	CList<FileType*> m_pFIleList;
 	CString m_strTestName;
+	FailItem* m_pFailItems;
 };
 

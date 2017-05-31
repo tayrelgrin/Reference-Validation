@@ -4,6 +4,7 @@
 #include "resource.h"
 #include "ListLog.h"
 #include "CRC.h"
+#include "FailItem.h"
 
 class DataController
 {
@@ -11,6 +12,7 @@ public:
 	DataController();
 	~DataController(void);
 	void SetListLog(ListLog* inData);
+	void SetListCtrl(CListCtrl* inData);
 	void LoadXMLFileListInValue();
 	void LoadXMLFileListInSetting();
 	void LoadXMLValueFile(CString inData);
@@ -43,6 +45,8 @@ public:
 	BOOL CheckCommonInformation();
 	bool CheckNamingRule();
 	BOOL ComparePreAndNew(CString inFilePath, CString inPre, CString inNew);
+	void SetProgressBar(CProgressCtrl* inData);
+	void SetFailItemPointer(FailItem* inData);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
@@ -53,6 +57,9 @@ private:
 	std::vector<CString> m_vDirVector;
 	std::vector<CString> m_vRootDIr;
 	ListLog* m_ListLog;
+	CListCtrl* m_ListCtrl;
+	CProgressCtrl* m_ProgressBar;
 	CString m_strLogPath;
 	CCRC m_cCRC;
+	FailItem* m_pFailItems;
 };

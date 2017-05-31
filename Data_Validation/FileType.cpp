@@ -349,7 +349,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 	BasicData* pTarget;
 	bool bFlagSection = false;
 	bool bFlagItem = false;
-
+	BOOL bCompareResult = TRUE;
 	while(pThisListPos )
 	{
 		pThis = m_pDataList.GetNext(pThisListPos);		
@@ -409,14 +409,14 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 
 					if (pThis->getValue()!=pTarget->getValue())
 					{
-						strFail.Format(_T("%s : %s %s %s %s : %s"),_T("Fail Item"),m_strFileName , pThis->getSection(), pThis->getItem(),pThis->getValue(), pTarget->getValue());
+						strFail.Format(_T("Fail Item : (%s %s %s) %s : %s"), m_strFileName, pThis->getSection(), pThis->getItem(), pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
 						cNewResult->SetCompareResult(FALSE);
 						outResult.AddTail(cNewResult);
+						bCompareResult = FALSE;
 					}
  					else if (pThis->getValue()==pTarget->getValue())
  					{
-
 						cNewResult->SetCompareResult(TRUE);
  						outResult.AddTail(cNewResult);
  					}
@@ -425,20 +425,17 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 				}
 				bFlagSection = true;
 			}
-// 			if (strPreSection != pTarget->getSection())
-// 			{
-// 				break;
-// 			}
 		}
 		if (bFlagSection && !bFlagItem)
 		{
-			strFail.Format(_T("%s : %s %s : %s ","Fail Item"),m_strFileName , pThis->getSection(),  _T("Not Exist Item"));
+			strFail.Format(_T("Fail Item : %s %s : Not Exist Item "), m_strFileName, pThis->getSection());
 			outFail.push_back(strFail);
-			strFail.Format(_T("%s : %s %s : %s","Fail Item"),m_strFileName , pThis->getItem(), _T("Not Exist Value"));
+			strFail.Format(_T("Fail Item : %s %s : Not Exist Value"), m_strFileName, pThis->getItem());
 			outFail.push_back(strFail);
 			break;
+			bCompareResult = FALSE;
 		}
 	}
 
-	return TRUE;
+	return bCompareResult;
 }

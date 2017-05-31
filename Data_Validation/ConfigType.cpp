@@ -182,6 +182,12 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 	TestType* pThis;
 	TestType* pTarget;
 
+	BOOL bCompareResult = FALSE; 
+	int nCount = 3;
+	int nItemCount = pListTargetTest.GetCount();
+	m_ProgressBar->SetStep((70/nItemCount));
+	int nTestCount = 0;
+
 	while(pThisListPos)
 	{
 		pThis = m_pListTestType.GetNext(pThisListPos);
@@ -200,15 +206,48 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetTestName(strTargetName);
 				outDifferent.AddTail(cNewConfig);
+				pThis->SetFailItemPointer(m_pFailItems);
+				std::vector<CString> vTempFail;
+				CString strTestDir = m_vTestDirPath[nTestCount++];
+				bCompareResult = pThis->CompareTest(pTarget, vTempFail, outDifferent);
 
-				pThis->CompareTest(pTarget, outFail, outDifferent);
+				for (int i = 0; i < vTempFail.size(); i++)
+				{
+					if (vTempFail[i].Find(_T("Fail Item")) != -1)
+					{
+						int nIndexCount = vTempFail[i].Find(')');
+						int nIndexCount1 = vTempFail[i].Find('(');
+						CString strItem = vTempFail[i].Left(nIndexCount);
+						CString strPath = vTempFail[i].Mid(nIndexCount+1);
+						CString strFailTest;
+						strFailTest.Format(_T(""));
+						
+						strItem = strItem.Mid(nIndexCount1+1);
+						AfxExtractSubString(strFailTest, strItem,0,' ');
+						strItem.Replace(strFailTest,"");
+						strPath = strTestDir + _T("\\") + strFailTest;
+						m_pFailItems->AddFailItem(strItem,strPath);
+					}
+					outFail.push_back(vTempFail[i]);
+				}
 
+				if(bCompareResult)
+				{
+					m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+				}
+				else
+				{
+					m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+				}
+				m_ListCtrl->SetItem(nCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+				m_ListCtrl->EnsureVisible(nCount,TRUE);
+				m_ListCtrl->Update(nCount++);				
+				m_ProgressBar->StepIt();
 				break;
 			}
 		}
 	}
 	
-	// TestType->Compare ผ๖วเ
 	return TRUE;
 }
 
@@ -235,4 +274,26 @@ void ConfigType::SetRootPath(CString inPath)
 void ConfigType::SetListLog(ListLog* inData)
 {
 	m_ListLog = inData;
+}
+
+void ConfigType::SetListCtrl(CListCtrl* inData)
+{
+	m_ListCtrl = inData;
+}
+
+void ConfigType::SetProgressBar(CProgressCtrl* inData)
+{
+	m_ProgressBar = inData;
+}
+
+void ConfigType:: SetFailItemPointer(FailItem* inData)
+{
+	m_pFailItems = inData;
+}
+
+void ConfigType::SetTestDir(std::vector<CString> invData)
+{
+	m_vTestDirPath.clear();
+
+	m_vTestDirPath.assign(invData.begin(), invData.end());
 }
