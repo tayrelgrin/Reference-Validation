@@ -42,7 +42,7 @@ public:
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
 	BOOL CheckCRC(std::vector<CString>& outData);
-	BOOL CheckCommonInformation();
+	void CheckCommonInformation();
 	bool CheckNamingRule();
 	BOOL ComparePreAndNew(CString inFilePath, CString inPre, CString inNew);
 	void SetProgressBar(CProgressCtrl* inData);
