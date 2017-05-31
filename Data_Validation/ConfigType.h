@@ -26,7 +26,7 @@ public:
 	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
 	void InitList();
 	/*void InitListAndVectors();*/
-	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
+	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent, int& inCount);
 	void GetDataList(CList<TestType*>& outData);
 	CString GetProject(){return m_strPrj;};
 	CString GetBuildNum(){return m_strBuildNum;};

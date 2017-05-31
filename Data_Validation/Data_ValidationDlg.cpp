@@ -250,6 +250,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			m_ButtonStop.ShowWindow(TRUE);
 
 			UpdateWindow();
+			m_FailItemDlg.ClearItems();
 
 			// 마우스 wait start
 			BeginWaitCursor();
@@ -275,6 +276,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			// 마우스 wait end
 			EndWaitCursor();
+			UpdateWindow();
 		}
 	}while(false);	
 }
@@ -546,8 +548,6 @@ BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
 
 void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::vector<CString> vTestName)
 {
-	m_ListCtrl_Main.DeleteAllItems();
-
 	m_ListCtrl_Main.InsertItem(0, _T(""));
 	m_ListCtrl_Main.SetItem(0, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
 	m_ListCtrl_Main.SetItem(0, 1,LVIF_TEXT,  _T("Reference File Check"),0,0,0,NULL );

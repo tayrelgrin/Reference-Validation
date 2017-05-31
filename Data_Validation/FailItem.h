@@ -22,6 +22,9 @@ protected:
 public:
 	virtual BOOL OnInitDialog();
 	void AddFailItem(CString inItem, CString inPath);
+	void ClearItems();
+	afx_msg void OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMClickListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
 public:
 	CListCtrl m_ListCtrl_FailItem;
 	

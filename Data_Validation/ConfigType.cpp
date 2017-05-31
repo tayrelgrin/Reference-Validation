@@ -169,7 +169,7 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 }
 
 
-BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent)
+BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent, int& inCount)
 {
 	CList<TestType*> pListTargetTest;
 
@@ -183,9 +183,8 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 	TestType* pTarget;
 
 	BOOL bCompareResult = FALSE; 
-	int nCount = 3;
 	int nItemCount = pListTargetTest.GetCount();
-	m_ProgressBar->SetStep((70/nItemCount));
+	m_ProgressBar->SetStep((75/nItemCount));
 	int nTestCount = 0;
 
 	while(pThisListPos)
@@ -233,15 +232,15 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 
 				if(bCompareResult)
 				{
-					m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
 				}
 				else
 				{
-					m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
 				}
-				m_ListCtrl->SetItem(nCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-				m_ListCtrl->EnsureVisible(nCount,TRUE);
-				m_ListCtrl->Update(nCount++);				
+				m_ListCtrl->SetItem(inCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+				m_ListCtrl->EnsureVisible(inCount,TRUE);
+				m_ListCtrl->Update(inCount++);				
 				m_ProgressBar->StepIt();
 				break;
 			}

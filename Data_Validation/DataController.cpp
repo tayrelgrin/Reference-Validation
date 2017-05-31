@@ -430,6 +430,7 @@ BOOL DataController::Validation(CString inData)
 {
 	m_ListLog->WriteLogFile(_T("Init All Lists"));
 	InitAllData();
+	int nCount = 1;
 
 	// Read Target Reference 
 	m_ListLog->WriteLogFile(_T("====================== Read Target Reference Start ======================"));
@@ -448,30 +449,27 @@ BOOL DataController::Validation(CString inData)
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information Start ======================"));
 	BOOL bResult = CheckCommonInformation();
 	if (bResult)
-		m_ListCtrl->SetItem(1,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);	
+		m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);	
 	else
-		m_ListCtrl->SetItem(1,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
-	m_ListCtrl->SetItem(1,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-	m_ListCtrl->Update(1);
+		m_ListCtrl->SetItem(nCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+	m_ListCtrl->SetItem(nCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+	m_ListCtrl->Update(nCount++);
 	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information End ======================"));
 
 	// Ref Naming rule checking
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
-	bool bCheckResult = CheckNamingRule();
-	if (bCheckResult)	
-		m_ListCtrl->SetItem(2,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);	
-	else
-		m_ListCtrl->SetItem(2,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
-	m_ListCtrl->SetItem(2,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-	m_ListCtrl->Update(2);
+	CheckNamingRule();
+	
+	m_ListCtrl->SetItem(nCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+	m_ListCtrl->Update(nCount++);
 	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End ======================"));
 
 	std::vector<CString> vTemp;
 	// Compare
 	m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
-	CompareReference(vTemp, m_pListCompareResult);
+	CompareReference(vTemp, m_pListCompareResult, nCount);
 	m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
 	// CRC 계산
@@ -614,9 +612,9 @@ void DataController::GetValueXMLFileList(std::vector<CString>& outData)
 }
 
 
-BOOL DataController::CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent)
+int DataController::CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent, int inCount)
 {
-	BOOL bResult = FALSE;
+	//BOOL bResult = FALSE;
 	POSITION pBaseRefPos = m_pListConfig.GetHeadPosition();
 	POSITION pTargetRefPos = m_pListTargetRefConfig.GetHeadPosition();
 	CString strTarget, strBase;
@@ -647,7 +645,8 @@ BOOL DataController::CompareReference(std::vector<CString> outResult, CList<Comp
 			pTargetRef->SetTestDir(m_vDirVector);
 			outDifferent.AddTail(cNewConfig);
 
-			pTargetRef->ConfigCompare(pBaseRef, vFailList, outDifferent);
+			pTargetRef->ConfigCompare(pBaseRef, vFailList, outDifferent, inCount);
+			inCount += 4;
 		}
 	}
 
@@ -655,8 +654,8 @@ BOOL DataController::CompareReference(std::vector<CString> outResult, CList<Comp
 	{
 		m_ListLog->WriteLogFile(vFailList[i]);
 	}
-
-	return bResult;
+	return inCount;
+	//return bResult;
 }
 
 void DataController::SetListLog(ListLog* inData)
@@ -1562,7 +1561,7 @@ bool DataController::CheckNamingRule()
 	CString strIniStiffener;
 	CString strIniCarrier;
 
-	strIniFlex.Format(_T(""));	
+	strIniFlex.Format(_T(""));
 	strIniLens.Format(_T(""));	
 	strIniSubstrate.Format(_T(""));
 	strIniIRCF.Format(_T(""));	
@@ -1571,155 +1570,230 @@ bool DataController::CheckNamingRule()
 	
 	TCHAR szBuf[MAX_PATH] = {0,};
 
-	for (int i=0; i<m_vFileVector.size(); i++)
+	std::vector<bool> vResult;
+
+	for (int nConfigFileCount = 0; nConfigFileCount < m_vRootDIr.size(); nConfigFileCount++)
 	{
-		strIniFIle.Format("%s",m_vFileVector[i]);
+		int nDirCount = 0;
+		int nRealDir = 0;
+		int nFileCount = 0;
+		int nStartIndex = -1;
+		int nEndIndex = -1;
+		int nStartFileIndex = -1;
+		int nEndFileIndex = -1;
 
-		if (strIniFIle.Find("ItemVersion.ini") != -1)
-		{	
-			GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniFlex.Format(_T("%s"), szBuf);
-			GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniLens.Format(_T("%s"), szBuf);
-			GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniSubstrate.Format(_T("%s"), szBuf);
-			GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniIRCF.Format(_T("%s"), szBuf);
-			GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniStiffener.Format(_T("%s"), szBuf);
-			GetPrivateProfileString(_T("LOG"), _T("Carrier_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
-			strIniCarrier.Format(_T("%s"), szBuf);
-			break;
-		}
-	}
-	CString strListLog;
-	strListLog.Format(_T("Flex : %s"), strIniFlex);
-	m_ListLog->WriteLogFile(strListLog);
+		CFileFind pFinder;
 
-	strListLog.Format(_T("Lens : %s"), strIniLens);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("Substrate : %s"), strIniSubstrate);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("IRCF : %s"), strIniIRCF	);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("Stiffener : %s"), strIniStiffener);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("Carrier : %s"), strIniCarrier);
-	m_ListLog->WriteLogFile(strListLog);
-
-	// 현재 디렉토리 가져오기
-	CString strEXEPath;
-	strEXEPath.Format("");	
-	CString strINIPath;
-	strINIPath.Format("");	
-
-	strEXEPath = GetEXEDirectoryPath();
-
-	strINIPath.Format(_T("%s%s"), strEXEPath,_T("\\Data\\NamingRule.ini"));
-
-	CString strFlexInitial;
-	CString strLensInitial;
-	CString strSubstrateInitial;
-	CString strIRCFInitial;
-	CString strStiffnerInitial;
-	CString strCarrierInitial;
-
-	strFlexInitial.Format(_T(""));
-	strLensInitial.Format(_T(""));
-	strSubstrateInitial.Format(_T(""));
-	strIRCFInitial.Format(_T(""));
-	strStiffnerInitial.Format(_T(""));
-	strCarrierInitial.Format(_T(""));
-
-	// ini 파일에 적힌 이니셜 읽어오기
-	
-	GetPrivateProfileString(_T("Flex_Config"),		LPSTR(LPCTSTR(strIniFlex)),		_T(""), szBuf,	MAX_PATH, strINIPath);
-	strFlexInitial.Format(_T("%s"), szBuf);
-
-	GetPrivateProfileString(_T("Lens_Config"),		LPSTR(LPCTSTR(strIniLens)),		_T(""), szBuf,	MAX_PATH, strINIPath);
-	strLensInitial.Format(_T("%s"), szBuf);
-
-	GetPrivateProfileString(_T("Substrate_Config"),	LPSTR(LPCTSTR(strIniSubstrate)),_T(""), szBuf,	MAX_PATH, strINIPath);
-	strSubstrateInitial.Format(_T("%s"), szBuf);
-
-	GetPrivateProfileString(_T("IRCF_Config"),		LPSTR(LPCTSTR(strIniIRCF)),		_T(""), szBuf,	MAX_PATH, strINIPath);
-	strIRCFInitial.Format(_T("%s"), szBuf);
-
-	GetPrivateProfileString(_T("Stiffener_Config"),	LPSTR(LPCTSTR(strIniStiffener)),_T(""), szBuf,	MAX_PATH, strINIPath);
-	strStiffnerInitial.Format(_T("%s"), szBuf);
-
-	GetPrivateProfileString(_T("Carrier_Config"),	LPSTR(LPCTSTR(strIniCarrier)),	_T(""), szBuf,	MAX_PATH, strINIPath);
-	strCarrierInitial.Format(_T("%s"), szBuf);
-	
-
-	strListLog.Format(_T("%s : %s"), strIniFlex , strFlexInitial);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("%s : %s"), strIniLens, 	strLensInitial);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("%s : %s"), strIniSubstrate, strSubstrateInitial);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("%s : %s"), strIniIRCF, strIRCFInitial	);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("%s : %s"), strIniStiffener, strStiffnerInitial);
-	m_ListLog->WriteLogFile(strListLog);
-
-	strListLog.Format(_T("%s : %s"), strIniCarrier, strCarrierInitial);
-	m_ListLog->WriteLogFile(strListLog);
-
-
-	// Ref Name combination
-	CString strReferenceName;
-	strReferenceName.Format("%s%s%s_%s%s%s",strFlexInitial, strLensInitial, strSubstrateInitial, strCarrierInitial, strIRCFInitial, strStiffnerInitial);
-	CString strRefDirName;
-	strRefDirName.Format(_T(""));
-	
-	CString strRefTemp;
-
-	int nCount = 0;
-
-	CFileFind pFind;
-	
-	bool bFailFlag = false;
-
-	for(int i=0; i<m_vDirVector.size();i++)
-	{
-		strRefDirName = m_vDirVector[i];
-		nCount = strRefDirName.ReverseFind('\\');
-		strRefDirName = strRefDirName.Mid(nCount+1);
-
-		if(strRefDirName.Find(strReferenceName) != -1)
+		for (int i = 0; i < m_vDirVector.size(); i++)
 		{
-			strListLog.Format(_T("Naming Rule Check PASS %s : %s"), strRefDirName, strReferenceName);
-			m_ListLog->WriteLogFile(strListLog);
+			if (m_vDirVector[i].Find(m_vRootDIr[nConfigFileCount]) != -1)
+			{
+				if (nStartIndex == -1)
+				{
+					nStartIndex = i;
+
+				}
+
+				CString	strRefDirName = m_vDirVector[i];
+				int nCount = strRefDirName.ReverseFind('\\');
+				strRefDirName = strRefDirName.Mid(nCount+1);
+
+				CString strTempFilePath;
+				strTempFilePath.Format(_T("%s\\%s%s"),m_vDirVector[i],strRefDirName,_T(".ini"));
+				if(pFinder.FindFile(strTempFilePath))
+				{
+					nRealDir++;
+				}
+				nDirCount++;
+			}
+		}
+
+		for (int i = 0; i < m_vFileVector.size(); i++)
+		{
+			if (m_vFileVector[i].Find(m_vRootDIr[nConfigFileCount]) != -1)
+			{
+				if (nStartFileIndex == -1)
+				{
+					nStartFileIndex = i;
+				}
+				nFileCount++;
+			}
+		}
+
+		nEndIndex = nStartIndex + nDirCount - 1;
+
+		nEndFileIndex = nStartFileIndex + nFileCount - 1;
+
+		for (int i = nStartFileIndex; i < nEndFileIndex; i++)
+		{
+			strIniFIle.Format("%s",m_vFileVector[i]);
+
+			if (strIniFIle.Find("ItemVersion.ini") != -1)
+			{	
+				GetPrivateProfileString(_T("LOG"), _T("Flex_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniFlex.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Lens_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniLens.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniSubstrate.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniIRCF.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniStiffener.Format(_T("%s"), szBuf);
+				GetPrivateProfileString(_T("LOG"), _T("Carrier_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
+				strIniCarrier.Format(_T("%s"), szBuf);
+				break;
+			}
+		}
+		CString strListLog;
+		strListLog.Format(_T("Flex : %s"), strIniFlex);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("Lens : %s"), strIniLens);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("Substrate : %s"), strIniSubstrate);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("IRCF : %s"), strIniIRCF	);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("Stiffener : %s"), strIniStiffener);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("Carrier : %s"), strIniCarrier);
+		m_ListLog->WriteLogFile(strListLog);
+
+		// 현재 디렉토리 가져오기
+		CString strEXEPath;
+		strEXEPath.Format("");
+		CString strINIPath;
+		strINIPath.Format("");
+
+		strEXEPath = GetEXEDirectoryPath();
+
+		strINIPath.Format(_T("%s%s"), strEXEPath,_T("\\Data\\NamingRule.ini"));
+
+		CString strFlexInitial;
+		CString strLensInitial;
+		CString strSubstrateInitial;
+		CString strIRCFInitial;
+		CString strStiffnerInitial;
+		CString strCarrierInitial;
+
+		strFlexInitial.Format(_T(""));
+		strLensInitial.Format(_T(""));
+		strSubstrateInitial.Format(_T(""));
+		strIRCFInitial.Format(_T(""));
+		strStiffnerInitial.Format(_T(""));
+		strCarrierInitial.Format(_T(""));
+
+		// ini 파일에 적힌 이니셜 읽어오기
+
+		GetPrivateProfileString(_T("Flex_Config"),		LPSTR(LPCTSTR(strIniFlex)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+		strFlexInitial.Format(_T("%s"), szBuf);
+
+		GetPrivateProfileString(_T("Lens_Config"),		LPSTR(LPCTSTR(strIniLens)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+		strLensInitial.Format(_T("%s"), szBuf);
+
+		GetPrivateProfileString(_T("Substrate_Config"),	LPSTR(LPCTSTR(strIniSubstrate)),_T(""), szBuf,	MAX_PATH, strINIPath);
+		strSubstrateInitial.Format(_T("%s"), szBuf);
+
+		GetPrivateProfileString(_T("IRCF_Config"),		LPSTR(LPCTSTR(strIniIRCF)),		_T(""), szBuf,	MAX_PATH, strINIPath);
+		strIRCFInitial.Format(_T("%s"), szBuf);
+
+		GetPrivateProfileString(_T("Stiffener_Config"),	LPSTR(LPCTSTR(strIniStiffener)),_T(""), szBuf,	MAX_PATH, strINIPath);
+		strStiffnerInitial.Format(_T("%s"), szBuf);
+
+		GetPrivateProfileString(_T("Carrier_Config"),	LPSTR(LPCTSTR(strIniCarrier)),	_T(""), szBuf,	MAX_PATH, strINIPath);
+		strCarrierInitial.Format(_T("%s"), szBuf);
+
+
+		strListLog.Format(_T("%s : %s"), strIniFlex , strFlexInitial);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("%s : %s"), strIniLens, 	strLensInitial);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("%s : %s"), strIniSubstrate, strSubstrateInitial);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("%s : %s"), strIniIRCF, strIRCFInitial	);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("%s : %s"), strIniStiffener, strStiffnerInitial);
+		m_ListLog->WriteLogFile(strListLog);
+
+		strListLog.Format(_T("%s : %s"), strIniCarrier, strCarrierInitial);
+		m_ListLog->WriteLogFile(strListLog);
+
+
+		// Ref Name combination
+		CString strReferenceName;
+		strReferenceName.Format("%s%s%s_%s%s%s",strFlexInitial, strLensInitial, strSubstrateInitial, strCarrierInitial, strIRCFInitial, strStiffnerInitial);
+		CString strRefDirName;
+		strRefDirName.Format(_T(""));
+
+		CString strRefTemp;
+
+		int nCount = 0;
+
+		CFileFind pFind;
+
+		bool bFailFlag = false;
+
+		for(int i = nStartIndex; i < nEndIndex; i++)
+		{
+			strRefDirName = m_vDirVector[i];
+			nCount = strRefDirName.ReverseFind('\\');
+			strRefDirName = strRefDirName.Mid(nCount+1);
+
+			if(strRefDirName.Find(strReferenceName) != -1)
+			{
+				strListLog.Format(_T("Naming Rule Check PASS %s : %s"), strRefDirName, strReferenceName);
+				m_ListLog->WriteLogFile(strListLog);
+			}
+			else
+			{
+				CString strTempFilePath;
+				strTempFilePath.Format(_T("%s\\%s%s"),m_vDirVector[i],strRefDirName,_T(".ini"));
+				if(pFind.FindFile(strTempFilePath))
+				{
+					strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
+					m_ListLog->WriteLogFile(strListLog);
+					m_pFailItems->AddFailItem(strReferenceName,strRefDirName);
+					bFailFlag = true;
+				}			
+			}
+		}
+
+		int nAddListCtrl = 0;
+
+		if (nConfigFileCount == 0)
+		{
+			nAddListCtrl = 2;
 		}
 		else
 		{
-			CString strTempFilePath;
-			strTempFilePath.Format(_T("%s\\%s%s"),m_vDirVector[i],strRefDirName,_T(".ini"));
-			if(pFind.FindFile(strTempFilePath))
-			{
-				strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
-				m_ListLog->WriteLogFile(strListLog);
-				m_pFailItems->AddFailItem(strReferenceName,strRefDirName);
-				bFailFlag = true;
-			}			
+			nAddListCtrl = nDirCount - nRealDir + 1;
 		}
+
+		if (bFailFlag)
+		{
+			m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+			m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+			m_ListCtrl->EnsureVisible(nStartIndex + nAddListCtrl,TRUE);
+			vResult.push_back(false);
+		}
+		else
+		{
+			m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+			m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+			m_ListCtrl->EnsureVisible(nStartIndex + nAddListCtrl,TRUE);
+			vResult.push_back(true);
+		}
+		m_ListCtrl->Update(nStartIndex + 2);
 	}
-	
-	if (bFailFlag)
-	{
-		bResult = false;
-	}
-	else
-		bResult = true;
 
 	return bResult;
 }

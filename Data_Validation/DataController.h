@@ -38,7 +38,7 @@ public:
 	void GetValueXMLFileList(std::vector<CString>& outData);
 	void LoadXMLDataFiles(CString inData);
 	CString GetEXEDirectoryPath();
-	BOOL CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent);
+	int CompareReference(std::vector<CString> outResult, CList<CompareResult*>& outDifferent, int inCount);
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
 	BOOL CheckCRC(std::vector<CString>& outData);
