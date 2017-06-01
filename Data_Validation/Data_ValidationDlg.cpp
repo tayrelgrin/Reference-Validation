@@ -296,7 +296,7 @@ void CData_ValidationDlg::OnBnClickedButtonStop()
 		m_ButtonStop.ShowWindow(FALSE);
 		m_ButtonStart.EnableWindow(TRUE);
 		m_ButtonStart.ShowWindow(TRUE);
-	}	
+	}
 }
 
 
@@ -362,6 +362,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 				if(bCheckTreeResult == FALSE)
 				{
 					AddToTreeRefName(strRefName);
+					AddToTreeTestName(vTestDir);
 
 					// Add To member vector
 					m_TotalData.AddTestDirectoryPath(vTestDir);
@@ -548,29 +549,37 @@ BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
 
 void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::vector<CString> vTestName)
 {
-	m_ListCtrl_Main.InsertItem(0, _T(""));
-	m_ListCtrl_Main.SetItem(0, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(0, 1,LVIF_TEXT,  _T("Reference File Check"),0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(0, 2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
-	m_ListCtrl_Main.SetItem(0, 3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+	int nCount = m_ListCtrl_Main.GetItemCount();
 
-	m_ListCtrl_Main.InsertItem(1, _T(""));
-	m_ListCtrl_Main.SetItem(1, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(1, 1,LVIF_TEXT,  _T("Common Value Check"),0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(1, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
-	m_ListCtrl_Main.SetItem(1, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+	m_ListCtrl_Main.InsertItem(nCount, _T(""));
+	m_ListCtrl_Main.SetItem(nCount, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 1,LVIF_TEXT,  _T("Reference File Check"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(nCount, 3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
 
-	m_ListCtrl_Main.InsertItem(2, _T(""));
-	m_ListCtrl_Main.SetItem(2, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(2, 1,LVIF_TEXT,  _T("Naming Rule"),0,0,0,NULL );
-	m_ListCtrl_Main.SetItem(2, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
-	m_ListCtrl_Main.SetItem(2, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+	nCount++;
 
-	for (int i=3; i<vTestName.size()+3; i++)
+	m_ListCtrl_Main.InsertItem(nCount, _T(""));
+	m_ListCtrl_Main.SetItem(nCount, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 1,LVIF_TEXT,  _T("Common Value Check"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(nCount, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+
+	nCount++;
+	m_ListCtrl_Main.InsertItem(nCount, _T(""));
+	m_ListCtrl_Main.SetItem(nCount, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 1,LVIF_TEXT,  _T("Naming Rule"),0,0,0,NULL );
+	m_ListCtrl_Main.SetItem(nCount, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
+	m_ListCtrl_Main.SetItem(nCount, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+
+	nCount++;
+	int nTestCount = 0;
+
+	for (int i=nCount; i<vTestName.size()+nCount; i++)
 	{
 		m_ListCtrl_Main.InsertItem(i, _T(""));
 		m_ListCtrl_Main.SetItem(i, 0,LVIF_TEXT,  inConfig,0,0,0,NULL );
-		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[i-3],0,0,0,NULL );
+		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[nTestCount++],0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 		m_ListCtrl_Main.SetItem(i, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
 		//CreateProgressBar(i,3);
@@ -620,7 +629,6 @@ void CData_ValidationDlg::PostNcDestroy()
 void CData_ValidationDlg::OnBnClickedButtonListlog()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-
 	CString strEXEPath = m_TotalData.GetEXEDirectoryPath();
 	CString strPath;
 	strPath.Format(_T("%s%s"), strEXEPath,_T("\\ListLog"));
@@ -635,4 +643,43 @@ void CData_ValidationDlg::OnBnClickedButtonResultlog()
 	CString strPath;
 	strPath.Format(_T("%s%s"), strEXEPath,_T("\\ResultLog"));
 	ShellExecute(NULL, _T("open"), strPath, NULL, NULL, SW_SHOW);
+}
+
+
+void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
+{
+	// total 에서 dirvector 받기
+	std::vector<CString> vTestTemp;
+	std::vector<CString> vConfigDIr;
+
+	// tree 에서 값 가져오기
+	int nTreeItemCount = m_TreeMain.GetCount();
+	std::vector<CString> vTreeItem;
+	HTREEITEM hItem;
+	CString strTreeItem;
+
+	hItem = m_TreeMain.GetRootItem();
+
+	for (int i = 0; i < nTreeItemCount; i++)
+	{
+		strTreeItem = m_TreeMain.GetItemText(hItem);
+
+		if(vTestDirPath[i].Find(strTreeItem) == -1)
+			continue;
+
+		int nIndex = -1;
+
+		for (int j = 0; j < vTestDirPath.size(); j++)
+		{
+			nIndex = vTestDirPath[j].ReverseFind('\\');
+			vTestTemp.push_back(vTestDirPath[j].Mid(nIndex+1));
+		}
+
+		m_TotalData.GetTestNameFromTestDirNameVector(vTestTemp, vConfigDIr);
+
+		for (int j = 0; j < vConfigDIr.size(); j++)
+		{
+			m_TreeMain.InsertItem(vConfigDIr[j], hItem, NULL);
+		}
+	}
 }

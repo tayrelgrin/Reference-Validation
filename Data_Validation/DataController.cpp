@@ -324,6 +324,7 @@ void DataController::ReadReference()
 			// config 별로 추가
 			AddNewConfigData(vConfig);
 			vConfig.clear();
+			i--;
 			strRootPath = m_vRootDIr[++nRootIndex];
 		}
 
@@ -448,24 +449,19 @@ BOOL DataController::Validation(CString inData)
 	// 공동 데이터 확인
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information Start ======================"));
 	CheckCommonInformation();
-	
-	m_ListCtrl->Update(nCount++);
 	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Common Information End ======================"));
 
 	// Ref Naming rule checking
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
 	CheckNamingRule();
-	
-	m_ListCtrl->SetItem(nCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-	m_ListCtrl->Update(nCount++);
 	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End ======================"));
 
 	std::vector<CString> vTemp;
 	// Compare
 	m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
-	CompareReference(vTemp, m_pListCompareResult, nCount);
+	CompareReference(vTemp, m_pListCompareResult, 3);
 	m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
 	// CRC 계산
@@ -642,7 +638,7 @@ int DataController::CompareReference(std::vector<CString> outResult, CList<Compa
 			outDifferent.AddTail(cNewConfig);
 
 			pTargetRef->ConfigCompare(pBaseRef, vFailList, outDifferent, inCount);
-			inCount += 4;
+			inCount += 3;
 		}
 	}
 
@@ -651,7 +647,7 @@ int DataController::CompareReference(std::vector<CString> outResult, CList<Compa
 		m_ListLog->WriteLogFile(vFailList[i]);
 	}
 	return inCount;
-	//return bResult;
+
 }
 
 void DataController::SetListLog(ListLog* inData)
@@ -941,14 +937,14 @@ BOOL DataController::CheckCRC(std::vector<CString>& outData)
 			
 			if (nCRCResult != nCRCValue)
 			{
-				strFailListLog.Format("%s%s\n\t Itemversion: %d :Calculated: %d", strIniFIle, _T(" : CRC Dismatched"),nCRCValue, nCRCResult);
+				strFailListLog.Format("%s%s\n\t Itemversion: %d :Calculated: %d\n", strIniFIle, _T(" : CRC Dismatched"),nCRCValue, nCRCResult);
 				outData.push_back(strFailListLog);
 			
 				bResult = FALSE;
 			}
 			else
 			{
-				strFailListLog.Format("%s\n\t Itemversion: %d :Calculated: %d", strIniFIle,nCRCValue, nCRCResult);
+				strFailListLog.Format("%s\n\t Itemversion: %d :Calculated: %d\n", strIniFIle,nCRCValue, nCRCResult);
 				outData.push_back(strFailListLog);
 				
 				bResult = TRUE;
@@ -1217,7 +1213,6 @@ void DataController::CheckCommonInformation()
 						bTotalResult = FALSE;
 					}
 				}
-
 
 				if (bResult)
 				{
@@ -1756,7 +1751,7 @@ bool DataController::CheckNamingRule()
 		strListLog.Format(_T("Substrate : %s"), strIniSubstrate);
 		m_ListLog->WriteLogFile(strListLog);
 
-		strListLog.Format(_T("IRCF : %s"), strIniIRCF	);
+		strListLog.Format(_T("IRCF : %s"), strIniIRCF);
 		m_ListLog->WriteLogFile(strListLog);
 
 		strListLog.Format(_T("Stiffener : %s"), strIniStiffener);
@@ -1893,7 +1888,7 @@ bool DataController::CheckNamingRule()
 			m_ListCtrl->EnsureVisible(nStartIndex + nAddListCtrl,TRUE);
 			vResult.push_back(true);
 		}
-		m_ListCtrl->Update(nStartIndex + 2);
+		m_ListCtrl->Update(nStartIndex + nAddListCtrl + 2);
 	}
 
 	return bResult;

@@ -49,7 +49,7 @@ public:
 	void AddToTreeRefName(CString inData);
 	BOOL CheckExistDataInTree(CString strRefName);	
 	void CreateProgressBar(int nIndex, int nSubIndex);
-	
+	void AddToTreeTestName(std::vector<CString> vTestDirPath);
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;

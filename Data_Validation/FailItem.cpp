@@ -78,7 +78,7 @@ void FailItem::OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult)
 	int nSubIndex = pNMItemActivate->iSubItem;
 	CString strSelectFilePath;
 	strSelectFilePath.Format(_T(""));
-	strSelectFilePath = m_ListCtrl_FailItem.GetItemText(nIndex-1, 2);
+	strSelectFilePath = m_ListCtrl_FailItem.GetItemText(nIndex, 2);
 
 	// 해당 파일 열기
 	if (strSelectFilePath != _T("") && nSubIndex == 2)

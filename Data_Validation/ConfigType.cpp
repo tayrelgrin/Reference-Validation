@@ -240,7 +240,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				}
 				m_ListCtrl->SetItem(inCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
 				m_ListCtrl->EnsureVisible(inCount,TRUE);
-				m_ListCtrl->Update(inCount++);				
+				m_ListCtrl->Update(inCount++);
 				m_ProgressBar->StepIt();
 				break;
 			}
