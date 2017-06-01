@@ -359,7 +359,7 @@ void DataController::DeleteFilePath(CString inTarget)
 
 	for (int i= 0; i< nIndex ; i++)
 	{
-		if (m_vFileVector[nDelCount].Find(inTarget))
+		if (m_vFileVector[nDelCount].Find(inTarget) != -1)
 		{
 			m_vFileVector.erase(m_vFileVector.begin()+nDelCount);
 		}
@@ -376,7 +376,7 @@ void DataController::DeleteTestDirectoryPath(CString inTarget)
 
 	for (int i= 0; i < nIndex; i++)
 	{
-		if (m_vDirVector[nDelCount].Find(inTarget))
+		if (m_vDirVector[nDelCount].Find(inTarget) != -1)
 		{
 			m_vDirVector.erase(m_vDirVector.begin()+nDelCount);
 		}

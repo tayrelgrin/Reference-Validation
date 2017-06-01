@@ -226,6 +226,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int nIndex = m_TreeMain.GetCount();
+	m_Progressctrl.SetRange(0,100);
 
 	do
 	{
@@ -238,12 +239,12 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 		std::vector<CString> vValueFileList;
 		m_ListLog->WriteLogFile(_T("Load File list in Value Directory"));
 		m_TotalData.LoadXMLFileListInValue();
-
 		m_TotalData.GetValueXMLFileList(vValueFileList);
 		m_ConfigSelectDlg.SetValueFileList(vValueFileList);
 
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{
+			InitListCtrl();
 			m_ButtonStart.EnableWindow(FALSE);
 			m_ButtonStart.ShowWindow(FALSE);
 			m_ButtonStop.EnableWindow(TRUE);
@@ -251,7 +252,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			UpdateWindow();
 			m_FailItemDlg.ClearItems();
-
+			
 			// 마우스 wait start
 			BeginWaitCursor();
 
@@ -487,7 +488,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 			// m_vTestName m_vDirName 에서 해당 정보 삭제
 			for (int i= 0; i< vTestDIrPath.size(); i++)
 			{
-				if (vTestDIrPath[i].Find(strSelectedConfigName))
+				if (vTestDIrPath[i].Find(strSelectedConfigName) != -1)
 				{
 					m_TotalData.DeleteTestDirectoryPath(strSelectedConfigName);
 
@@ -503,7 +504,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 					nDelCount++;
 			}
 			
-			m_TotalData.DeleteFilePath(strSelectedConfigName);			
+			m_TotalData.DeleteFilePath(strSelectedConfigName);	
 
 			nDelCount = 0;
 			int nItemCount = m_ListCtrl_Main.GetItemCount();
@@ -521,7 +522,8 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 			}
 			m_ListLog->WriteLogFile(_T("Delete Config :") + strConfigNum);
 		}
-	}		
+	}
+	UpdateWindow();
 }
 
 BOOL CData_ValidationDlg::CheckExistDataInTree(CString strRefName)
@@ -686,4 +688,42 @@ void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
 		}
 	}
 	UpdateWindow();
+}
+
+void CData_ValidationDlg::InitListCtrl()
+{
+	int count = m_ListCtrl_Main.GetItemCount();
+	CString strItem;
+	strItem.Format(_T(""));
+
+	for (int i = 0; i < count; i++)
+	{
+		strItem = m_ListCtrl_Main.GetItemText(i,1);
+
+		if (strItem == _T("Reference File Check"))
+		{
+			continue;
+		}
+
+		m_ListCtrl_Main.SetItem(i,2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
+		m_ListCtrl_Main.SetItem(i,3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
+	}
+}
+
+void CData_ValidationDlg::DeleteConfigListCtrl(CString inTarget)
+{
+	int count = m_ListCtrl_Main.GetItemCount();
+	CString strConfig;
+	strConfig.Format(_T(""));
+
+	for (int i = 0; i < count; i++)
+	{
+		strConfig = m_ListCtrl_Main.GetItemText(i,0);
+
+		if (strConfig != inTarget)
+		{
+			continue;
+		}
+		m_ListCtrl_Main.DeleteItem(i);
+	}
 }

@@ -50,6 +50,7 @@ public:
 	BOOL CheckExistDataInTree(CString strRefName);	
 	void CreateProgressBar(int nIndex, int nSubIndex);
 	void AddToTreeTestName(std::vector<CString> vTestDirPath);
+	void InitListCtrl();
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;
