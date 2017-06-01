@@ -442,6 +442,7 @@ void CData_ValidationDlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 void CData_ValidationDlg::AddToTreeRefName(CString inData)
 {
 	HTREEITEM h_BASEINFO = m_TreeMain.InsertItem(inData, TVI_ROOT, TVI_LAST);
+	UpdateWindow();
 }
 
 
@@ -655,18 +656,20 @@ void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
 	// tree 에서 값 가져오기
 	int nTreeItemCount = m_TreeMain.GetCount();
 	std::vector<CString> vTreeItem;
-	HTREEITEM hItem;
+	HTREEITEM hItem, hPre;
 	CString strTreeItem;
 
 	hItem = m_TreeMain.GetRootItem();
-
-	for (int i = 0; i < nTreeItemCount; i++)
+	int i = 0;
+	while(hItem)
 	{
 		strTreeItem = m_TreeMain.GetItemText(hItem);
-
-		if(vTestDirPath[i].Find(strTreeItem) == -1)
+		hPre = hItem;
+		hItem = m_TreeMain.GetNextItem(hItem, TVGN_NEXT);
+		if(vTestDirPath[i++].Find(strTreeItem) == -1)
+		{
 			continue;
-
+		}
 		int nIndex = -1;
 
 		for (int j = 0; j < vTestDirPath.size(); j++)
@@ -679,7 +682,8 @@ void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
 
 		for (int j = 0; j < vConfigDIr.size(); j++)
 		{
-			m_TreeMain.InsertItem(vConfigDIr[j], hItem, NULL);
+			m_TreeMain.InsertItem(vConfigDIr[j], hPre, NULL);
 		}
 	}
+	UpdateWindow();
 }
