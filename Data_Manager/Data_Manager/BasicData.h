@@ -6,6 +6,7 @@
 #pragma once
 #include "tinyxml2.h"
 
+
 //////////////////////////////////////////////////////////////////////////
 // BasicData
 // Parent class of SettingData class and FileData class

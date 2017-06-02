@@ -74,6 +74,13 @@ void FileType::AddNewData(CString inData, int inNInput)
 	for (int i = 0; i< vtemp.size() ; i++)
 	{
 		strTemp = vtemp[i];
+		CString strTempTrim = strTemp;
+
+		strTempTrim.Trim();
+		if (strTempTrim=="")
+		{
+			continue;
+		}
 		if (strTemp.Find('/') != -1)
 		{
 			if (cNewData==NULL)
@@ -97,6 +104,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
 			cNewData->setValue(strValue);
+			bFlag = false;
 		}
 		else if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{
@@ -110,6 +118,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 		{
 			m_pDataList.AddTail(cNewData);
 			cNewData = new BasicData();
+			strSection = strTemp;
 			cNewData->setSection(strTemp);
 			bFlag = true;
 		}
@@ -210,8 +219,8 @@ void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
 		}
 		if(!bIsNotEOL) break;
 
-		if(strLine!="")	// 공란 제거
-			outData.push_back(strLine);		
+		if(strLine!="" || strLine!="")	// 공란 제거
+			outData.push_back(strLine);
 	}
 
 	sourceFile.Close();

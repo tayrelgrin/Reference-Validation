@@ -696,7 +696,7 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	
-	if (IDYES == AfxMessageBox("Save Data?",MB_YESNO))
+	if (IDYES == AfxMessageBox(_T("Save Data?"),MB_YESNO))
 	{
 		if( m_strPrj != "" &&
 			m_strBuildNum != "" &&
@@ -1739,7 +1739,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 		rtSubItem.left + nThisLeft ,
 		rtSubItem.top + nThisTop-30,
 		rtSubItem.right - rtSubItem.left - 3,
-		rtSubItem.bottom - rtSubItem.top -1,
+		rtSubItem.bottom - rtSubItem.top - 1,
 		NULL);
 
 	::ShowWindow(::GetDlgItem(m_hWnd,IDC_EDIT1),SW_SHOW);
