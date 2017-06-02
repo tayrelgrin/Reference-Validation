@@ -97,6 +97,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 			cNewData->setSection(strSection);
 			cNewData->setItem(strItem);
 			cNewData->setValue(strValue);
+			bFlag = false;
 		}
 		else if(strTemp.Find('[') != -1 && strTemp.Find(']')!= -1 && bFlag == false)
 		{
@@ -110,6 +111,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 		{
 			m_pDataList.AddTail(cNewData);
 			cNewData = new BasicData();
+			strSection = strTemp;
 			cNewData->setSection(strTemp);
 			bFlag = true;
 		}

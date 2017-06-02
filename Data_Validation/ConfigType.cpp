@@ -285,7 +285,7 @@ void ConfigType::SetProgressBar(CProgressCtrl* inData)
 	m_ProgressBar = inData;
 }
 
-void ConfigType:: SetFailItemPointer(FailItem* inData)
+void ConfigType::SetFailItemPointer(FailItem* inData)
 {
 	m_pFailItems = inData;
 }
@@ -295,4 +295,28 @@ void ConfigType::SetTestDir(std::vector<CString> invData)
 	m_vTestDirPath.clear();
 
 	m_vTestDirPath.assign(invData.begin(), invData.end());
+}
+
+CString ConfigType::GetInputDirPath()
+{
+	return m_strInputDirPath;
+}
+
+bool ConfigType::SearchTestInList(CString inTargetTest, TestType*& outData)
+{
+	bool bResult = false; 
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListTestType.GetHeadPosition();
+
+	while(pPos && m_pListTestType.GetSize()>0)
+	{
+		TestType* temp = m_pListTestType.GetNext(pPos);
+		if (temp->GetTestName() == inTargetTest)
+		{
+			outData = temp;
+			break;
+		}
+	}
+
+	return bResult;
 }

@@ -1899,7 +1899,66 @@ void DataController::SetProgressBar(CProgressCtrl* inData)
 	m_ProgressBar = inData;
 }
 
-void DataController:: SetFailItemPointer(FailItem* inData)
+void DataController::SetFailItemPointer(FailItem* inData)
 {
 	m_pFailItems = inData;
+}
+
+bool DataController::SearchTestInTarget(CString inTargetConfig, CString inTest,TestType*& outTarget)
+{
+	bool bResult = false;
+	
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListTargetRefConfig.GetHeadPosition();
+
+	while(pPos && m_pListTargetRefConfig.GetSize()>0)
+	{
+		pTemp = pPos;
+		ConfigType* temp = m_pListTargetRefConfig.GetNext(pPos);
+
+		if(temp->GetInputDirPath().Find(inTargetConfig) != -1)
+		{
+			temp->SearchTestInList(inTest, outTarget);
+		}
+	}
+
+	return bResult;
+}
+
+
+bool DataController::SearchTestInBase(CString inTargetConfig, CString inTest,TestType*& outTarget)
+{
+	bool bResult = false;
+
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListConfig.GetHeadPosition();
+
+	while(pPos && m_pListConfig.GetSize()>0)
+	{
+		pTemp = pPos;
+		ConfigType* temp = m_pListConfig.GetNext(pPos);
+
+		bResult = temp->SearchTestInList(inTest, outTarget);
+	}
+
+	return bResult;
+}
+
+
+bool DataController::SearchTestInSetting(CString inTargetConfig, CString inTest,TestType*& outTarget)
+{
+	bool bResult = false;
+
+	POSITION pTemp = NULL;
+	POSITION pPos = m_pListSetting.GetHeadPosition();
+
+	while(pPos && m_pListSetting.GetSize()>0)
+	{
+		pTemp = pPos;
+		ConfigType* temp = m_pListSetting.GetNext(pPos);
+
+		bResult = temp->SearchTestInList(inTest, outTarget);
+	}
+
+	return bResult;
 }

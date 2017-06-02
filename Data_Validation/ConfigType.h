@@ -23,9 +23,8 @@ public:
 	CString GetEXEDirectoryPath();
 	void LoadDataFiles(CString inStrPath);
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
-	bool SearchFileDataInList(CString inTargetTest, CString inTargetFile, FileType& outData);
+	bool SearchTestInList(CString inTargetTest, TestType*& outData);
 	void InitList();
-	/*void InitListAndVectors();*/
 	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent, int& inCount);
 	void GetDataList(CList<TestType*>& outData);
 	CString GetProject(){return m_strPrj;};
@@ -38,6 +37,8 @@ public:
 	void SetProgressBar(CProgressCtrl* inData);
 	void SetFailItemPointer(FailItem* inData);
 	void SetTestDir(std::vector<CString> invData);
+	CString GetInputDirPath();
+
 private:
 	CString m_strInputDirPath;
 	CString m_strPrj;

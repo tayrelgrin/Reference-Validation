@@ -25,7 +25,6 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV 지원입니다.
 
-
 // 구현입니다.
 protected:
 	HICON m_hIcon;
@@ -71,4 +70,6 @@ public:
 	afx_msg void OnBnClickedButtonListlog();
 	afx_msg void OnBnClickedButtonResultlog();
 	CProgressCtrl m_Progressctrl;
+	CListCtrl m_ListCtrl_Test;
+	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 };

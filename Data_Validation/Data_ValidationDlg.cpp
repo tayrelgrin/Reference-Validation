@@ -61,6 +61,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TAB1, m_TabCtrl_Main);
 	DDX_Control(pDX, IDC_TREE_MAIN, m_TreeMain);
 	DDX_Control(pDX, IDC_PROGRESS1, m_Progressctrl);
+	DDX_Control(pDX, IDC_LIST_TEST, m_ListCtrl_Test);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -76,6 +77,7 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CData_ValidationDlg::OnBnClickedButtonDelete)
 	ON_BN_CLICKED(IDC_BUTTON_LISTLOG, &CData_ValidationDlg::OnBnClickedButtonListlog)
 	ON_BN_CLICKED(IDC_BUTTON_RESULTLOG, &CData_ValidationDlg::OnBnClickedButtonResultlog)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ValidationDlg::OnTvnSelchangedTreeMain)
 END_MESSAGE_MAP()
 
 
@@ -115,7 +117,7 @@ BOOL CData_ValidationDlg::OnInitDialog()
 
 	
 	//////////////////////////////////////////////////////////////////////////
-	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER | LVS_EDITLABELS);
+	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER );
 
 	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 100,  -1);
 	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 180, -1);
@@ -126,6 +128,16 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	m_TabCtrl_Main.InsertItem(2,_T("Fail Item"));
 	//////////////////////////////////////////////////////////////////////////
 
+	//////////////////////////////////////////////////////////////////////////
+	m_ListCtrl_Test.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER );
+
+	m_ListCtrl_Test.InsertColumn(0, _T("Test"),			LVCFMT_CENTER, 80,  -1);
+	m_ListCtrl_Test.InsertColumn(1, _T("File"),			LVCFMT_CENTER, 80, -1);
+	m_ListCtrl_Test.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 80, -1);
+	m_ListCtrl_Test.InsertColumn(3, _T("Item"),			LVCFMT_CENTER, 100, -1);
+	m_ListCtrl_Test.InsertColumn(4, _T("Base Value"),	LVCFMT_CENTER, 200, -1);
+	m_ListCtrl_Test.InsertColumn(5, _T("Current Value"),LVCFMT_CENTER, 200, -1);
+	//////////////////////////////////////////////////////////////////////////
 	CRect rect;
 
 	m_TabCtrl_Main.GetClientRect(&rect);
@@ -279,7 +291,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			EndWaitCursor();
 			UpdateWindow();
 		}
-	}while(false);	
+	}while(false);
 }
 
 
@@ -585,7 +597,6 @@ void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::v
 		m_ListCtrl_Main.SetItem(i, 1,LVIF_TEXT,  vTestName[nTestCount++],0,0,0,NULL );
 		m_ListCtrl_Main.SetItem(i, 2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 		m_ListCtrl_Main.SetItem(i, 3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
-		//CreateProgressBar(i,3);
 	}
 }
 
@@ -690,6 +701,7 @@ void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
 	UpdateWindow();
 }
 
+
 void CData_ValidationDlg::InitListCtrl()
 {
 	int count = m_ListCtrl_Main.GetItemCount();
@@ -704,26 +716,150 @@ void CData_ValidationDlg::InitListCtrl()
 		{
 			continue;
 		}
-
 		m_ListCtrl_Main.SetItem(i,2,LVIF_TEXT,  _T("Ready"),0,0,0,NULL);
 		m_ListCtrl_Main.SetItem(i,3,LVIF_TEXT,  _T("0%"),0,0,0,NULL);
 	}
 }
 
-void CData_ValidationDlg::DeleteConfigListCtrl(CString inTarget)
+
+void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	int count = m_ListCtrl_Main.GetItemCount();
-	CString strConfig;
-	strConfig.Format(_T(""));
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	for (int i = 0; i < count; i++)
+	HTREEITEM hSelected, hParent;
+	hSelected = m_TreeMain.GetNextItem(NULL, TVGN_CARET); // 현재 선택된 아이템의 핸들을 가져온다.
+	hParent = m_TreeMain.GetNextItem(hSelected, TVGN_PARENT); // 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	
+	if (hParent)
 	{
-		strConfig = m_ListCtrl_Main.GetItemText(i,0);
+		(GetDlgItem(IDC_LIST_TEST))->ShowWindow(TRUE);
+		(GetDlgItem(IDC_LIST_MAIN))->ShowWindow(FALSE);
+		m_ListCtrl_Test.DeleteAllItems();
+		UpdateWindow();
 
-		if (strConfig != inTarget)
+		CString strTest;
+		strTest.Format(_T(""));
+		strTest = m_TreeMain.GetItemText(hSelected);
+
+		CString strConfig;
+		strConfig.Format(_T(""));
+		strConfig = m_TreeMain.GetItemText(hParent);
+
+		TestType* pTestSetting = NULL;
+		TestType* pTestBaseValue = NULL;
+		TestType* pTestTargetValue = NULL;
+
+		m_TotalData.SearchTestInTarget(strConfig,	strTest, pTestTargetValue);
+		m_TotalData.SearchTestInSetting(strConfig,	strTest, pTestSetting);
+		m_TotalData.SearchTestInBase(strConfig,		strTest, pTestBaseValue);
+
+		POSITION pTarget;
+		POSITION pSetting;
+		POSITION pBase;
+
+		CList<FileType*> lTargetList;
+		CList<FileType*> lSettingList;
+		CList<FileType*> lBaseList;
+
+		if (pTestBaseValue && pTestSetting && pTestTargetValue)
 		{
-			continue;
+			pTestTargetValue->GetDataList(lTargetList);
+			pTestSetting->GetDataList(lSettingList);
+			pTestBaseValue->GetDataList(lBaseList);
 		}
-		m_ListCtrl_Main.DeleteItem(i);
+		else
+			return;
+		
+		pTarget = lTargetList.GetHeadPosition();
+
+		int nSettingCount = 0;
+
+		while(pTarget)
+		{
+			FileType* pTargetFile = lTargetList.GetNext(pTarget);			
+			pSetting = lSettingList.GetHeadPosition();
+			pBase = lBaseList.GetHeadPosition();
+
+			while(pSetting)
+			{
+				FileType* pSettingFile = lSettingList.GetNext(pSetting);
+				FileType* pBaseFile = lBaseList.GetNext(pBase);
+
+				if(pTargetFile->GetFileName() == pSettingFile->GetFileName())
+				{
+					if (pBaseFile->GetFileName() != pSettingFile->GetFileName())
+					{
+						while(pBase)
+						{
+							pBaseFile = lBaseList.GetNext(pBase);
+
+							if(pBaseFile->GetFileName() == pSettingFile->GetFileName())
+							{
+								break;
+							}
+						}
+					}
+					
+					CString strFileName;
+					strFileName.Format(_T("%s"),pTargetFile->GetFileName());
+					CList<BasicData*> lSettingItems;
+					CList<BasicData*> lTargetItems;
+					CList<BasicData*> lBaseItems;
+					pSettingFile->CopyDataToList(lSettingItems);
+					pTargetFile->CopyDataToList(lTargetItems);
+					pBaseFile->CopyDataToList(lBaseItems);
+					
+					POSITION pTargetItems = lTargetItems.GetHeadPosition();
+					POSITION pSettingItems;
+					POSITION pBaseItems;
+
+					while(pTargetItems)
+					{
+						BasicData* pTargetData = lTargetItems.GetNext(pTargetItems);
+						pSettingItems = lSettingItems.GetHeadPosition();
+						pBaseItems = lBaseItems.GetHeadPosition();
+
+						while(pSettingItems)
+						{
+							BasicData* pSettingData = lSettingItems.GetNext(pSettingItems);
+							BasicData* pBaseData = lBaseItems.GetNext(pBaseItems);
+
+							if (pTargetData->getItem()== pSettingData->getItem() && pTargetData->getSection()==pSettingData->getSection())
+							{
+								if (pSettingData->getValue() == _T("1"))
+								{
+									CString strCompareResult;
+									if (pTargetData->getValue() == pBaseData->getValue())
+									{
+										strCompareResult.Format(_T("O"));
+									}
+									else
+									{
+										strCompareResult.Format(_T("X"));
+									}
+
+									m_ListCtrl_Test.InsertItem(nSettingCount, _T(""));
+									m_ListCtrl_Test.SetItem(nSettingCount, 0,LVIF_TEXT,  strTest,0,0,0,NULL );
+									m_ListCtrl_Test.SetItem(nSettingCount, 1,LVIF_TEXT,  strFileName,0,0,0,NULL );
+									m_ListCtrl_Test.SetItem(nSettingCount, 2,LVIF_TEXT,  strCompareResult,0,0,0,NULL);
+									m_ListCtrl_Test.SetItem(nSettingCount, 3,LVIF_TEXT,  pTargetData->getItem(),0,0,0,NULL);
+									m_ListCtrl_Test.SetItem(nSettingCount, 4,LVIF_TEXT,  pBaseData->getValue(),0,0,0,NULL);
+									m_ListCtrl_Test.SetItem(nSettingCount, 5,LVIF_TEXT,  pTargetData->getValue(),0,0,0,NULL);
+									nSettingCount++;
+								}
+							}							
+						}
+					}
+				}
+			}
+		}
 	}
+	else	// tree 에서 Root 선택 시
+	{
+		(GetDlgItem(IDC_LIST_TEST))->ShowWindow(FALSE);
+		(GetDlgItem(IDC_LIST_MAIN))->ShowWindow(TRUE);
+		UpdateWindow();
+	}
+	*pResult = 0;
 }

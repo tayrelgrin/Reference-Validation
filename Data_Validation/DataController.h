@@ -47,6 +47,9 @@ public:
 	BOOL ComparePreAndNew(CString inFilePath, CString inPre, CString inNew);
 	void SetProgressBar(CProgressCtrl* inData);
 	void SetFailItemPointer(FailItem* inData);
+	bool SearchTestInTarget(CString inTargetConfig, CString inTest,TestType*& outTarget);
+	bool SearchTestInBase(CString inTargetConfig, CString inTest,TestType*& outTarget);
+	bool SearchTestInSetting(CString inTargetConfig, CString inTest,TestType*& outTarget);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;
