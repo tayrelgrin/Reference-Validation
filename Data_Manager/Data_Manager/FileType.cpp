@@ -252,15 +252,26 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 
 	for (pAttr = pParent; pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
 	{
-		CString strTemp = (CString)pAttr->Name();
+		CString strTemp;
+		strTemp.Format(_T("%s"),pAttr->Name());
 
-		if("Section" == strTemp)
-			outData->setSection((CString)pAttr->Value());
+		if(_T("Section") == strTemp)
+		{
+			CString strData;
+			strData.Format(_T("%s"),pAttr->Value());
+			outData->setSection(strData);
+		}
 		else if("Item" == strTemp)
-			outData->setItem((CString)pAttr->Value());
+		{
+			CString strData;
+			strData.Format(_T("%s"),pAttr->Value());
+			outData->setItem(strData);
+		}
 		else if("Value" == strTemp)
 		{
-			outData->setValue((CString)pAttr->Value());
+			CString strData;
+			strData.Format(_T("%s"),pAttr->Value());
+			outData->setValue(strData);
 			bFlag = true;
 		}
 	}
