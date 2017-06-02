@@ -679,15 +679,15 @@ void CData_ValidationDlg::AddToTreeTestName(std::vector<CString> vTestDirPath)
 		strTreeItem = m_TreeMain.GetItemText(hItem);
 		hPre = hItem;
 		hItem = m_TreeMain.GetNextItem(hItem, TVGN_NEXT);
-		if(vTestDirPath[i++].Find(strTreeItem) == -1)
+		int nIndex = -1;
+		if(nIndex = vTestDirPath[i++].Find(strTreeItem) == -1)
 		{
 			continue;
 		}
-		int nIndex = -1;
-
+		
 		for (int j = 0; j < vTestDirPath.size(); j++)
 		{
-			nIndex = vTestDirPath[j].ReverseFind('\\');
+			nIndex = vTestDirPath[j].Find(strTreeItem) + strTreeItem.GetLength();
 			vTestTemp.push_back(vTestDirPath[j].Mid(nIndex+1));
 		}
 
@@ -739,8 +739,12 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		UpdateWindow();
 
 		CString strTest;
+		CString strTestForTarget;
 		strTest.Format(_T(""));
+		strTestForTarget.Format(_T(""));		
 		strTest = m_TreeMain.GetItemText(hSelected);
+		strTestForTarget = strTest;
+		strTest.Replace('\\',':');
 
 		CString strConfig;
 		strConfig.Format(_T(""));
@@ -750,7 +754,7 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		TestType* pTestBaseValue = NULL;
 		TestType* pTestTargetValue = NULL;
 
-		m_TotalData.SearchTestInTarget(strConfig,	strTest, pTestTargetValue);
+		m_TotalData.SearchTestInTarget(strConfig,	strTestForTarget, pTestTargetValue);
 		m_TotalData.SearchTestInSetting(strConfig,	strTest, pTestSetting);
 		m_TotalData.SearchTestInBase(strConfig,		strTest, pTestBaseValue);
 

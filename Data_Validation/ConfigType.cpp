@@ -314,6 +314,7 @@ bool ConfigType::SearchTestInList(CString inTargetTest, TestType*& outData)
 		if (temp->GetTestName() == inTargetTest)
 		{
 			outData = temp;
+			bResult = true;
 			break;
 		}
 	}
