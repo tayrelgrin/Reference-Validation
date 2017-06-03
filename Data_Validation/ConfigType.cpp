@@ -169,7 +169,7 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 }
 
 
-BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent, int& inCount)
+BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount)
 {
 	CList<TestType*> pListTargetTest;
 
@@ -204,11 +204,12 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				outFail.push_back(strTestLog);
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetTestName(strTargetName);
+				outLogData.AddTail(cNewConfig);
 				outDifferent.AddTail(cNewConfig);
 				pThis->SetFailItemPointer(m_pFailItems);
 				std::vector<CString> vTempFail;
 				CString strTestDir = m_vTestDirPath[nTestCount++];
-				bCompareResult = pThis->CompareTest(pTarget, vTempFail, outDifferent);
+				bCompareResult = pThis->CompareTest(pTarget, vTempFail, outLogData, outDifferent);
 
 				for (int i = 0; i < vTempFail.size(); i++)
 				{
@@ -219,6 +220,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 						CString strItem = vTempFail[i].Left(nIndexCount);
 						CString strPath = vTempFail[i].Mid(nIndexCount+1);
 						CString strFailTest;
+						CString strTemp;
 						strFailTest.Format(_T(""));
 						
 						strItem = strItem.Mid(nIndexCount1+1);

@@ -257,13 +257,13 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 		if(m_ConfigSelectDlg.DoModal() == true)
 		{
 			InitListCtrl();
+			m_FailItemDlg.ClearItems();
 			m_ButtonStart.EnableWindow(FALSE);
 			m_ButtonStart.ShowWindow(FALSE);
 			m_ButtonStop.EnableWindow(TRUE);
 			m_ButtonStop.ShowWindow(TRUE);
-
+			
 			UpdateWindow();
-			m_FailItemDlg.ClearItems();
 			
 			// 마우스 wait start
 			BeginWaitCursor();
@@ -635,7 +635,7 @@ void CData_ValidationDlg::PostNcDestroy()
 	// TODO: 여기에 특수화된 코드를 추가 및/또는 기본 클래스를 호출합니다.
 
 	delete m_ListLog;
-
+	m_TotalData.InitAllData();
 	CDialogEx::PostNcDestroy();
 }
 
@@ -858,6 +858,55 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 				}
 			}
 		}
+		// 비교 결과 다른것 출력
+		m_TotalData.GetDefferentResult(m_ListDefferent);
+
+		POSITION pPos = m_ListDefferent.GetHeadPosition();
+		bool bTestFlag = false;
+		CString strFileNameTemp;
+		while(pPos)
+		{
+			CompareResult* cTemp = m_ListDefferent.GetNext(pPos);
+			CString strTestTemp;
+			
+			strTestTemp.Format(_T("%s"), cTemp->GetTestName());
+			strTestTemp.Replace('\\',':');
+
+			if (strTestTemp == strTest)
+			{
+				bTestFlag = true;
+			}
+			else if (bTestFlag && strTestTemp != _T("") && strTestTemp != strTest)
+			{
+				break;
+			}
+			else if (bTestFlag)
+			{
+				if (cTemp->GetFileName() != _T(""))
+				{
+					//strFileNameTemp.Format(_T("%s"), cTemp->GetFileName());
+					strFileNameTemp = cTemp->GetFileName();
+					continue;
+				}
+				m_ListCtrl_Test.InsertItem(nSettingCount, _T(""));
+				m_ListCtrl_Test.SetItem(nSettingCount, 0,LVIF_TEXT,  strTest,0,0,0,NULL );
+				m_ListCtrl_Test.SetItem(nSettingCount, 1,LVIF_TEXT,  strFileNameTemp,0,0,0,NULL );
+				CString strResultTemp;
+				if (cTemp->GetCompareResult())
+				{
+					strResultTemp.Format(_T("O"));
+				}
+				else
+				{
+					strResultTemp.Format(_T("X"));
+				}
+				m_ListCtrl_Test.SetItem(nSettingCount, 2,LVIF_TEXT,  strResultTemp,0,0,0,NULL);
+				m_ListCtrl_Test.SetItem(nSettingCount, 3,LVIF_TEXT,  cTemp->GetItemName(),0,0,0,NULL);
+				m_ListCtrl_Test.SetItem(nSettingCount, 4,LVIF_TEXT,  cTemp->GetBaseInfoValue(),0,0,0,NULL);
+				m_ListCtrl_Test.SetItem(nSettingCount, 5,LVIF_TEXT,  cTemp->GetCurrentInfoValue(),0,0,0,NULL);
+				nSettingCount++;
+			}
+		}
 	}
 	else	// tree 에서 Root 선택 시
 	{
@@ -865,5 +914,7 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		(GetDlgItem(IDC_LIST_MAIN))->ShowWindow(TRUE);
 		UpdateWindow();
 	}
+
+
 	*pResult = 0;
 }

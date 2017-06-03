@@ -22,7 +22,7 @@ public:
 	void SetListCountZero();
 	void ModifyData(BasicData* inTarget);
 	void SaveDataToFile(tinyxml2::XMLDocument& cXMLDoc, tinyxml2::XMLElement* cElement);
-	BOOL CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent);
+	BOOL CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outDifferent, CList<CompareResult*>& outDefferent);
 	
 private:
 	CList<BasicData*> m_pDataList;

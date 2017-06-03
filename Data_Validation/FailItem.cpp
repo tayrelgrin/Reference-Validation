@@ -58,6 +58,11 @@ BOOL FailItem::OnInitDialog()
 void FailItem::AddFailItem(CString inItem, CString inPath)
 {
 	int nCount = m_ListCtrl_FailItem.GetItemCount();
+	int nFileIndex = inPath.ReverseFind('\\');
+	CString strTemp = inPath.Left(nFileIndex);
+	nFileIndex = strTemp.ReverseFind('\\');
+	inPath = inPath.Mid(nFileIndex+1);
+
 	UpdateData(TRUE);
 	m_ListCtrl_FailItem.InsertItem(nCount, _T(""));
 	m_ListCtrl_FailItem.SetItem(nCount, 1,LVIF_TEXT,  inItem,0,0,0,NULL );

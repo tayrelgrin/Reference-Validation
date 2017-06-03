@@ -59,7 +59,7 @@ private:
 	DataController m_TotalData;
 	CWnd* m_pwndShow;
 	Config_Select_Dlg m_ConfigSelectDlg;
-	
+	CList<CompareResult*> m_ListDefferent;
 public:
 	CTabCtrl m_TabCtrl_Main;
 	CButton m_ButtonStart;

@@ -339,7 +339,7 @@ void FileType::ModifyData(BasicData* inTarget)
 }
 
 
-BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outResult)
+BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDefferent)
 {
 	CList<BasicData*> pListTargetData;
 
@@ -414,13 +414,14 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 						strFail.Format(_T("Fail Item : (%s %s %s) %s : %s"), m_strFileName, pThis->getSection(), pThis->getItem(), pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
 						cNewResult->SetCompareResult(FALSE);
-						outResult.AddTail(cNewResult);
+						outLogData.AddTail(cNewResult);
+						outDefferent.AddTail(cNewResult);
 						bCompareResult = FALSE;
 					}
  					else if (pThis->getValue()==pTarget->getValue())
  					{
 						cNewResult->SetCompareResult(TRUE);
- 						outResult.AddTail(cNewResult);
+ 						outLogData.AddTail(cNewResult);
  					}
 					bFlagItem = true;
 					break;

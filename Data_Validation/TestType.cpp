@@ -309,7 +309,7 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 	}
 }
 
-BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outResult)
+BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult)
 {
 	BOOL bResult = FALSE;
 	BOOL bFileCount = FALSE;
@@ -415,10 +415,10 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			{
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetFileName(pTarget->GetFileName());
+				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
-
 				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail,outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail,outLogData, outResult);
 				if (!bCompareRusult)
 				{
 					bFailFlag = true;
@@ -429,10 +429,10 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			{
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetFileName(pTarget->GetFileName());
+				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
-
 				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail, outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
 				if (!bCompareRusult)
 				{
 					bFailFlag = true;
@@ -443,10 +443,10 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			{
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetFileName(pTarget->GetFileName());
+				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
-
 				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail, outResult);
+				bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
 				if (!bCompareRusult)
 				{
 					bFailFlag = true;
