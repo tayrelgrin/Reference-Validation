@@ -362,12 +362,45 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 	}
 
 	int nFilecount = 0;
+	CString strBaseRefFile, strTargetRefFile;
+	strBaseRefFile.Format(_T(""));
+	strTargetRefFile.Format(_T(""));
+
+	for(int i = 0; i < vBaseFileName.size(); i++)
+	{
+		if (vBaseFileName[i].Find(_T("_Register")) != -1)
+		{
+			strBaseRefFile = vBaseFileName[i];
+			strBaseRefFile.Replace(_T("_Register"),_T(""));
+		}
+	}
+
+	for(int i = 0; i < vTargetFileName.size(); i++)
+	{
+		if (vTargetFileName[i].Find(_T("_Register")) != -1)
+		{
+			strTargetRefFile = vTargetFileName[i];
+			strTargetRefFile.Replace(_T("_Register"),_T(""));
+		}
+	}
+
+	
 
 	for(int i = 0; i < vBaseFileName.size(); i++)
 	{
 		for(int j = 0; j < vTargetFileName.size(); j++)
 		{
 			if(vBaseFileName[i] == vTargetFileName[j])
+			{
+				nFilecount++;
+				break;
+			}
+			else if(vBaseFileName[i].Find(_T("_Register")) != -1 && vTargetFileName[j].Find(_T("_Register")) != -1)
+			{
+				nFilecount++;
+				break;
+			}
+			else if(vBaseFileName[i] == strBaseRefFile && vTargetFileName[j] == strTargetRefFile)
 			{
 				nFilecount++;
 				break;
@@ -383,6 +416,137 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 	}
 	else
 	{
+		std::vector<CString> vTempData1;
+		std::vector<CString> vTempData2;
+		std::vector<CString> vTempData3;
+		std::vector<CString> vTempData4;
+		// adding file
+		if (vTargetFileName.size() > vBaseFileName.size())
+		{
+			vTempData1.assign(vTargetFileName.begin(),vTargetFileName.end());
+			vTempData2.assign(vBaseFileName.begin(),vBaseFileName.end());
+		}
+		else	// missing file or Name Mismatching
+		{
+			vTempData1.assign(vBaseFileName.begin(),vBaseFileName.end());
+			vTempData2.assign(vTargetFileName.begin(),vTargetFileName.end());	
+			vTempData3.assign(vBaseFileName.begin(),vBaseFileName.end());
+			vTempData4.assign(vTargetFileName.begin(),vTargetFileName.end());
+		}
+		
+
+		for (int i = 0; i < vTempData2.size(); i++)
+		{
+			for (int j = 0; j < vTempData1.size(); j++)
+			{
+				if(vTempData2[i] == vTempData1[j])
+				{
+					vTempData1.erase(vTempData1.begin()+j);
+					break;
+				}
+				else if(vTempData2[i].Find(_T("_Register")) != -1 && vTempData1[j].Find(_T("_Register")) != -1)
+				{
+					vTempData1.erase(vTempData1.begin()+j);
+					break;
+				}
+				else if(vTempData2[i] == strBaseRefFile && vTempData1[j] == strTargetRefFile)
+				{
+					vTempData1.erase(vTempData1.begin()+j);
+					break;
+				}
+			}
+		}
+
+		for (int i = 0; i < vTempData3.size(); i++)
+		{
+			for (int j = 0; j < vTempData4.size(); j++)
+			{
+				if(vTempData3[i] == vTempData4[j])
+				{
+					vTempData4.erase(vTempData4.begin()+j);
+					break;
+				}
+				else if(vTempData3[i].Find(_T("_Register")) != -1 && vTempData4[j].Find(_T("_Register")) != -1)
+				{
+					vTempData4.erase(vTempData4.begin()+j);
+					break;
+				}
+				else if(vTempData3[i] == strBaseRefFile && vTempData4[j] == strTargetRefFile)
+				{
+					vTempData4.erase(vTempData4.begin()+j);
+					break;
+				}
+			}
+		}
+
+		CString strFailLog;
+		// add to fail object
+ 		if (vTargetFileName.size() > vBaseFileName.size())
+		{
+			for (int i = 0; i < vTempData1.size() ; i++)
+			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(vTempData1[i]);
+				outLogData.AddTail(cNewConfig);
+				outResult.AddTail(cNewConfig);
+
+				CompareResult* cNewConfig1 = new CompareResult;
+				cNewConfig1->SetCompareResult(FALSE);
+				cNewConfig1->SetItemName(_T("File Missing"));
+				cNewConfig1->SetBaseInfoValue(_T("X"));
+				cNewConfig1->SetCurrentInfoValue(vTempData1[i]);
+				
+				strFailLog.Format(_T("File Missing : %s"), vTempData1[i]);
+				outLogData.AddTail(cNewConfig1);
+				outResult.AddTail(cNewConfig1);
+				outFail.push_back(strFailLog);
+				m_pFailItems->AddFailItem(strFailLog,_T(""));
+			}
+		}
+		else if(vTargetFileName.size() < vBaseFileName.size())
+		{
+			for (int i = 0; i < vTempData1.size() ; i++)
+			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(vTempData1[i]);
+				outLogData.AddTail(cNewConfig);
+				outResult.AddTail(cNewConfig);
+
+				CompareResult* cNewConfig1 = new CompareResult;
+				cNewConfig1->SetCompareResult(FALSE);
+				cNewConfig1->SetItemName(_T("File Adding"));
+				cNewConfig1->SetCurrentInfoValue(_T("X"));
+				cNewConfig1->SetBaseInfoValue(vTempData1[i]);
+
+				strFailLog.Format(_T("File Adding : %s"), vTempData1[i]);
+				outLogData.AddTail(cNewConfig1);
+				outResult.AddTail(cNewConfig1);
+				outFail.push_back(strFailLog);
+				m_pFailItems->AddFailItem(strFailLog,_T(""));
+			}
+		}
+		else
+		{
+			for (int i = 0; i < vTempData1.size() ; i++)
+			{
+				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetFileName(vTempData1[i]);
+				outLogData.AddTail(cNewConfig);
+				outResult.AddTail(cNewConfig);
+
+				CompareResult* cNewConfig1 = new CompareResult;
+				cNewConfig1->SetCompareResult(FALSE);
+				cNewConfig1->SetItemName(_T("File Name Mismatch"));
+				cNewConfig1->SetBaseInfoValue(vTempData4[i]);
+				cNewConfig1->SetCurrentInfoValue(vTempData1[i]);
+
+				strFailLog.Format(_T("File Name Mismatch : %s : %s"),vTempData4[i], vTempData1[i]);
+				outLogData.AddTail(cNewConfig1);
+				outResult.AddTail(cNewConfig1);
+				outFail.push_back(strFailLog);
+				m_pFailItems->AddFailItem(strFailLog,_T(""));
+			}
+		}
 		bFileCount = FALSE;
 	}
 	//////////////////////////////////////////////////////////////////////////

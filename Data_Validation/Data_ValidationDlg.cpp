@@ -484,7 +484,9 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 	// 리스트 컨트롤에 삭제
 	if(hItem != NULL)
 	{
-		if (AfxMessageBox(_T("Delete %s Config?", strSelectedConfigName),MB_OKCANCEL) == 1)
+		CString strTemp;
+		strTemp.Format(_T("Delete %s Config?"), strSelectedConfigName);
+		if (AfxMessageBox(strTemp,MB_OKCANCEL) == 1)
 		{
 			m_TreeMain.DeleteItem(hItem);
 			CString strConfigNum;
