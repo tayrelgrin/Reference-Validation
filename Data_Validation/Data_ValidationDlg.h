@@ -43,6 +43,8 @@ public:
 	afx_msg void OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMRClickTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonDelete();
+	afx_msg void OnCustomdrawMainList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnCustomdrawTestList(NMHDR *pNMHDR, LRESULT *pResult);
 public:
 	void AddConfigAndTestToListControl(CString inConfig ,std::vector<CString> vTestName);
 	void AddToTreeRefName(CString inData);
@@ -61,9 +63,7 @@ private:
 	Config_Select_Dlg m_ConfigSelectDlg;
 	CList<CompareResult*> m_ListDefferent;
 public:
-	CTabCtrl m_TabCtrl_Main;
-	CButton m_ButtonStart;
-	CButton m_ButtonStop;
+	CTabCtrl m_TabCtrl_Main;	
 	CListCtrl m_ListCtrl_Main;
 	CTreeCtrl m_TreeMain;
 	virtual void PostNcDestroy();
@@ -72,4 +72,9 @@ public:
 	CProgressCtrl m_Progressctrl;
 	CListCtrl m_ListCtrl_Test;
 	afx_msg void OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
+	CBitmapButton m_Button_Login;
+	CBitmapButton m_Button_RefSel;
+	CBitmapButton m_Button_Delete;
+	CBitmapButton m_Button_Start;
+	CBitmapButton m_Button_Stop;
 };

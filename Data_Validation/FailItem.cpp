@@ -14,7 +14,7 @@ IMPLEMENT_DYNAMIC(FailItem, CDialogEx)
 FailItem::FailItem(CWnd* pParent /*=NULL*/)
 	: CDialogEx(FailItem::IDD, pParent)
 {
-
+	m_strRootPath.Format(_T(""));
 }
 
 FailItem::~FailItem()
@@ -82,9 +82,11 @@ void FailItem::OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult)
 	int nIndex = pNMView->iItem;
 	int nSubIndex = pNMItemActivate->iSubItem;
 	CString strSelectFilePath;
+	CString strTemp;
 	strSelectFilePath.Format(_T(""));
-	strSelectFilePath = m_ListCtrl_FailItem.GetItemText(nIndex, 2);
+	strTemp = m_ListCtrl_FailItem.GetItemText(nIndex, 2);
 
+	strSelectFilePath.Format("%s\\%s",m_strRootPath, strTemp);
 	// 해당 파일 열기
 	if (strSelectFilePath != _T("") && nSubIndex == 2)
 	{
@@ -109,4 +111,9 @@ void FailItem::OnNMClickListFailitem(NMHDR *pNMHDR, LRESULT *pResult)
 void FailItem::ClearItems()
 {
 	m_ListCtrl_FailItem.DeleteAllItems();
+}
+
+void FailItem::SetRootPath(CString inData)
+{
+	m_strRootPath = inData;
 }

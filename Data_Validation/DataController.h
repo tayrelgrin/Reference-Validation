@@ -51,6 +51,7 @@ public:
 	bool SearchTestInBase(CString inTargetConfig, CString inTest,TestType*& outTarget);
 	bool SearchTestInSetting(CString inTargetConfig, CString inTest,TestType*& outTarget);
 	void GetDefferentResult(CList<CompareResult*>& outDifferent);
+	void InitDifferentResultList();
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;

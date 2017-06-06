@@ -383,6 +383,18 @@ void DataController::DeleteTestDirectoryPath(CString inTarget)
 		else
 			nDelCount++;
 	}
+
+	nDelCount = 0;
+	nIndex = m_vRootDIr.size();
+	for (int i= 0; i < nIndex; i++)
+	{
+		if (m_vRootDIr[nDelCount].Find(inTarget) != -1)
+		{
+			m_vRootDIr.erase(m_vRootDIr.begin()+nDelCount);
+		}
+		else
+			nDelCount++;
+	}
 }
 
 void DataController::GetTestDirectoryPath(std::vector<CString>& outvData)
@@ -965,7 +977,7 @@ BOOL DataController::CheckCRC(std::vector<CString>& outData)
 
 				CompareResult* cFailItem2 = new CompareResult;
 				cFailItem2->SetBaseInfoValue(strCRCValue);
-				cFailItem2->SetCurrentInfoValue(strCRCResult);				
+				cFailItem2->SetCurrentInfoValue(strCRCResult);
 				cFailItem2->SetCompareResult(FALSE);
 				m_pListLogData.AddTail(cFailItem2);
 				m_pListDifferentResult.AddTail(cFailItem2);
@@ -2037,4 +2049,9 @@ void DataController::GetDefferentResult(CList<CompareResult*>& outDifferent)
 		CompareResult* cTemp = m_pListDifferentResult.GetNext(pPos);
 		outDifferent.AddTail(cTemp);
 	}
+}
+
+void DataController::InitDifferentResultList()
+{
+	m_pListDifferentResult.RemoveAll();
 }

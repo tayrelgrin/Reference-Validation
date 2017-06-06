@@ -55,13 +55,16 @@ CData_ValidationDlg::CData_ValidationDlg(CWnd* pParent /*=NULL*/)
 void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
-	DDX_Control(pDX, IDC_BUTTON_START, m_ButtonStart);
-	DDX_Control(pDX, IDC_BUTTON_STOP, m_ButtonStop);
+	DDX_Control(pDX, IDC_BUTTON_START, m_Button_Start);
+	DDX_Control(pDX, IDC_BUTTON_STOP, m_Button_Stop);
 	DDX_Control(pDX, IDC_LIST_MAIN, m_ListCtrl_Main);
 	DDX_Control(pDX, IDC_TAB1, m_TabCtrl_Main);
 	DDX_Control(pDX, IDC_TREE_MAIN, m_TreeMain);
 	DDX_Control(pDX, IDC_PROGRESS1, m_Progressctrl);
 	DDX_Control(pDX, IDC_LIST_TEST, m_ListCtrl_Test);
+	DDX_Control(pDX, IDC_BUTTON_LOGIN, m_Button_Login);
+	DDX_Control(pDX, IDC_BUTTON_REF_SELECT, m_Button_RefSel);
+	DDX_Control(pDX, IDC_BUTTON_DELETE, m_Button_Delete);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -78,6 +81,8 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_LISTLOG, &CData_ValidationDlg::OnBnClickedButtonListlog)
 	ON_BN_CLICKED(IDC_BUTTON_RESULTLOG, &CData_ValidationDlg::OnBnClickedButtonResultlog)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ValidationDlg::OnTvnSelchangedTreeMain)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_MAIN, OnCustomdrawMainList)
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_TEST, OnCustomdrawTestList)
 END_MESSAGE_MAP()
 
 
@@ -180,6 +185,23 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	m_TotalData.LoadXMLFileListInValue();
 	m_ListLog->WriteLogFile(_T("Load XML File List From Value Directory"));
 
+	//////////////////////////////////////////////////////////////////////////
+	m_Button_Login.LoadBitmaps(IDB_BITMAP_LOGIN, IDB_BITMAP_LOGIN, NULL, NULL);
+	m_Button_Login.SizeToContent();
+
+	m_Button_Start.LoadBitmaps(IDB_BITMAP_PLAY, IDB_BITMAP_PLAY, NULL, NULL);
+	m_Button_Start.SizeToContent();
+
+	m_Button_Delete.LoadBitmaps(IDB_BITMAP_DELETE, IDB_BITMAP_DELETE, NULL, NULL);
+ 	m_Button_Delete.SizeToContent();
+
+	m_Button_RefSel.LoadBitmaps(IDB_BITMAP_SELECT, IDB_BITMAP_SELECT, NULL, NULL);
+	m_Button_RefSel.SizeToContent();
+
+	m_Button_Stop.LoadBitmaps(IDB_BITMAP_STOP, IDB_BITMAP_STOP, NULL, NULL);
+	m_Button_Stop.SizeToContent();
+	//////////////////////////////////////////////////////////////////////////
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -258,11 +280,12 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 		{
 			InitListCtrl();
 			m_FailItemDlg.ClearItems();
-			m_ButtonStart.EnableWindow(FALSE);
-			m_ButtonStart.ShowWindow(FALSE);
-			m_ButtonStop.EnableWindow(TRUE);
-			m_ButtonStop.ShowWindow(TRUE);
+			m_Button_Start.EnableWindow(FALSE);
+			m_Button_Start.ShowWindow(FALSE);
+			m_Button_Stop.EnableWindow(TRUE);
+			m_Button_Stop.ShowWindow(TRUE);
 			
+			m_TotalData.InitDifferentResultList();
 			UpdateWindow();
 			
 			// 마우스 wait start
@@ -282,10 +305,10 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			m_TotalData.Validation(strConfigName);
 			m_ListLog->WriteLogFile(_T("Reference Validation is done"));
 
-			m_ButtonStop.EnableWindow(FALSE);
-			m_ButtonStop.ShowWindow(FALSE);
-			m_ButtonStart.EnableWindow(TRUE);
-			m_ButtonStart.ShowWindow(TRUE);
+			m_Button_Stop.EnableWindow(FALSE);
+			m_Button_Stop.ShowWindow(FALSE);
+			m_Button_Start.EnableWindow(TRUE);
+			m_Button_Start.ShowWindow(TRUE);
 
 			// 마우스 wait end
 			EndWaitCursor();
@@ -305,10 +328,10 @@ void CData_ValidationDlg::OnBnClickedButtonStop()
 
 		m_TotalData.InitAllData();
 
-		m_ButtonStop.EnableWindow(FALSE);
-		m_ButtonStop.ShowWindow(FALSE);
-		m_ButtonStart.EnableWindow(TRUE);
-		m_ButtonStart.ShowWindow(TRUE);
+		m_Button_Stop.EnableWindow(FALSE);
+		m_Button_Stop.ShowWindow(FALSE);
+		m_Button_Start.EnableWindow(TRUE);
+		m_Button_Start.ShowWindow(TRUE);
 	}
 }
 
@@ -361,6 +384,7 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 			else
 			{
 				m_TotalData.AddRootPath((LPTSTR)Pathname);
+				m_FailItemDlg.SetRootPath((LPTSTR)Pathname);
 				m_ListLog->WriteLogFile(_T("Check Base File In All Data : PASS"));
 				CString strRefName, strTemp;
 				strRefName.Format(_T(""));
@@ -860,6 +884,8 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 				}
 			}
 		}
+
+		m_ListDefferent.RemoveAll();
 		// 비교 결과 다른것 출력
 		m_TotalData.GetDefferentResult(m_ListDefferent);
 
@@ -917,6 +943,70 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		UpdateWindow();
 	}
 
+	*pResult = 0;
+}
+
+void CData_ValidationDlg::OnCustomdrawMainList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	CString strTestList,strMainList;
+	BOOL bEmerFlag = FALSE;
+
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+
+	strMainList = m_ListCtrl_Main.GetItemText(pLVCD->nmcd.dwItemSpec, 2);
 
 	*pResult = 0;
+
+	if ( CDDS_PREPAINT == pLVCD->nmcd.dwDrawStage )
+		*pResult = CDRF_NOTIFYITEMDRAW;
+
+	else if ( CDDS_ITEMPREPAINT == pLVCD->nmcd.dwDrawStage )
+	{
+		if((strMainList.Find("FAIL") != -1))
+		{
+			pLVCD->clrTextBk = RGB(237,0,0);
+		}		
+		else if((strMainList.Find("PASS") != -1))        // 긴급 플래그가 아닐때
+		{
+			pLVCD->clrTextBk = RGB(0,255,0);
+		}
+		else
+		{
+			pLVCD->clrTextBk = RGB(255,255,255);
+		}
+		*pResult = CDRF_DODEFAULT;
+	}
+}
+
+
+void CData_ValidationDlg::OnCustomdrawTestList(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	CString strTestList;
+	BOOL bEmerFlag = FALSE;
+
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+
+	strTestList = m_ListCtrl_Test.GetItemText(pLVCD->nmcd.dwItemSpec, 2);
+
+	*pResult = 0;
+
+	if ( CDDS_PREPAINT == pLVCD->nmcd.dwDrawStage )
+		*pResult = CDRF_NOTIFYITEMDRAW;
+
+	else if ( CDDS_ITEMPREPAINT == pLVCD->nmcd.dwDrawStage )
+	{
+		if((strTestList.Find("X") != -1))
+		{
+			pLVCD->clrTextBk = RGB(237,0,0);
+		}		
+		else if((strTestList.Find("O") != -1))        // 긴급 플래그가 아닐때
+		{
+			pLVCD->clrTextBk = RGB(0,255,0);
+		}
+		else
+		{
+			pLVCD->clrTextBk = RGB(255,255,255);
+		}
+		*pResult = CDRF_DODEFAULT;
+	}
 }

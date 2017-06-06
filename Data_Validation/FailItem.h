@@ -23,9 +23,10 @@ public:
 	virtual BOOL OnInitDialog();
 	void AddFailItem(CString inItem, CString inPath);
 	void ClearItems();
+	void SetRootPath(CString inData);
 	afx_msg void OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
 public:
 	CListCtrl m_ListCtrl_FailItem;
-	
+	CString m_strRootPath;
 };
