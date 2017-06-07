@@ -77,4 +77,5 @@ public:
 	CBitmapButton m_Button_Delete;
 	CBitmapButton m_Button_Start;
 	CBitmapButton m_Button_Stop;
+	CStatic m_BaseRefText;
 };

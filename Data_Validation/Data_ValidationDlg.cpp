@@ -65,6 +65,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_LOGIN, m_Button_Login);
 	DDX_Control(pDX, IDC_BUTTON_REF_SELECT, m_Button_RefSel);
 	DDX_Control(pDX, IDC_BUTTON_DELETE, m_Button_Delete);
+	DDX_Control(pDX, IDC_STATIC_BASEREF, m_BaseRefText);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -90,7 +91,6 @@ END_MESSAGE_MAP()
 
 BOOL CData_ValidationDlg::OnInitDialog()
 {
-	//AfxSetAllocStop(519410);
 	CDialogEx::OnInitDialog();
 
 	// 시스템 메뉴에 "정보..." 메뉴 항목을 추가합니다.
@@ -119,6 +119,8 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 작은 아이콘을 설정합니다.
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
+
+
 
 	
 	//////////////////////////////////////////////////////////////////////////
@@ -298,8 +300,12 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			CString strConfigName;
 			strConfigName.Format(_T("%s\\%s-%s-%s.xml"),strPrj,strBuild,strConfig,strDOE);
+			CString strBaseRefName;
+			strBaseRefName.Format(_T("vs %s-%s-%s-%s"),strPrj,strBuild,strConfig,strDOE);
+			m_BaseRefText.SetWindowTextA(strBaseRefName);
 			m_ListLog->WriteLogFile(strConfigName);
 			m_ListLog->WriteLogFile(_T("Start Reference Validation"));
+			UpdateWindow();
 
 			// Validation start
 			m_TotalData.Validation(strConfigName);
