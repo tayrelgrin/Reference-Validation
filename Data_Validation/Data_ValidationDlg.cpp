@@ -120,9 +120,6 @@ BOOL CData_ValidationDlg::OnInitDialog()
 
 	// TODO: 여기에 추가 초기화 작업을 추가합니다.
 
-
-
-	
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER );
 
@@ -502,8 +499,7 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 
-	// 트리에서 선택한 아이템 정보 가져오기
-	
+	// 트리에서 선택한 아이템 정보 가져오기	
 	CString strSelectedConfigName;
 	strSelectedConfigName.Format(_T(""));
 
@@ -972,7 +968,7 @@ void CData_ValidationDlg::OnCustomdrawMainList(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			pLVCD->clrTextBk = RGB(237,0,0);
 		}		
-		else if((strMainList.Find("PASS") != -1))        // 긴급 플래그가 아닐때
+		else if((strMainList.Find("PASS") != -1))
 		{
 			pLVCD->clrTextBk = RGB(0,255,0);
 		}
@@ -1005,7 +1001,7 @@ void CData_ValidationDlg::OnCustomdrawTestList(NMHDR *pNMHDR, LRESULT *pResult)
 		{
 			pLVCD->clrTextBk = RGB(237,0,0);
 		}		
-		else if((strTestList.Find("O") != -1))        // 긴급 플래그가 아닐때
+		else if((strTestList.Find("O") != -1))
 		{
 			pLVCD->clrTextBk = RGB(0,255,0);
 		}
