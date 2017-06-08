@@ -5,6 +5,11 @@
 ConfigDMData::ConfigDMData(void)
 {
 	m_bNewData = false;
+	m_strInputDirPath.Format(_T(""));
+	m_strPrj.Format(_T(""));
+	m_strBuildNum.Format(_T(""));
+	m_strConfigNum.Format(_T(""));
+	m_strDOE.Format(_T(""));
 }
 
 
@@ -264,34 +269,14 @@ void ConfigDMData::AddNewTest(std::vector<CString> inBaseFile, int inNInput)
 		strTemp.Format("%s%c",m_strInputDirPath,'\\');
 		strDir.Replace(strTemp, "");
 
-		//int nIndex = m_vTestDirPath[i].ReverseFind('\\');
-// 		CString strDir = m_vTestDirPath[i];
-// 		strDir = strDir.Mid(nIndex+1);
 		CString strSubDir;
 		strSubDir.Format("");
 
 		AfxExtractSubString(strTestName,strDir,5,'_');
-// 		AfxExtractSubString(strIndex8th,strDir,7,'_');
-// 		AfxExtractSubString(strIndex9th,strDir,8,'_');
 
 		if(strTestName == m_strBasicLoadTxt)
 			strTestName.Format("");
-// 		if (strIndex8th == m_strBasicLoadTxt)
-// 			strIndex8th.Format("");
-// 		if (strIndex9th == m_strBasicLoadTxt)
-// 			strIndex9th.Format("");
-// 
-// 		if (strIndex9th=="" && strIndex8th != "")
-// 		{
-// 			if(strIndex8th.Find('-') != -1)
-// 				strIndex9th = strIndex8th;
-// 		}
 
-// 		if(strIndex9th != "" && strTestName != "")
-// 		{
-// 			strTestName = strIndex9th + "\\" + strTestName;
-// 		}
-// 		
 		if (strDir.Find('\\') != -1)
 		{
 			int nIndex = strDir.Find('\\');
@@ -610,7 +595,6 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 	tinyxml2::XMLNode* pNode;
 	tinyxml2::XMLElement* pElent;
 
-
 	for (pNode = (tinyxml2::XMLNode*)pParent->FirstChild(); pNode != 0; pNode = (tinyxml2::XMLNode*)pNode->NextSibling())
 	{
 		CString strTemp = (CString)pNode->Value();
@@ -631,16 +615,16 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					BasicData* outData = new BasicData;
 					for (pAttr = (tinyxml2::XMLAttribute*)pElent->FirstAttribute(); pAttr != 0; pAttr = (tinyxml2::XMLAttribute*)pAttr->Next() )
 					{
-						CString strTempValue = (CString)pAttr->Name();
+						CString strTempValue;
+						strTempValue.Format(_T("%s"),pAttr->Name());
 
-						if("Section" == strTempValue)
+						if(_T("Section") == strTempValue)
 							outData->setSection((CString)pAttr->Value());
-						else if("Item" == strTempValue)
+						else if(_T("Item") == strTempValue)
 							outData->setItem((CString)pAttr->Value());
-						else if("Value" == strTempValue)
+						else if(_T("Value") == strTempValue)
 						{
 							outData->setValue((CString)pAttr->Value());
-							/*bFlag = true;*/
 						}
 					}
 					m_lBaseInfo.AddTail(outData);
@@ -669,6 +653,9 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 					{
 						CString strFile;
 						CString strDir;
+
+						strFile.Format(_T(""));
+						strDir.Format(_T(""));
 
 						AfxExtractSubString(strDir, vTemp[i], 2,':');
 						if (strDir=="")

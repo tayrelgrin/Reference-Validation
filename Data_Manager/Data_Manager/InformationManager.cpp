@@ -171,7 +171,6 @@ void InformationManager::LoadBaseFileList()
 
 			pElem2->LinkEndChild(text);
 			pElem->LinkEndChild(pElem2);
-			
 		}
 		cDoc.LinkEndChild(pElem);		
 		cDoc.SaveFile(LPSTR(LPCTSTR(strFilepath)));
@@ -371,14 +370,6 @@ void InformationManager::AddNewBaseInfo(BasicData& inData)
 
 void InformationManager::InitBaseInfo()
 {
-	POSITION pPos = m_listBaseInfo.GetHeadPosition();
-	POSITION pTemp = NULL;
-	while(pPos)
-	{
-		pTemp = pPos;
-		BasicData* pData = m_listBaseInfo.GetNext(pPos);
-		delete pData;
-	}
 	m_listBaseInfo.RemoveAll();
 }
 
