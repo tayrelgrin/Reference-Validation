@@ -309,6 +309,11 @@ void TestType::ChangeFileName(CString inTargetFileName, CString inNewFileName)
 	}
 }
 
+void TestType::SetListLog(ListLog* inData)
+{
+	m_ListLog = inData;
+}
+
 BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult)
 {
 	BOOL bResult = FALSE;
@@ -383,8 +388,6 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			strTargetRefFile.Replace(_T("_Register"),_T(""));
 		}
 	}
-
-	
 
 	for(int i = 0; i < vBaseFileName.size(); i++)
 	{

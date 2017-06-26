@@ -29,9 +29,11 @@ public:
 	BOOL CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult);
 	void GetDataList(CList<FileType*>& outData);
 	void SetFailItemPointer(FailItem* inData);
+	void SetListLog(ListLog* inData);
 private:
 	CList<FileType*> m_pFIleList;
 	CString m_strTestName;
 	FailItem* m_pFailItems;
+	ListLog* m_ListLog;
 };
 

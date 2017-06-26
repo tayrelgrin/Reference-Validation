@@ -67,6 +67,28 @@ BOOL CData_ValidationApp::InitInstance()
 	// 적절한 내용으로 수정해야 합니다.
 	SetRegistryKey(_T("로컬 응용 프로그램 마법사에서 생성된 응용 프로그램"));
 
+	HANDLE hMutex = CreateMutex(NULL,TRUE,_T("Data_Validation"));
+	if(GetLastError() == ERROR_ALREADY_EXISTS)
+	{
+		ReleaseMutex(hMutex);
+
+		CWnd *pWndPrev, *pWndChild;
+		pWndPrev = CWnd::FindWindow(NULL, _T("ABC"));
+		if(pWndPrev)
+		{
+			pWndChild = pWndPrev->GetLastActivePopup();
+
+			if(pWndChild->IsIconic())
+				pWndPrev->ShowWindow(SW_RESTORE);
+
+			pWndChild->SetForegroundWindow();
+		}
+		return FALSE;
+	}
+
+	ReleaseMutex(hMutex);
+
+
 	CData_ValidationDlg dlg;
 	m_pMainWnd = &dlg;
 	INT_PTR nResponse = dlg.DoModal();

@@ -104,10 +104,12 @@
     <None Include="res\Data_Validation.ico" />
     <None Include="res\Data_Validation.rc2" />
     <None Include="res\Delete.bmp" />
+    <None Include="res\icon1.ico" />
     <None Include="res\login.bmp" />
     <None Include="res\Play.bmp" />
     <None Include="res\Play_push.bmp" />
     <None Include="res\RefSelect.bmp" />
+    <None Include="res\RV_ICON11.ico" />
     <None Include="res\Select.bmp" />
   </ItemGroup>
   <ItemGroup>

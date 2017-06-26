@@ -173,7 +173,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 {
 	CList<TestType*> pListTargetTest;
 
-	// inTarget의 리스트 카피해오기
+	// inTarget의 리스트 카피해오기 base
 	inTarget->GetDataList(pListTargetTest);
 
 	// this list 와 inTarget list 비교 수행
@@ -201,15 +201,16 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 			{
 				CString strTestLog;
 				strTestLog.Format(_T("======================  %s Compare Start ====================="), strTargetName);
-				outFail.push_back(strTestLog);
+				m_ListLog->WriteLogFile(strTestLog);
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetTestName(strTargetName);
 				outLogData.AddTail(cNewConfig);
 				outDifferent.AddTail(cNewConfig);
 				pThis->SetFailItemPointer(m_pFailItems);
+				
 				std::vector<CString> vTempFail;
 				CString strTestDir = m_vTestDirPath[nTestCount++];
-				bCompareResult = pThis->CompareTest(pTarget, vTempFail, outLogData, outDifferent);
+				bCompareResult = pTarget->CompareTest(pThis, vTempFail, outLogData, outDifferent);
 
 				for (int i = 0; i < vTempFail.size(); i++)
 				{
@@ -229,7 +230,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 						strPath = strTestDir + _T("\\") + strFailTest;
 						m_pFailItems->AddFailItem(strItem,strPath);
 					}
-					outFail.push_back(vTempFail[i]);
+					m_ListLog->WriteLogFile(vTempFail[i]);
 				}
 
 				if(bCompareResult)

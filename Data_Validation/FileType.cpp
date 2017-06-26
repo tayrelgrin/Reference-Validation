@@ -352,7 +352,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 	bool bFlagSection = false;
 	bool bFlagItem = false;
 	BOOL bCompareResult = TRUE;
-	while(pThisListPos )
+	while(pThisListPos)
 	{
 		pThis = m_pDataList.GetNext(pThisListPos);		
 		pTargetListPos = pListTargetData.GetHeadPosition();
