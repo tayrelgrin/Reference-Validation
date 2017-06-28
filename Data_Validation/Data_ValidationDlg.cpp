@@ -66,6 +66,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_REF_SELECT, m_Button_RefSel);
 	DDX_Control(pDX, IDC_BUTTON_DELETE, m_Button_Delete);
 	DDX_Control(pDX, IDC_STATIC_BASEREF, m_BaseRefText);
+	DDX_Control(pDX, IDC_BASICCHECK, m_BasicCheckBox);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -123,10 +124,10 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_Main.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER );
 
-	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 100,  -1);
+	m_ListCtrl_Main.InsertColumn(0, _T("Config"),		LVCFMT_CENTER, 100, -1);
 	m_ListCtrl_Main.InsertColumn(1, _T("Test"),			LVCFMT_CENTER, 180, -1);
 	m_ListCtrl_Main.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 200, -1);
-	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 260, -1);
+	m_ListCtrl_Main.InsertColumn(3, _T("Progress"),		LVCFMT_CENTER, 240, -1);
 
 	m_TabCtrl_Main.InsertItem(1,_T("List Log"));
 	m_TabCtrl_Main.InsertItem(2,_T("Fail Item"));
@@ -136,11 +137,11 @@ BOOL CData_ValidationDlg::OnInitDialog()
 	m_ListCtrl_Test.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_CENTER );
 
 	m_ListCtrl_Test.InsertColumn(0, _T("Test"),			LVCFMT_CENTER, 80,  -1);
-	m_ListCtrl_Test.InsertColumn(1, _T("File"),			LVCFMT_CENTER, 80, -1);
-	m_ListCtrl_Test.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 80, -1);
+	m_ListCtrl_Test.InsertColumn(1, _T("File"),			LVCFMT_CENTER, 80,  -1);
+	m_ListCtrl_Test.InsertColumn(2, _T("Result"),		LVCFMT_CENTER, 80,  -1);
 	m_ListCtrl_Test.InsertColumn(3, _T("Item"),			LVCFMT_CENTER, 100, -1);
-	m_ListCtrl_Test.InsertColumn(4, _T("Base Value"),	LVCFMT_CENTER, 200, -1);
-	m_ListCtrl_Test.InsertColumn(5, _T("Current Value"),LVCFMT_CENTER, 200, -1);
+	m_ListCtrl_Test.InsertColumn(4, _T("Base Value"),	LVCFMT_CENTER, 190, -1);
+	m_ListCtrl_Test.InsertColumn(5, _T("Current Value"),LVCFMT_CENTER, 190, -1);
 	//////////////////////////////////////////////////////////////////////////
 	CRect rect;
 
@@ -304,8 +305,9 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			m_ListLog->WriteLogFile(_T("Start Reference Validation"));
 			UpdateWindow();
 
+			bool bChecked = m_BasicCheckBox.GetCheck();
 			// Validation start
-			m_TotalData.Validation(strConfigName);
+			m_TotalData.Validation(strConfigName, bChecked);
 			m_ListLog->WriteLogFile(_T("Reference Validation is done"));
 
 			m_Button_Stop.EnableWindow(FALSE);

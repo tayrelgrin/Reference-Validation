@@ -78,4 +78,5 @@ public:
 	CBitmapButton m_Button_Start;
 	CBitmapButton m_Button_Stop;
 	CStatic m_BaseRefText;
+	CButton m_BasicCheckBox;
 };

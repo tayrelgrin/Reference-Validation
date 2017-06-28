@@ -169,7 +169,7 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 }
 
 
-BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount)
+BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, bool inBasicCheck)
 {
 	CList<TestType*> pListTargetTest;
 
@@ -210,7 +210,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				
 				std::vector<CString> vTempFail;
 				CString strTestDir = m_vTestDirPath[nTestCount++];
-				bCompareResult = pTarget->CompareTest(pThis, vTempFail, outLogData, outDifferent);
+				bCompareResult = pTarget->CompareTest(pThis, vTempFail, outLogData, outDifferent, inBasicCheck);
 
 				for (int i = 0; i < vTempFail.size(); i++)
 				{

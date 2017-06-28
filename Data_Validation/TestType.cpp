@@ -314,7 +314,7 @@ void TestType::SetListLog(ListLog* inData)
 	m_ListLog = inData;
 }
 
-BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult)
+BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck)
 {
 	BOOL bResult = FALSE;
 	BOOL bFileCount = FALSE;
@@ -578,7 +578,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 		{
 			pTarget = pListTargetFile.GetNext(pTargetListPos);
 
-			if(strTargetRef.Find(pTarget->GetFileName()) != -1 &&  strBaseRef.Find(pThis->GetFileName()) != -1 )
+			if(strTargetRef.Find(pTarget->GetFileName()) != -1 &&  strBaseRef.Find(pThis->GetFileName()) != -1 && inBasicCheck == false)
 			{
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetFileName(pTarget->GetFileName());
@@ -608,17 +608,25 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			}
 			else if(pThis->GetFileName()==pTarget->GetFileName())
 			{
-				CompareResult* cNewConfig = new CompareResult;
-				cNewConfig->SetFileName(pTarget->GetFileName());
-				outLogData.AddTail(cNewConfig);
-				outResult.AddTail(cNewConfig);
-				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
-				if (!bCompareRusult)
+				if(inBasicCheck==true && (pTarget->GetFileName().Find("ItemVersion.ini") != -1 || strTargetRef.Find(pTarget->GetFileName()) != -1))
 				{
-					bFailFlag = true;
+					bCompareRusult = true;
+					break;
 				}
-				break;
+				else
+				{
+					CompareResult* cNewConfig = new CompareResult;
+					cNewConfig->SetFileName(pTarget->GetFileName());
+					outLogData.AddTail(cNewConfig);
+					outResult.AddTail(cNewConfig);
+					outFail.push_back(pThis->GetFileName());
+					bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
+					if (!bCompareRusult)
+					{
+						bFailFlag = true;
+					}
+					break;
+				}
 			}
 			nIndex++;
 		}
