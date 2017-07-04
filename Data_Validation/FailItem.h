@@ -21,7 +21,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();
-	void AddFailItem(CString inItem, CString inPath);
+	void AddFailItem(CString inConfig,CString inTest, CString inFileName, CString inItem, CString inPath);
 	void ClearItems();
 	void SetRootPath(CString inData);
 	afx_msg void OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult);

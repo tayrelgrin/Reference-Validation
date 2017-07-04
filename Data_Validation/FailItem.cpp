@@ -45,9 +45,12 @@ BOOL FailItem::OnInitDialog()
 	//////////////////////////////////////////////////////////////////////////
 	m_ListCtrl_FailItem.SetExtendedStyle(LVS_EX_GRIDLINES | LVCFMT_LEFT | LVS_EX_FULLROWSELECT );
 
-	m_ListCtrl_FailItem.InsertColumn(0, _T(""),			LVCFMT_CENTER, 0,  -1);
-	m_ListCtrl_FailItem.InsertColumn(1, _T("Detail"),	LVCFMT_CENTER, 220, -1);
-	m_ListCtrl_FailItem.InsertColumn(2, _T("Path"),		LVCFMT_CENTER, 490, -1);
+	m_ListCtrl_FailItem.InsertColumn(0, _T(""),				LVCFMT_CENTER, 0,  -1);
+	m_ListCtrl_FailItem.InsertColumn(1, _T("Config"),		LVCFMT_CENTER, 100, -1);
+	m_ListCtrl_FailItem.InsertColumn(2, _T("Test"),			LVCFMT_CENTER, 100, -1);
+	m_ListCtrl_FailItem.InsertColumn(3, _T("File Name"),	LVCFMT_CENTER, 300, -1);
+	m_ListCtrl_FailItem.InsertColumn(4, _T("Item"),			LVCFMT_CENTER, 150, -1);	
+	m_ListCtrl_FailItem.InsertColumn(5, _T("Execute"),		LVCFMT_CENTER, 70, -1);
 	
 	////////////////////////////////////////////////////////////////////////// 
 
@@ -55,7 +58,7 @@ BOOL FailItem::OnInitDialog()
 	// 예외: OCX 속성 페이지는 FALSE를 반환해야 합니다.
 }
 
-void FailItem::AddFailItem(CString inItem, CString inPath)
+void FailItem::AddFailItem(CString inConfig,CString inTest, CString inFileName, CString inItem, CString inPath)
 {
 	int nCount = m_ListCtrl_FailItem.GetItemCount();
 	int nFileIndex = inPath.ReverseFind('\\');
@@ -65,8 +68,11 @@ void FailItem::AddFailItem(CString inItem, CString inPath)
 
 	UpdateData(TRUE);
 	m_ListCtrl_FailItem.InsertItem(nCount, _T(""));
-	m_ListCtrl_FailItem.SetItem(nCount, 1,LVIF_TEXT,  inItem,0,0,0,NULL );
-	m_ListCtrl_FailItem.SetItem(nCount, 2,LVIF_TEXT,  inPath,0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 1,LVIF_TEXT, inConfig,	0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 2,LVIF_TEXT, inTest,	0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 3,LVIF_TEXT, inFileName,0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 4,LVIF_TEXT, inItem,	0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 5,LVIF_TEXT, inPath,	0,0,0,NULL );
 	UpdateData(FALSE);
 }
 
@@ -84,11 +90,11 @@ void FailItem::OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CString strSelectFilePath;
 	CString strTemp;
 	strSelectFilePath.Format(_T(""));
-	strTemp = m_ListCtrl_FailItem.GetItemText(nIndex, 2);
+	strTemp = m_ListCtrl_FailItem.GetItemText(nIndex, 5);
 
 	strSelectFilePath.Format("%s\\%s",m_strRootPath, strTemp);
 	// 해당 파일 열기
-	if (strSelectFilePath != _T("") && nSubIndex == 2)
+	if (strSelectFilePath != _T("") && nSubIndex == 5)
 	{
 		ShellExecute(NULL, _T("open"), strSelectFilePath, NULL, NULL, SW_SHOW);
 	}

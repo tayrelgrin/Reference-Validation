@@ -503,7 +503,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem(strFailLog,_T(""));
+				m_pFailItems->AddFailItem("","","",strFailLog,_T(""));
 			}
 		}
 		else if(vTargetFileName.size() < vBaseFileName.size())
@@ -525,7 +525,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem(strFailLog,_T(""));
+				m_pFailItems->AddFailItem("","",strFailLog,vTempData1[i],_T(""));
 			}
 		}
 		else
@@ -547,7 +547,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem(strFailLog,_T(""));
+				m_pFailItems->AddFailItem("","",strFailLog,vTempData1[i],_T(""));
 			}
 		}
 		bFileCount = FALSE;
@@ -565,7 +565,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 	FileType* pThis;
 	FileType* pTarget;
 	bool bFailFlag = false;
-	bool bCompareRusult = false;
+	BOOL bCompareRusult = FALSE;
 	int nIndex = 0;
 
 	while(pThisListPos)
@@ -608,7 +608,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			}
 			else if(pThis->GetFileName()==pTarget->GetFileName())
 			{
-				if(inBasicCheck==true && (pTarget->GetFileName().Find("ItemVersion.ini") != -1 || strTargetRef.Find(pTarget->GetFileName()) != -1))
+				if(inBasicCheck == true && (pTarget->GetFileName().Find("ItemVersion.ini") != -1 || strTargetRef.Find(pTarget->GetFileName()) != -1))
 				{
 					bCompareRusult = true;
 					break;

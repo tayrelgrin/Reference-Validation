@@ -431,9 +431,9 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 		}
 		if (bFlagSection && !bFlagItem)
 		{
-			strFail.Format(_T("Fail Item : %s %s : Not Exist Item "), m_strFileName, pThis->getSection());
+			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Item "), m_strFileName, pThis->getSection());
 			outFail.push_back(strFail);
-			strFail.Format(_T("Fail Item : %s %s : Not Exist Value"), m_strFileName, pThis->getItem());
+			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Value"), m_strFileName, pThis->getItem());
 			outFail.push_back(strFail);
 			break;
 			bCompareResult = FALSE;

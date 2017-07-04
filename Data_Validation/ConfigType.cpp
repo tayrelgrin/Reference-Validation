@@ -228,7 +228,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 						AfxExtractSubString(strFailTest, strItem,0,' ');
 						strItem.Replace(strFailTest,"");
 						strPath = strTestDir + _T("\\") + strFailTest;
-						m_pFailItems->AddFailItem(strItem,strPath);
+						m_pFailItems->AddFailItem(m_strConfigNum,strTargetName,strFailTest,strItem,strPath);
 					}
 					m_ListLog->WriteLogFile(vTempFail[i]);
 				}

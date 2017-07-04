@@ -1089,8 +1089,6 @@ void DataController::CheckCommonInformation(int inIndex)
 	std::vector<int> vCounts;
 	std::vector<int> vDirCount;
 
-	vCounts.push_back(0);
-
 	int nDirCount = 0;
 	int nRealDir = 0;
 
@@ -1116,12 +1114,20 @@ void DataController::CheckCommonInformation(int inIndex)
 	vDirCount.push_back(nRealDir);
 
 	int nPre = 0;
-	
+	bool bFirstFlag = false;
+
 	for (int j=0; j<m_vFileVector.size(); j++)
 	{
 		if (m_vFileVector[j].Find(m_vRootDIr[inIndex]) != -1)
 		{
-			nCount++;
+			if(!bFirstFlag)
+			{
+				nCount = j;
+				vCounts.push_back(nCount);
+				bFirstFlag = true;
+			}
+			else
+				nCount++;
 		}
 		else if(nCount != nPre)
 		{
@@ -1129,14 +1135,15 @@ void DataController::CheckCommonInformation(int inIndex)
 			nPre = nCount;
 			break;
 		}
+		if (j==m_vFileVector.size()-1)
+		{
+			vCounts.push_back(j);
+		}
 	}
-
-
-	vCounts.push_back(m_vFileVector.size());
 
 	int nAddListCtrl = 0;
 	
-	for (int j = inIndex ; j < vCounts.size() - 1; j++)
+	for (int j = 0 ; j < vCounts.size() ; j++)
 	{
 		strIniFIle.Format(_T(""));
 		strVERSION.Format(_T(""));
@@ -1171,7 +1178,7 @@ void DataController::CheckCommonInformation(int inIndex)
 		strCISMaskID.Format(_T(""));
 		strLAST_STRING.Format(_T(""));
 
-		for (int i = vCounts[j]; i < vCounts[j+1]; i++)
+		for (int i = vCounts[j]; i <= vCounts[j+1]; i++)
 		{
 			if (m_vFileVector[i].Find("ItemVersion.ini") != -1)
 			{
@@ -1578,16 +1585,16 @@ void DataController::CheckCommonInformation(int inIndex)
 			}
 		}
 
-		if (j == 0)
+		if (inIndex == 0)
 		{
 			nAddListCtrl = 1;
 		}
 		else
 		{
-			nAddListCtrl = nAddListCtrl + vDirCount[j-1] + 3;
+			nAddListCtrl = nAddListCtrl + (vDirCount[0] + 4)*inIndex;
 		}
 
-		if (bTotalResult)
+		if(bTotalResult)
 			m_ListCtrl->SetItem(nAddListCtrl,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
 		else
 			m_ListCtrl->SetItem(nAddListCtrl,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
@@ -1607,15 +1614,20 @@ BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 	{
 		int nFileName = inFilePath.ReverseFind('\\');
 
+		CString strFileName = inFilePath.Mid(nFileName+1);
 		CompareResult* cFailItem = new CompareResult;
-		cFailItem->SetFileName(inFilePath.Mid(nFileName+1));
+		cFailItem->SetFileName(strFileName);
+
 
 		int nDirName = inFilePath.Left(nFileName).ReverseFind('\\');
 		CString strDir = inFilePath.Left(nFileName).Mid(nDirName+1);
 		CString strTestName;
+		CString strConfig;
 		strTestName.Format(_T(""));
+		strConfig.Format(_T(""));
 
 		AfxExtractSubString(strTestName, strDir, 5, '_');
+		AfxExtractSubString(strConfig, strDir, 4, '_');
 
 		CompareResult* cFailItem1 = new CompareResult;
 		cFailItem1->SetTestName(strTestName);
@@ -1635,7 +1647,7 @@ BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 
 		strListLog.Format("%s : %s, %s Mismatch!",inFilePath, inPre, inNew);
 		m_ListLog->WriteLogFile(strListLog);
-		m_pFailItems->AddFailItem(inNew, inFilePath);
+		m_pFailItems->AddFailItem(strConfig, strTestName, strFileName, inType, inFilePath);
 		bResult = FALSE;
 	}
 	return bResult;
@@ -1848,7 +1860,12 @@ bool DataController::CheckNamingRule(int inIndex)
 			{
 				strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
 				m_ListLog->WriteLogFile(strListLog);
-				m_pFailItems->AddFailItem(strReferenceName,strRefDirName);
+				CString strTempConfig, strTempTest;
+				strTempConfig.Format(_T(""));
+				strTempTest.Format(_T(""));
+				AfxExtractSubString(strTempConfig, strRefDirName,4,'_');
+				AfxExtractSubString(strTempTest, strRefDirName,5,'_');
+				m_pFailItems->AddFailItem(strTempConfig,strTempTest,strRefDirName,"Ref Name Fail","");
 				bFailFlag = true;
 			}			
 		}
