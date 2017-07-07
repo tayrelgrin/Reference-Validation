@@ -169,10 +169,10 @@ void ConfigType::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 }
 
 
-BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, bool inBasicCheck)
+bool ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, bool inBasicCheck)
 {
 	CList<TestType*> pListTargetTest;
-
+	bool bResult = TRUE;
 	// inTarget의 리스트 카피해오기 base
 	inTarget->GetDataList(pListTargetTest);
 
@@ -182,7 +182,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 	TestType* pThis;
 	TestType* pTarget;
 
-	BOOL bCompareResult = FALSE; 
+	bool bCompareResult = FALSE; 
 	int nItemCount = pListTargetTest.GetCount();
 	m_ProgressBar->SetStep((75/nItemCount));
 	int nTestCount = 0;
@@ -240,6 +240,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				else
 				{
 					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+					bResult = FALSE;
 				}
 				m_ListCtrl->SetItem(inCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
 				m_ListCtrl->EnsureVisible(inCount,TRUE);
@@ -250,7 +251,7 @@ BOOL ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 		}
 	}
 	
-	return TRUE;
+	return bResult;
 }
 
 void ConfigType::GetDataList(CList<TestType*>& outData)

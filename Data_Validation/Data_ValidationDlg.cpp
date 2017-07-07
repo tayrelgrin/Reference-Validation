@@ -67,6 +67,7 @@ void CData_ValidationDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BUTTON_DELETE, m_Button_Delete);
 	DDX_Control(pDX, IDC_STATIC_BASEREF, m_BaseRefText);
 	DDX_Control(pDX, IDC_BASICCHECK, m_BasicCheckBox);
+	DDX_Control(pDX, IDC_TOTALRESULT, m_FinalResult);
 }
 
 BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
@@ -85,6 +86,8 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_TREE_MAIN, &CData_ValidationDlg::OnTvnSelchangedTreeMain)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_MAIN, OnCustomdrawMainList)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_TEST, OnCustomdrawTestList)
+	ON_WM_CTLCOLOR()
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
 
@@ -204,6 +207,11 @@ BOOL CData_ValidationDlg::OnInitDialog()
 
 	m_BasicCheckBox.SetCheck(true);
 
+	m_font.CreatePointFont(290,"굴림");
+	m_brush.CreateSolidBrush(RGB(255, 0, 0));
+
+	GetDlgItem(IDC_TOTALRESULT)->SetFont(&m_font);
+
 	return TRUE;  // 포커스를 컨트롤에 설정하지 않으면 TRUE를 반환합니다.
 }
 
@@ -263,7 +271,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int nIndex = m_TreeMain.GetCount();
 	m_Progressctrl.SetRange(0,100);
-
+	BOOL bResult;
 	do
 	{
 		if(nIndex < 1)
@@ -287,6 +295,8 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 			m_Button_Stop.EnableWindow(TRUE);
 			m_Button_Stop.ShowWindow(TRUE);
 			
+			m_FinalResult.SetWindowTextA("Ing...");
+
 			m_TotalData.InitDifferentResultList();
 			UpdateWindow();
 			
@@ -309,13 +319,22 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 
 			bool bChecked = m_BasicCheckBox.GetCheck();
 			// Validation start
-			m_TotalData.Validation(strConfigName, bChecked);
+			bResult = m_TotalData.Validation(strConfigName, bChecked);
 			m_ListLog->WriteLogFile(_T("Reference Validation is done"));
 
 			m_Button_Stop.EnableWindow(FALSE);
 			m_Button_Stop.ShowWindow(FALSE);
 			m_Button_Start.EnableWindow(TRUE);
 			m_Button_Start.ShowWindow(TRUE);
+
+			if(bResult)
+			{
+				m_FinalResult.SetWindowTextA("PASS");
+			}
+			else
+			{
+				m_FinalResult.SetWindowTextA("FAIL");
+			}
 
 			// 마우스 wait end
 			EndWaitCursor();
@@ -351,16 +370,13 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	char   Pathname[MAX_PATH];
 	BROWSEINFO     BrInfo;
 
-	std::vector<CString> vTestDir;
-	std::vector<CString> vFileNames;
+
 
 	m_ListLog->WriteLogFile(_T("Pushed Select Ref Button"));
 
 	BrInfo.hwndOwner = GetSafeHwnd();
 	BrInfo.pidlRoot = NULL;
 
-	vTestDir.clear();
-	vFileNames.clear();
 
 	memset( &BrInfo, 0, sizeof(BrInfo) );
 	BrInfo.pszDisplayName =(LPTSTR)Pathname;
@@ -371,71 +387,10 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	pidlBrowse = SHBrowseForFolder(&BrInfo);
 	if( pidlBrowse != NULL)
 	{
-		// 패스를 얻어옴
 		BOOL bSuccess = ::SHGetPathFromIDList(pidlBrowse, (LPTSTR)Pathname);
 		if ( bSuccess )
 		{
-			// file, directory check
-			m_TotalData.GetDirList((LPTSTR)Pathname,vTestDir, vFileNames);
-			m_ListLog->WriteLogFile((LPTSTR)Pathname);
-			m_ListLog->WriteLogFile(_T("Check Base File In All Data"));
-
-			bool bCheckResult = m_TotalData.CheckBaseInfoInAllData((LPTSTR)Pathname, vTestDir);
-			if(bCheckResult == false)
-			{
-				m_ListLog->WriteLogFile(_T("Reference Checking Fail!"));
-				AfxMessageBox(_T("Reference Checking Fail!"), MB_OK);
-				vTestDir.clear();
-				vFileNames.clear();
-			}
-			else
-			{
-				m_TotalData.AddRootPath((LPTSTR)Pathname);
-				m_FailItemDlg.SetRootPath((LPTSTR)Pathname);
-				m_ListLog->WriteLogFile(_T("Check Base File In All Data : PASS"));
-				CString strRefName, strTemp;
-				strRefName.Format(_T(""));
-				strTemp.Format(_T(""));
-				strTemp = Pathname;
-				int nIndex = strTemp.ReverseFind('\\');
-				strRefName = strTemp.Mid(nIndex+1);
-				
-				// check same item in tree
-				BOOL bCheckTreeResult = CheckExistDataInTree(strRefName);
-				// Add To Tree
-				if(bCheckTreeResult == FALSE)
-				{
-					AddToTreeRefName(strRefName);
-					AddToTreeTestName(vTestDir);
-
-					// Add To member vector
-					m_TotalData.AddTestDirectoryPath(vTestDir);
-					m_TotalData.AddFilePath(vFileNames);
-					m_ListLog->WriteLogFile(_T("Add to Member Vector"));
-
-					// Extract Test Name From Dir Vector
-					std::vector<CString> vTestName;
-					std::vector<CString> vTempName;
-					CString strConfig;
-					strConfig.Format(_T(""));
-
-					m_TotalData.RemoveRootPathInVector( vTestDir,  vTempName, (LPTSTR)Pathname);
-					m_ListLog->WriteLogFile(_T("Remove Root Path in Directory Vector"));
-
-					m_TotalData.GetConfigFromTestDirNameVector(vTempName, strConfig);
-					m_ListLog->WriteLogFile(_T("Extract Config : ") + strConfig );
-
-					m_TotalData.GetTestNameFromTestDirNameVector(vTempName, vTestName);
-					m_ListLog->WriteLogFile(_T("Extract Test Name From Directory Name"));
-
-					// Add To ListControl
-					AddConfigAndTestToListControl(strConfig, vTestName);
-				}
-				else
-				{
-					AfxMessageBox(_T("Already Same Config in Data "), MB_OK);
-				}
-			}
+			AddReference(Pathname);
 		}
 		else
 		{
@@ -445,6 +400,78 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	}
 }
 
+void CData_ValidationDlg::AddReference(char* Pathname)
+{
+	std::vector<CString> vTestDir;
+	std::vector<CString> vFileNames;
+
+	vTestDir.clear();
+	vFileNames.clear();
+
+	// file, directory check
+	m_TotalData.GetDirList((LPTSTR)Pathname,vTestDir, vFileNames);
+	m_ListLog->WriteLogFile((LPTSTR)Pathname);
+	m_ListLog->WriteLogFile(_T("Check Base File In All Data"));
+
+	bool bCheckResult = m_TotalData.CheckBaseInfoInAllData((LPTSTR)Pathname, vTestDir);
+	if(bCheckResult == false)
+	{
+		m_ListLog->WriteLogFile(_T("Reference Checking Fail!"));
+		AfxMessageBox(_T("Reference Checking Fail!"), MB_OK);
+		vTestDir.clear();
+		vFileNames.clear();
+	}
+	else
+	{
+		m_ListLog->WriteLogFile(_T("Check Base File In All Data : PASS"));
+		CString strRefName, strTemp;
+		strRefName.Format(_T(""));
+		strTemp.Format(_T(""));
+		strTemp = Pathname;
+		int nIndex = strTemp.ReverseFind('\\');
+		strRefName = strTemp.Mid(nIndex+1);
+
+		// check same item in tree
+		BOOL bCheckTreeResult = CheckExistDataInTree(strRefName);
+		// Add To Tree
+		if(bCheckTreeResult == FALSE)
+		{
+			m_TotalData.AddRootPath((LPTSTR)Pathname);
+			m_FailItemDlg.SetRootPath((LPTSTR)Pathname);
+
+			AddToTreeRefName(strRefName);
+			AddToTreeTestName(vTestDir);
+
+			// Add To member vector
+			m_TotalData.AddTestDirectoryPath(vTestDir);
+			m_TotalData.AddFilePath(vFileNames);
+			m_ListLog->WriteLogFile(_T("Add to Member Vector"));
+
+			// Extract Test Name From Dir Vector
+			std::vector<CString> vTestName;
+			std::vector<CString> vTempName;
+			CString strConfig;
+			strConfig.Format(_T(""));
+
+			m_TotalData.RemoveRootPathInVector( vTestDir,  vTempName, (LPTSTR)Pathname);
+			m_ListLog->WriteLogFile(_T("Remove Root Path in Directory Vector"));
+
+			m_TotalData.GetConfigFromTestDirNameVector(vTempName, strConfig);
+			m_ListLog->WriteLogFile(_T("Extract Config : ") + strConfig );
+
+			m_TotalData.GetTestNameFromTestDirNameVector(vTempName, vTestName);
+			m_ListLog->WriteLogFile(_T("Extract Test Name From Directory Name"));
+
+			// Add To ListControl
+			AddConfigAndTestToListControl(strConfig, vTestName);
+		}
+		else
+		{
+			AfxMessageBox(_T("Already Same Config in Data "), MB_OK);
+			// root 제거
+		}
+	}	
+}
 
 void CData_ValidationDlg::OnBnClickedButtonLogin()
 {
@@ -1015,4 +1042,55 @@ void CData_ValidationDlg::OnCustomdrawTestList(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 		*pResult = CDRF_DODEFAULT;
 	}
+}
+
+HBRUSH CData_ValidationDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CDialogEx::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	// TODO:  여기서 DC의 특성을 변경합니다.
+
+	// TODO:  기본값이 적당하지 않으면 다른 브러시를 반환합니다.
+
+	if (pWnd->GetDlgCtrlID() == IDC_TOTALRESULT)
+	{
+		CString strTemp;
+		strTemp.Format(_T(""));
+		m_FinalResult.GetWindowTextA(strTemp);
+
+		if(strTemp == _T("FAIL"))
+		{
+			pDC->SetBkColor(RGB(255, 0, 0));
+			m_brush.CreateSolidBrush(RGB(255, 0, 0));
+		}
+		else
+		{
+			pDC->SetBkColor(RGB(0, 255, 0));
+			m_brush.CreateSolidBrush(RGB(0, 255, 0));
+		}
+		return m_brush;
+	}
+
+	return hbr;
+}
+
+
+
+void CData_ValidationDlg::OnDropFiles(HDROP hDropInfo)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	int nFiles;
+	char szPathName[MAX_PATH];
+	CString strFileName;
+
+	nFiles = ::DragQueryFileA(hDropInfo,0xFFFFFFFF,szPathName,MAX_PATH);
+
+	for (int i = nFiles-1; i>=0; i--)
+	{
+		::DragQueryFileA(hDropInfo,i,szPathName,MAX_PATH);
+		AddReference(szPathName);
+	}
+
+	CDialogEx::OnDropFiles(hDropInfo);
 }

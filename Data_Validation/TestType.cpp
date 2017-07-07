@@ -314,10 +314,10 @@ void TestType::SetListLog(ListLog* inData)
 	m_ListLog = inData;
 }
 
-BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck)
+bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck)
 {
-	BOOL bResult = FALSE;
-	BOOL bFileCount = FALSE;
+	bool bResult = false;
+	bool bFileCount = false;
 
 	//////////////////////////////////////////////////////////////////////////
 	// file name 가져오기
@@ -415,7 +415,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 		nFilecount == vTargetFileName.size())
 	{
 		// File 개수 체크 패스
-		bFileCount = TRUE;
+		bFileCount = true;
 	}
 	else
 	{
@@ -550,7 +550,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				m_pFailItems->AddFailItem("","",strFailLog,vTempData1[i],_T(""));
 			}
 		}
-		bFileCount = FALSE;
+		bFileCount = false;
 	}
 	//////////////////////////////////////////////////////////////////////////
 	// list copy and compare
@@ -565,7 +565,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 	FileType* pThis;
 	FileType* pTarget;
 	bool bFailFlag = false;
-	BOOL bCompareRusult = FALSE;
+	bool bCompareRusult = false;
 	int nIndex = 0;
 
 	while(pThisListPos)
@@ -634,7 +634,7 @@ BOOL TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 
 	if (bFileCount && !bFailFlag)
 	{
-		bResult = TRUE;
+		bResult = true;
 	}
 
 	return bResult;

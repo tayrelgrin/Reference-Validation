@@ -25,7 +25,7 @@ public:
 	void SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex = 0);
 	bool SearchTestInList(CString inTargetTest, TestType*& outData);
 	void InitList();
-	BOOL ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, bool inBasicCheck);
+	bool ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, bool inBasicCheck);
 	void GetDataList(CList<TestType*>& outData);
 	CString GetProject(){return m_strPrj;};
 	CString GetBuildNum(){return m_strBuildNum;};

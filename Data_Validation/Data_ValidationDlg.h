@@ -52,6 +52,7 @@ public:
 	void CreateProgressBar(int nIndex, int nSubIndex);
 	void AddToTreeTestName(std::vector<CString> vTestDirPath);
 	void InitListCtrl();
+	void AddReference(char* Pathname);
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;
@@ -79,4 +80,11 @@ public:
 	CBitmapButton m_Button_Stop;
 	CStatic m_BaseRefText;
 	CButton m_BasicCheckBox;
+
+	CFont m_font;
+	CBrush m_brush;
+	CStatic m_FinalResult;
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+//	afx_msg void OnTvnBegindragTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 };

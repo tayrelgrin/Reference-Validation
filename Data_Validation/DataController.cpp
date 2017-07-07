@@ -441,7 +441,7 @@ void DataController::AddNewConfigData(std::vector<CString> inData)
 	m_pListTargetRefConfig.AddTail(m_pTargetRef);
 }
 
-BOOL DataController::Validation(CString inData, bool inBasicCheck)
+bool DataController::Validation(CString inData, bool inBasicCheck)
 {
 	m_ListLog->WriteLogFile(_T("Init All Lists"));
 	InitAllData();
@@ -461,32 +461,40 @@ BOOL DataController::Validation(CString inData, bool inBasicCheck)
 	m_ProgressBar->StepIt();
 
 	std::vector<CString> vTemp;
+	std::vector<BOOL> vResults;
+	bool bTemp;
+	bool bResult = true;
+
 	int nListViewCount = 3;
+	int nListViewIndex = 0;
 
 	for (int i= 0; i < nConfigCount ; i++)
 	{
 		// 공동 데이터 확인
 		m_ListLog->WriteLogFile(_T("====================== Check Common Information Start ======================"));
-		CheckCommonInformation(i);
+		bTemp = CheckCommonInformation(i, nListViewIndex);
+		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Check Common Information End   ======================"));
 
 		// Ref Naming rule checking
 		m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
-		CheckNamingRule(i);
+		CheckNamingRule(i, nListViewIndex+1);
+		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End   ======================"));
 
 		// Compare
-
 		m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
-		nListViewCount = CompareReference( m_pListLogData,m_pListDifferentResult, nListViewCount, i, inBasicCheck);
+		bTemp = CompareReference( m_pListLogData,m_pListDifferentResult, nListViewCount, i, inBasicCheck);
+		vResults.push_back(bTemp);
 		m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
 
 		// CRC 계산
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
 		CheckCRC(vTemp);
+		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
 	}
@@ -498,7 +506,16 @@ BOOL DataController::Validation(CString inData, bool inBasicCheck)
 	m_ProgressBar->SetStep(100-nProgressValue);
 	m_ProgressBar->StepIt();
 	m_ListLog->WriteLogFile(_T("====================== End Writing Log ======================"));
-	return TRUE;
+	for (int i = 0; i<vResults.size(); i++)
+	{
+		if (vResults[i] == false)
+		{
+			bResult = false;
+			break;
+		}
+	}
+
+	return bResult;
 }
 
 void DataController::LoadXMLDataFiles(CString inData)
@@ -625,13 +642,15 @@ void DataController::GetValueXMLFileList(std::vector<CString>& outData)
 }
 
 
-int DataController::CompareReference(CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent,int inCount, int inConfigCount, bool inBasicCheck)
+bool DataController::CompareReference(CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent,int& inCount, int inConfigCount, bool inBasicCheck)
 {
-	//BOOL bResult = FALSE;
+	bool bResult = true;
 	POSITION pBaseRefPos = m_pListConfig.GetHeadPosition();
 	POSITION pTargetRefPos = m_pListTargetRefConfig.GetHeadPosition();
 	CString strTarget, strBase;
 	std::vector<CString> vFailList;
+	std::vector<bool> vResult;
+	bool bTemp = true;
 
 	while(pBaseRefPos)
 	{
@@ -663,12 +682,20 @@ int DataController::CompareReference(CList<CompareResult*>& outLogData, CList<Co
 		outLogData.AddTail(cNewConfig);
 		outDifferent.AddTail(cNewConfig);
 
-		pTargetRef->ConfigCompare(pBaseRef, vFailList, outLogData, outDifferent, inCount, inBasicCheck);
+		bTemp = pTargetRef->ConfigCompare(pBaseRef, vFailList, outLogData, outDifferent, inCount, inBasicCheck);
 		inCount += 3;
-		
+		vResult.push_back(bTemp);
+	}
+	for (int i= 0; i< vResult.size(); i++)
+	{
+		if(vResult[i] == false)
+		{
+			bResult = false;
+			break;
+		}
 	}
 
-	return inCount;
+	return bResult;
 }
 
 void DataController::SetListLog(ListLog* inData)
@@ -935,9 +962,9 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 }
 
 
-BOOL DataController::CheckCRC(std::vector<CString>& outData)
+bool DataController::CheckCRC(std::vector<CString>& outData)
 {
-	BOOL bResult = FALSE;
+	bool bResult = false;
 	CString strIniFIle;
 	CString strTestDir;
 	CString strTestName;
@@ -1009,10 +1036,10 @@ BOOL DataController::CheckCRC(std::vector<CString>& outData)
 }
 
 
-void DataController::CheckCommonInformation(int inIndex)
+bool DataController::CheckCommonInformation(int inIndex, int& inListViewIndex)
 {
-	BOOL bResult = FALSE;
-	BOOL bTotalResult = TRUE;
+	bool bResult = true;
+	bool bTotalResult = true;
 
 	CString strIniFIle;
 	CString strVERSION;
@@ -1143,7 +1170,7 @@ void DataController::CheckCommonInformation(int inIndex)
 
 	int nAddListCtrl = 0;
 	
-	for (int j = 0 ; j < vCounts.size() ; j++)
+	for (int j = 0 ; j < vCounts.size() -1 ; j++)
 	{
 		strIniFIle.Format(_T(""));
 		strVERSION.Format(_T(""));
@@ -1195,7 +1222,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 					GetPrivateProfileString(_T("LOG"), _T("ers_ver"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1209,7 +1236,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("vsr_ver"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1223,7 +1250,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("build_num"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1237,7 +1264,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("Build_Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1251,7 +1278,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("Flex_Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1265,7 +1292,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("Lens_Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1279,7 +1306,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("Substrate_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1293,7 +1320,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("IRCF_Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1307,7 +1334,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("Stiffener_Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1321,7 +1348,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 
 					GetPrivateProfileString(_T("LOG"), _T("AA_Machine"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1335,7 +1362,7 @@ void DataController::CheckCommonInformation(int inIndex)
 					{
 						strListLog.Format(_T("%s Base Data Fail"), szBuf);
 						m_ListLog->WriteLogFile(strListLog);
-						bTotalResult = FALSE;
+						bTotalResult = false;
 					}
 			}
 			else if (m_vFileVector[i].Find("_Register.ini") != -1)
@@ -1354,7 +1381,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("ProjectID"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1368,7 +1395,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Project_Version"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1382,7 +1409,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Integrator"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1396,7 +1423,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("CameraBuild"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1410,7 +1437,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Config"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1424,7 +1451,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("IRCF"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1438,7 +1465,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Substrate"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1452,7 +1479,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("SensorType"),_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1466,7 +1493,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Lens"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1480,7 +1507,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Flex"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1494,7 +1521,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Stiffener"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1508,7 +1535,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("Carrier"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1522,7 +1549,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("LensComponent_Revision_Major"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1536,7 +1563,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("LensComponent_Revision_Minor"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1550,7 +1577,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				GetPrivateProfileString(_T("OTP_WRITE"), _T("ColorShading_Revision"), _T(""), szBuf,	MAX_PATH, strIniFIle);
@@ -1565,7 +1592,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 
 				int nTemp = GetPrivateProfileInt(_T("OTP_WRITE"), _T("CISMaskID"),	0, strIniFIle);
@@ -1580,7 +1607,7 @@ void DataController::CheckCommonInformation(int inIndex)
 				{
 					strListLog.Format(_T("%s Base Data Fail"), szBuf);
 					m_ListLog->WriteLogFile(strListLog);
-					bTotalResult = FALSE;
+					bTotalResult = false;
 				}
 			}
 		}
@@ -1591,8 +1618,10 @@ void DataController::CheckCommonInformation(int inIndex)
 		}
 		else
 		{
-			nAddListCtrl = nAddListCtrl + (vDirCount[0] + 4)*inIndex;
+			nAddListCtrl = inListViewIndex + vDirCount[0] + 3;
 		}
+		
+		inListViewIndex = nAddListCtrl;
 
 		if(bTotalResult)
 			m_ListCtrl->SetItem(nAddListCtrl,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
@@ -1601,13 +1630,14 @@ void DataController::CheckCommonInformation(int inIndex)
 		m_ListCtrl->SetItem(nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
 		m_ListCtrl->EnsureVisible(nAddListCtrl,TRUE);
 		m_ListCtrl->Update(nAddListCtrl);
-		bTotalResult = TRUE;
 	}
+
+	return bTotalResult;
 }
 
-BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString inNew, CString inType)
+bool DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString inNew, CString inType)
 {
-	BOOL bResult = TRUE;
+	bool bResult = true;
 	CString strListLog;
 
 	if (inNew.Find(inPre) == -1)
@@ -1653,9 +1683,9 @@ BOOL DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 	return bResult;
 }
 
-bool DataController::CheckNamingRule(int inIndex)
+bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 {
-	bool bResult = FALSE;
+	bool bResult = false;
 	CString strIniFIle;
 	CString strIniFlex;
 	CString strIniLens;
@@ -1841,7 +1871,7 @@ bool DataController::CheckNamingRule(int inIndex)
 
 	bool bFailFlag = false;
 
-	for(int i = nStartIndex; i < nEndIndex; i++)
+	for(int i = nStartIndex; i <= nEndIndex; i++)
 	{
 		strRefDirName = m_vDirVector[i];
 		nCount = strRefDirName.ReverseFind('\\');
@@ -1871,33 +1901,21 @@ bool DataController::CheckNamingRule(int inIndex)
 		}
 	}
 
-	int nAddListCtrl = 0;
-
-	if (inIndex == 0)
-	{
-		nAddListCtrl = 2;
-	}
-	else
-	{
-		nAddListCtrl = nDirCount - nRealDir + 1;
-	}
-
 	if (bFailFlag)
 	{
-		m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
-		m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-		m_ListCtrl->EnsureVisible(nStartIndex + nAddListCtrl,TRUE);
+		m_ListCtrl->SetItem(inListViewIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+		m_ListCtrl->SetItem(inListViewIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+		m_ListCtrl->EnsureVisible(inListViewIndex,TRUE);
 		vResult.push_back(false);
 	}
 	else
 	{
-		m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
-		m_ListCtrl->SetItem(nStartIndex + nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-		m_ListCtrl->EnsureVisible(nStartIndex + nAddListCtrl,TRUE);
+		m_ListCtrl->SetItem(inListViewIndex,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+		m_ListCtrl->SetItem(inListViewIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+		m_ListCtrl->EnsureVisible(inListViewIndex,TRUE);
 		vResult.push_back(true);
 	}
-	m_ListCtrl->Update(nStartIndex + nAddListCtrl + 2);
-	
+	m_ListCtrl->Update(inListViewIndex);
 
 	return bResult;
 }

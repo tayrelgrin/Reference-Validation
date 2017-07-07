@@ -411,7 +411,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 
 					if (pThis->getValue()!=pTarget->getValue())
 					{
-						strFail.Format(_T("Fail Item : (%s %s %s) %s : %s"), m_strFileName, pThis->getSection(), pThis->getItem(), pThis->getValue(), pTarget->getValue());
+						strFail.Format(_T("Fail Item : (%s %s %s) %s : %s"), inTarget->GetFileName(), pThis->getSection(), pThis->getItem(), pThis->getValue(), pTarget->getValue());
 						outFail.push_back(strFail);
 						cNewResult->SetCompareResult(FALSE);
 						outLogData.AddTail(cNewResult);
@@ -431,9 +431,9 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 		}
 		if (bFlagSection && !bFlagItem)
 		{
-			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Item "), m_strFileName, pThis->getSection());
+			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Item "), inTarget->GetFileName(), pThis->getSection());
 			outFail.push_back(strFail);
-			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Value"), m_strFileName, pThis->getItem());
+			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Value"), inTarget->GetFileName(), pThis->getItem());
 			outFail.push_back(strFail);
 			break;
 			bCompareResult = FALSE;
