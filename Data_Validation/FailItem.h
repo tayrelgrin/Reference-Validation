@@ -24,6 +24,9 @@ public:
 	void AddFailItem(CString inConfig,CString inTest, CString inFileName, CString inItem, CString inPath);
 	void ClearItems();
 	void SetRootPath(CString inData);
+	bool SearchFailItem(CString inTargetConfig, CString inTargetTest);
+
+
 	afx_msg void OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickListFailitem(NMHDR *pNMHDR, LRESULT *pResult);
 public:

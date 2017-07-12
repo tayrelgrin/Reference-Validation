@@ -53,6 +53,7 @@ public:
 	void AddToTreeTestName(std::vector<CString> vTestDirPath);
 	void InitListCtrl();
 	void AddReference(char* Pathname);
+	bool GetTreeItemstatus(HTREEITEM hItem);
 private:
 	CString m_strOutPath;
 	LogInDlg m_LogInDlg;
@@ -87,4 +88,5 @@ public:
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 //	afx_msg void OnTvnBegindragTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnDropFiles(HDROP hDropInfo);
+	afx_msg void OnNMCustomdrawTreeMain(NMHDR *pNMHDR, LRESULT *pResult);
 };

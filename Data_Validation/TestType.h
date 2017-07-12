@@ -35,5 +35,6 @@ private:
 	CString m_strTestName;
 	FailItem* m_pFailItems;
 	ListLog* m_ListLog;
+
 };
 

@@ -43,7 +43,7 @@ public:
 	void WriteResultLog(std::vector<CString> inData);
 	bool CheckCRC(std::vector<CString>& outData);
 	bool CheckCommonInformation(int inIndex, int& inListViewIndex);
-	bool CheckNamingRule(int inIndex, int inListViewIndex);
+	bool CheckNamingRule(int inIndex, int& inListViewIndex);
 	bool ComparePreAndNew(CString inFilePath, CString inPre, CString inNew, CString inType);
 	void SetProgressBar(CProgressCtrl* inData);
 	void SetFailItemPointer(FailItem* inData);

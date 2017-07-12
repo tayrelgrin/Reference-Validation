@@ -354,7 +354,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 	BOOL bCompareResult = TRUE;
 	while(pThisListPos)
 	{
-		pThis = m_pDataList.GetNext(pThisListPos);		
+		pThis = m_pDataList.GetNext(pThisListPos);
 		pTargetListPos = pListTargetData.GetHeadPosition();
 		CString strFail;
 		CString strPreSection;
@@ -428,6 +428,11 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 				}
 				bFlagSection = true;
 			}
+// 			else if(bFlagSection)
+// 			{
+// 				bFlagItem = false;
+// 				break;
+// 			}
 		}
 		if (bFlagSection && !bFlagItem)
 		{
@@ -435,8 +440,8 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 			outFail.push_back(strFail);
 			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Value"), inTarget->GetFileName(), pThis->getItem());
 			outFail.push_back(strFail);
-			break;
 			bCompareResult = FALSE;
+			break;
 		}
 	}
 

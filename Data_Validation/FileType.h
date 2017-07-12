@@ -27,5 +27,6 @@ public:
 private:
 	CList<BasicData*> m_pDataList;
 	CString m_strFileName;
+
 };
 

@@ -88,6 +88,7 @@ BEGIN_MESSAGE_MAP(CData_ValidationDlg, CDialogEx)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_LIST_TEST, OnCustomdrawTestList)
 	ON_WM_CTLCOLOR()
 	ON_WM_DROPFILES()
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_TREE_MAIN, &CData_ValidationDlg::OnNMCustomdrawTreeMain)
 END_MESSAGE_MAP()
 
 
@@ -1093,4 +1094,59 @@ void CData_ValidationDlg::OnDropFiles(HDROP hDropInfo)
 	}
 
 	CDialogEx::OnDropFiles(hDropInfo);
+}
+
+bool CData_ValidationDlg::GetTreeItemstatus(HTREEITEM hItem)
+{
+	bool bResult = true;
+	CString strConfig, strTest;
+
+	HTREEITEM hParent;
+
+	strConfig.Format(_T(""));
+	strTest.Format(_T(""));
+
+	strTest = m_TreeMain.GetItemText(hItem);
+	hParent = m_TreeMain.GetNextItem(hItem, TVGN_PARENT); // 현재 선택되어진 아이템의 상위 아이템을 가져온다.
+	strConfig = m_TreeMain.GetItemText(hParent);
+	if(strConfig!="")
+	{
+		if( m_FailItemDlg.SearchFailItem(strConfig,strTest))
+		{
+			bResult = false;
+		}
+	}	
+
+	return bResult;
+}
+
+
+void CData_ValidationDlg::OnNMCustomdrawTreeMain(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMCUSTOMDRAW pNMCD = reinterpret_cast<LPNMCUSTOMDRAW>(pNMHDR);
+	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+
+	NMTVCUSTOMDRAW* pcd = (NMTVCUSTOMDRAW*)pNMHDR;
+
+	HTREEITEM hItem;
+
+	switch(pcd->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+	case CDDS_ITEMPREPAINT:
+		hItem = (HTREEITEM)pcd->nmcd.dwItemSpec;
+
+		bool bResult = GetTreeItemstatus(hItem);
+
+		if(bResult == false)
+		{
+			pcd->clrTextBk = RGB(255,0,0);
+		}
+		pResult = CDRF_DODEFAULT;
+		break;
+	}
+// 
+// 	*pResult = 0;
 }

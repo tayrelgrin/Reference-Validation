@@ -465,7 +465,6 @@ bool DataController::Validation(CString inData, bool inBasicCheck)
 	bool bTemp;
 	bool bResult = true;
 
-	int nListViewCount = 3;
 	int nListViewIndex = 0;
 
 	for (int i= 0; i < nConfigCount ; i++)
@@ -479,14 +478,14 @@ bool DataController::Validation(CString inData, bool inBasicCheck)
 
 		// Ref Naming rule checking
 		m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule Start ======================"));
-		CheckNamingRule(i, nListViewIndex+1);
+		CheckNamingRule(i, ++nListViewIndex);
 		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End   ======================"));
 
 		// Compare
 		m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
-		bTemp = CompareReference( m_pListLogData,m_pListDifferentResult, nListViewCount, i, inBasicCheck);
+		bTemp = CompareReference( m_pListLogData,m_pListDifferentResult, nListViewIndex, i, inBasicCheck);
 		vResults.push_back(bTemp);
 		m_ListLog->WriteLogFile(_T("======================Compare Reference End======================"));
 
@@ -683,7 +682,6 @@ bool DataController::CompareReference(CList<CompareResult*>& outLogData, CList<C
 		outDifferent.AddTail(cNewConfig);
 
 		bTemp = pTargetRef->ConfigCompare(pBaseRef, vFailList, outLogData, outDifferent, inCount, inBasicCheck);
-		inCount += 3;
 		vResult.push_back(bTemp);
 	}
 	for (int i= 0; i< vResult.size(); i++)
@@ -1168,7 +1166,6 @@ bool DataController::CheckCommonInformation(int inIndex, int& inListViewIndex)
 		}
 	}
 
-	int nAddListCtrl = 0;
 	
 	for (int j = 0 ; j < vCounts.size() -1 ; j++)
 	{
@@ -1609,27 +1606,38 @@ bool DataController::CheckCommonInformation(int inIndex, int& inListViewIndex)
 					m_ListLog->WriteLogFile(strListLog);
 					bTotalResult = false;
 				}
+
+				GetPrivateProfileString(_T("LOG"), _T("LAST_STRING"), _T(""), szBuf,	MAX_PATH, strIniFIle);
+				strTemp.Format(_T("%s"), szBuf);
+				if (strLAST_STRING == _T(""))
+				{
+					strLAST_STRING.Format(_T("%s"), szBuf);
+				}
+
+				bResult = ComparePreAndNew(strIniFIle, strLAST_STRING, strTemp, _T("LAST_STRING"));
+				if (!bResult)
+				{
+					strListLog.Format(_T("%s Base Data Fail"), szBuf);
+					m_ListLog->WriteLogFile(strListLog);
+					bTotalResult = false;
+				}
 			}
 		}
 
 		if (inIndex == 0)
 		{
-			nAddListCtrl = 1;
+			inListViewIndex = 1;
 		}
 		else
-		{
-			nAddListCtrl = inListViewIndex + vDirCount[0] + 3;
-		}
-		
-		inListViewIndex = nAddListCtrl;
+			inListViewIndex++;
 
 		if(bTotalResult)
-			m_ListCtrl->SetItem(nAddListCtrl,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+			m_ListCtrl->SetItem(inListViewIndex,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
 		else
-			m_ListCtrl->SetItem(nAddListCtrl,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
-		m_ListCtrl->SetItem(nAddListCtrl,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-		m_ListCtrl->EnsureVisible(nAddListCtrl,TRUE);
-		m_ListCtrl->Update(nAddListCtrl);
+			m_ListCtrl->SetItem(inListViewIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+		m_ListCtrl->SetItem(inListViewIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+		m_ListCtrl->EnsureVisible(inListViewIndex,TRUE);
+		m_ListCtrl->Update(inListViewIndex);
 	}
 
 	return bTotalResult;
@@ -1683,7 +1691,7 @@ bool DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 	return bResult;
 }
 
-bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
+bool DataController::CheckNamingRule(int inIndex, int& inListViewIndex)
 {
 	bool bResult = false;
 	CString strIniFIle;
@@ -1693,6 +1701,7 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 	CString strIniIRCF;
 	CString strIniStiffener;
 	CString strIniCarrier;
+	CString strLastString;
 
 	strIniFlex.Format(_T(""));
 	strIniLens.Format(_T(""));	
@@ -1700,6 +1709,7 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 	strIniIRCF.Format(_T(""));	
 	strIniStiffener.Format(_T(""));	
 	strIniCarrier.Format(_T(""));
+	strLastString.Format(_T(""));
 	
 	TCHAR szBuf[MAX_PATH] = {0,};
 
@@ -1753,6 +1763,9 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 	nEndIndex = nStartIndex + nDirCount - 1;
 	nEndFileIndex = nStartFileIndex + nFileCount - 1;
 
+	bool bItemVersion = false;
+	bool bReference = false;
+
 	for (int i = nStartFileIndex; i < nEndFileIndex; i++)
 	{
 		strIniFIle.Format("%s",m_vFileVector[i]);
@@ -1771,6 +1784,18 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 			strIniStiffener.Format(_T("%s"), szBuf);
 			GetPrivateProfileString(_T("LOG"), _T("Carrier_Config"),	_T(""), szBuf,	MAX_PATH, strIniFIle);
 			strIniCarrier.Format(_T("%s"), szBuf);
+			bItemVersion = true;
+		}
+		else if(strIniFIle.Find("_Register.ini") != -1)
+		{
+			strIniFIle.Replace("_Register","");
+			GetPrivateProfileString(_T("LOG"), _T("LAST_STRING"),		_T(""), szBuf,	MAX_PATH, strIniFIle);
+			strLastString.Format(_T("%s"), szBuf);
+			bReference = true;
+		}
+
+		if (bItemVersion && bReference)
+		{
 			break;
 		}
 	}
@@ -1791,6 +1816,9 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 	m_ListLog->WriteLogFile(strListLog);
 
 	strListLog.Format(_T("Carrier : %s"), strIniCarrier);
+	m_ListLog->WriteLogFile(strListLog);
+
+	strListLog.Format(_T("Last String : %s"), strLastString);
 	m_ListLog->WriteLogFile(strListLog);
 
 	// 현재 디렉토리 가져오기
@@ -1859,7 +1887,7 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 
 	// Ref Name combination
 	CString strReferenceName;
-	strReferenceName.Format("%s%s%s_%s%s%s",strFlexInitial, strLensInitial, strSubstrateInitial, strCarrierInitial, strIRCFInitial, strStiffnerInitial);
+	strReferenceName.Format("%s%s%s_%s%s%s_%s",strFlexInitial, strLensInitial, strSubstrateInitial, strCarrierInitial, strIRCFInitial, strStiffnerInitial,strLastString);
 	CString strRefDirName;
 	strRefDirName.Format(_T(""));
 
@@ -1915,7 +1943,7 @@ bool DataController::CheckNamingRule(int inIndex, int inListViewIndex)
 		m_ListCtrl->EnsureVisible(inListViewIndex,TRUE);
 		vResult.push_back(true);
 	}
-	m_ListCtrl->Update(inListViewIndex);
+	m_ListCtrl->Update(inListViewIndex++);
 
 	return bResult;
 }

@@ -50,8 +50,8 @@ BOOL FailItem::OnInitDialog()
 	m_ListCtrl_FailItem.InsertColumn(2, _T("Test"),			LVCFMT_CENTER, 100, -1);
 	m_ListCtrl_FailItem.InsertColumn(3, _T("File Name"),	LVCFMT_CENTER, 300, -1);
 	m_ListCtrl_FailItem.InsertColumn(4, _T("Item"),			LVCFMT_CENTER, 150, -1);	
-	m_ListCtrl_FailItem.InsertColumn(5, _T("Execute"),		LVCFMT_CENTER,  0, -1);
-	m_ListCtrl_FailItem.InsertColumn(6, _T("Execute"),		LVCFMT_CENTER, 50, -1);
+	m_ListCtrl_FailItem.InsertColumn(5, _T("Execute"),		LVCFMT_CENTER, 50, -1);
+	m_ListCtrl_FailItem.InsertColumn(6, _T("Execute"),		LVCFMT_CENTER,  0, -1);
 	
 	////////////////////////////////////////////////////////////////////////// 
 
@@ -72,9 +72,9 @@ void FailItem::AddFailItem(CString inConfig,CString inTest, CString inFileName, 
 	m_ListCtrl_FailItem.SetItem(nCount, 1,LVIF_TEXT, inConfig,	0,0,0,NULL );
 	m_ListCtrl_FailItem.SetItem(nCount, 2,LVIF_TEXT, inTest,	0,0,0,NULL );
 	m_ListCtrl_FailItem.SetItem(nCount, 3,LVIF_TEXT, inFileName,0,0,0,NULL );
-	m_ListCtrl_FailItem.SetItem(nCount, 4,LVIF_TEXT, inItem,	0,0,0,NULL );
-	m_ListCtrl_FailItem.SetItem(nCount, 5,LVIF_TEXT, inPath,	0,0,0,NULL );
-	m_ListCtrl_FailItem.SetItem(nCount, 6,LVIF_TEXT, "▶",	0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 4,LVIF_TEXT, inItem,	0,0,0,NULL );	
+	m_ListCtrl_FailItem.SetItem(nCount, 5,LVIF_TEXT, "▶",	0,0,0,NULL );
+	m_ListCtrl_FailItem.SetItem(nCount, 6,LVIF_TEXT, inPath,	0,0,0,NULL );
 	UpdateData(FALSE);
 }
 
@@ -92,11 +92,11 @@ void FailItem::OnNMDblclkListFailitem(NMHDR *pNMHDR, LRESULT *pResult)
 	CString strSelectFilePath;
 	CString strTemp;
 	strSelectFilePath.Format(_T(""));
-	strTemp = m_ListCtrl_FailItem.GetItemText(nIndex, 5);
+	strTemp = m_ListCtrl_FailItem.GetItemText(nIndex, 6);
 
 	strSelectFilePath.Format("%s\\%s",m_strRootPath, strTemp);
 	// 해당 파일 열기
-	if (strSelectFilePath != _T("") && nSubIndex == 6)
+	if (strSelectFilePath != _T("") && nSubIndex == 5)
 	{
 		ShellExecute(NULL, _T("open"), strSelectFilePath, NULL, NULL, SW_SHOW);
 	}
@@ -124,4 +124,20 @@ void FailItem::ClearItems()
 void FailItem::SetRootPath(CString inData)
 {
 	m_strRootPath = inData;
+}
+
+bool FailItem::SearchFailItem(CString inTargetConfig, CString inTargetTest)
+{
+	bool bResult = false;
+
+	for (int i= 0; i < m_ListCtrl_FailItem.GetItemCount() ; i++)
+	{
+		if (inTargetConfig.Find(m_ListCtrl_FailItem.GetItemText(i,1)) != -1 && m_ListCtrl_FailItem.GetItemText(i,2) == inTargetTest)
+		{
+			bResult = true;
+			break;
+		}
+	}
+
+	return bResult;
 }
