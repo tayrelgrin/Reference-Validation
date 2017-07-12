@@ -34,6 +34,7 @@ public:
 	InformationManager* m_pData;
 	CListCtrl m_ListCtrl_BaseItem;
 	CString m_strFirstTestName;
+	CString m_strRefFileName;
 	CTreeCtrl m_TreeCtrl_BaseFile;
 	afx_msg void OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonAdditembi();

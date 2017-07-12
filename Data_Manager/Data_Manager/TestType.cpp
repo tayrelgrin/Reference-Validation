@@ -5,6 +5,7 @@
 TestType::TestType(void)
 {
 	m_pFIleList.RemoveAll();
+	m_strTestName.Format(_T(""));
 }
 
 

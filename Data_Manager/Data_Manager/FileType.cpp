@@ -3,6 +3,8 @@
 
 FileType::FileType(void)
 {
+	m_strFileName.Format(_T(""));
+	m_pDataList.RemoveAll();
 }
 
 FileType::~FileType(void)
@@ -77,7 +79,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 		CString strTempTrim = strTemp;
 
 		strTempTrim.Trim();
-		if (strTempTrim=="")
+		if (strTempTrim==_T(""))
 		{
 			continue;
 		}
@@ -86,7 +88,7 @@ void FileType::AddNewData(CString inData, int inNInput)
 			if (cNewData==NULL)
 				cNewData = new BasicData();
 
-			AfxExtractSubString(strItem,		strTemp, 0, '=');
+			AfxExtractSubString(strItem,	strTemp, 0, '=');
 			if(inNInput!=2)
 			{
 				strValue.Format(_T("%d"), inNInput);
@@ -221,6 +223,7 @@ void FileType::INIFileReadByLine(CString inPath, std::vector<CString>& outData)
 
 		if(strLine!="" || strLine!="")	// 공란 제거
 			outData.push_back(strLine);
+		strLine.Format("");
 	}
 
 	sourceFile.Close();
@@ -289,7 +292,7 @@ void FileType::LoadDataFromXML(tinyxml2::XMLAttribute* pParent)
 void FileType::CopyData(FileType& outData)
 {
 	outData.InitList();
-
+	outData.SetFileName(m_strFileName);
 	POSITION pPos = m_pDataList.GetHeadPosition();
 
 	while(pPos)

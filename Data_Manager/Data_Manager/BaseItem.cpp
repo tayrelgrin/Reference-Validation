@@ -81,8 +81,14 @@ BOOL BaseItem::OnInitDialog()
 	cBaseInfo->CopyDataToList(lBaseInfoList);
 
 	POSITION pPos = lBaseInfoList.GetHeadPosition();
+	
+	m_strRefFileName.Format(_T(""));
 
 	CString strSection, strItem, strValue;
+
+	strSection.Format(_T(""));
+	strItem.Format(_T(""));
+	strValue.Format(_T(""));
 
 	int nIndex = 0;
 
@@ -122,12 +128,11 @@ void BaseItem::OnCbnSelchangeCombo1()
 	if(nIndex == -1)
 		return;
 
-	std::string strSelect = "";
-	m_cComboFiles.GetLBText(nIndex,(LPTSTR)strSelect.c_str());
+	CString strSelect = "";
+	m_cComboFiles.GetLBText(nIndex,strSelect);
 
-	 if(strSelect.compare("Register") == 0)
+	 if(strSelect.Find("Reference") != -1)
 		 strSelect = "_Register";
-	// else if(strSelect == "Reference")
 
 	TestType* cTarget = new TestType;
 	TestType* cTemp;
@@ -137,6 +142,7 @@ void BaseItem::OnCbnSelchangeCombo1()
 
 	bool bResult=false;
 	cTemp = m_pData->SearchSettingData(*cTarget, bResult);
+
 	if(!bResult)
 	{
 		delete cTarget;
@@ -144,8 +150,20 @@ void BaseItem::OnCbnSelchangeCombo1()
 	}
 	cTarget = cTemp;
 	CString strFileName;
-	strFileName.Format("%s%s",strSelect.c_str(),".ini");
+	strFileName.Format("%s%s",strSelect,".ini");
 	cTarget->SearchFileInList(strFileName,cFile);
+
+	if(strSelect.Find("_Register") != -1)
+	{
+		strFileName = cFile.GetFileName();
+		strFileName.Replace("_Register","");
+
+		m_strRefFileName = strFileName;
+
+		cFile.InitList();
+		cTarget->SearchFileInList(strFileName,cFile);
+	}
+	
 	CList<BasicData*> FileListData;
 	cFile.CopyDataToList(FileListData);
 	
@@ -163,6 +181,9 @@ void BaseItem::OnCbnSelchangeCombo1()
 
 		strSection	= temp->getSection();
 		strItem		= temp->getItem();
+
+		if(strSection.compare("") == 0)
+			continue;
 
 		if(m_TreeCtrl_BaseFile.GetCount() >= 1)
 			strCompare = m_TreeCtrl_BaseFile.GetItemText(h_Root);	// Search in Root level in tree
@@ -243,6 +264,11 @@ void BaseItem::OnBnClickedButtonAdditembi()
 
 	int nIndex = m_cComboFiles.GetCurSel();
 	m_cComboFiles.GetLBText(nIndex, strFileName);
+
+	if (strFileName == "Reference")
+	{
+		strFileName = m_strRefFileName;
+	}
 
 	hParent = m_TreeCtrl_BaseFile.GetNextItem(m_TreeCtrl_BaseFile.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
 	strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);									// 그 아이템의 이름을 얻어온다.

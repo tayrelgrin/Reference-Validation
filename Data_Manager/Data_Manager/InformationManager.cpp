@@ -55,22 +55,14 @@ void InformationManager::AddNewConfigData(ConfigDMData* inNewData)
 
 void InformationManager::AddNewSettingData(ConfigDMData* inNewData)
 {
-// 	std::vector<CString> vTest;
-// 	inNewData->GetTestList(vTest);
 	int nInput = 0;
 	inNewData->AddNewTest(m_vBasicFile, nInput);
 
 	m_listSetting.AddTail(inNewData);
-
-// 	for(int i = 0; i<vTest.size(); i++)
-// 	{
-// 		vTest.erase(vTest.begin()+i);
-// 	}
-// 	vTest.clear();
 }
 
 
-bool InformationManager::SaveRefToFile(CString inFilePath)
+bool InformationManager::SaveRefToFile()
 {
 	ConfigDMData* pTemp;
 	bool bResult = false;
@@ -407,8 +399,22 @@ void InformationManager::ModifyBaseInfoData(CString inTargetTestName, CString in
 
 		if(temp->getSection() == inTarget->getSection() && temp->getItem()== inTarget->getItem())
 		{
-			CString strTemp = temp->getValue() +"/" +inTarget->getValue();
-			temp->setValue(strTemp);
+			CString strBaseValue;
+			strBaseValue.Format(_T(""));
+			CString strTemp;
+			strTemp.Format(_T(""));
+
+			if(temp->getValue().Find('/') != -1)
+			{
+				AfxExtractSubString(strTemp, temp->getValue(), 0, '/');
+				strBaseValue = strTemp +"/" +inTarget->getValue();
+			}
+			else
+			{
+				strBaseValue = temp->getValue() +"/" +inTarget->getValue();
+			}
+			
+			temp->setValue(strBaseValue);
 			break;
 		}
 	}
@@ -416,16 +422,16 @@ void InformationManager::ModifyBaseInfoData(CString inTargetTestName, CString in
 
 bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferentTest)
 {
-	bool bResult;
+	bool bResult = false;
 	FileType cTempFile;
 	BasicData* cBaseInfoItem;
 	BasicData* cTempItem;
 	BasicData* cBaseInfoValue;
 	std::vector<CString> vTestName;
 	ConfigDMData* temp;
-	POSITION pPos;
-	POSITION pBase;
-	POSITION pValue;
+	POSITION pPos=NULL;
+	POSITION pBase=NULL;
+	POSITION pValue=NULL;
 	CList<BasicData*> BaseInfoItemContentsList;
 	CList<BasicData*> listTemp;
 	CList<BasicData*> BaseInfoItemValueList;
@@ -453,6 +459,7 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 	{
 		cBaseInfoItem = m_listBaseInfo.GetNext(pBase);
 		strFileName = cBaseInfoItem->getValue();
+
 		if(strFileName.Find('/') != -1)
 		{
 			CString strTemp;
@@ -460,6 +467,7 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 			AfxExtractSubString(strTemp, strFileName, 0,'/');
 			strFileName = strTemp;
 		}
+
 		if (strPreFileName != strFileName)
 		{
 			temp->SearchFileDataInList(vTestName[0], strFileName, cTempFile);
@@ -494,6 +502,16 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 
 			strFileName = cBaseInfoItem->getValue();
 
+			if (strFileName.Find('_') != -1)
+			{			
+				for (int i = 0; i < 6; i++)
+				{
+					int nIndex = strFileName.Find('_');
+					strFileName = strFileName.Mid(nIndex+1);
+				}
+				strFileName = vTestName[i] + "_" + strFileName;
+			}
+
 			if (strPreFileName != strFileName)
 			{
 				temp->SearchFileDataInList(vTestName[i], strFileName, cTempFile);
@@ -520,5 +538,5 @@ bool InformationManager::CheckBaseInfoInAllData(std::vector<CString>& vDifferent
 		}
 	}
 
-	return 0;
+	return bResult;
 }

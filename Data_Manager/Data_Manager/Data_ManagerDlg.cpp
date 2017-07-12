@@ -154,6 +154,12 @@ BOOL CData_ManagerDlg::OnInitDialog()
 
 	Button_Imaging();
 
+	m_strRootPath.Format(_T(""));
+	m_strPrj.Format(_T(""));
+	m_strBuildNum.Format(_T(""));
+	m_strConfigNum.Format(_T(""));
+	m_strDOE.Format(_T(""));
+
 	m_bNotFirst = false;
 	m_bNewData = false;
 	m_bModify = false;
@@ -364,6 +370,8 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 			AddToTree(m_cNewSettingData);
 
+			OnBnClickedButtonSetting();
+
 			if(m_lbProject.FindStringExact(-1, m_strPrj) == -1)
 				AddProjectToListBox(m_strPrj);
 
@@ -400,11 +408,9 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 		m_cSettingDlg.m_vSettingFileList = m_vAllFileList;	// Base setting 을 위한 파일 리스트
 
 		m_cSettingDlg.m_pData = &m_cValueData;
-
 		m_cSettingDlg.DoModal();
 
 		m_vAllFileList = m_cSettingDlg.m_vSettingFileList;
-
 		bool bModify = m_cSettingDlg.m_bModifyFlag;
 
 		if (bModify)
@@ -460,7 +466,7 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 		m_cNewSettingData->InitListAndVectors();
 
 		delete m_cFileData;
-		delete m_cBasicData;
+		//delete m_cBasicData;
 		::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 	}
 }
@@ -478,7 +484,6 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 	char szFilter[] = "All Files(*.*)|*.*||";
 
 	strEXEDirectory = pSetting->GetEXEDirectoryPath();
-
 	strEXEDirectory = strEXEDirectory + "\\Data\\Setting\\";
 
 	CFileDialog dlg(TRUE, NULL, NULL, OFN_HIDEREADONLY, szFilter);
@@ -573,7 +578,6 @@ void CData_ManagerDlg::OnBnClickedButtonLoadsetting()
 				{
 					AfxMessageBox("You chose same config data\n Choose another one",MB_OK);
 				}
-				
 			}
 			else
 			{
@@ -641,8 +645,12 @@ void CData_ManagerDlg::OnBnClickedButtonDelete()
 void CData_ManagerDlg::OnBnClickedButtonReload()
 {
 	HTREEITEM hItem;
-	CString strDirName ="";
+	CString strDirName;
 	CString strFileName, strTestName;
+
+	strDirName.Format(_T(""));
+	strFileName.Format(_T(""));
+	strTestName.Format(_T(""));
 
 	BeginWaitCursor();
 
@@ -664,6 +672,7 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 	
 	CString strTarget = m_strPrj + '_' + m_strBuildNum + '_' + m_strConfigNum + '_' + m_strDOE;
 	CString strTemp;
+	strTemp.Format(_T(""));
 	std::vector<CString> vFileList;
 
 	FindStringInVector(m_vConfigName, strTarget, vFileList);
@@ -712,7 +721,7 @@ void CData_ManagerDlg::OnBnClickedButtonSave()
 			}
 			else
 			{
-				bool bResult = m_cValueData.SaveRefToFile(_T("temp"));
+				bool bResult = m_cValueData.SaveRefToFile();
 				EndWaitCursor();
 				if(bResult)
 				{
@@ -1365,7 +1374,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 
 void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 {
-	m_ListCtrlMain.DeleteAllItems(); 
+	m_ListCtrlMain.DeleteAllItems();
 
 	CList<BasicData*> lBaseItems;
 	CList<BasicData*> lBaseValueItems;
@@ -1403,7 +1412,10 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 		{
 			strPreItem = strTarget;
 			CString strTemp = strTarget.c_str();
-			strTemp = strTemp+".ini";
+			if (strTemp.Find(".ini") == -1)
+			{
+				strTemp = strTemp+".ini";
+			}
 
 			m_cNewConfigData->SearchFileDataInList(inData,strTemp,*pFile) ;
 
@@ -1412,9 +1424,16 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 
 		POSITION pValuePos = lBaseValueItems.GetHeadPosition();
 		CString strFileName, strSetting, strDescription;
+		
+
 		while(pValuePos)
 		{
+			strFileName.Format(_T(""));
+			strSetting.Format(_T(""));
+			strDescription.Format(_T(""));
+
 			BasicData* tempValue = lBaseValueItems.GetNext(pValuePos);
+
 			if (tempValue->getSection()== temp->getSection() && 
 				tempValue->getItem() == temp->getItem())
 			{
@@ -1438,8 +1457,16 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 
 		m_ListCtrlMain.InsertItem(nIndex, strSequence);
 		m_ListCtrlMain.SetItem(nIndex, 0,LVIF_TEXT,  "",0,0,0,NULL );
-
-		m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  strFileName,0,0,0,NULL );
+		if (strFileName.Find(".ini") != -1)
+		{
+			m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  "Reference",0,0,0,NULL );
+			m_ListCtrlMain.SetItem(nIndex, 5,LVIF_TEXT,  strFileName,0,0,0,NULL );
+		}
+		else
+		{
+			m_ListCtrlMain.SetItem(nIndex, 1,LVIF_TEXT,  strFileName,0,0,0,NULL );
+		}
+		
 		m_ListCtrlMain.SetItem(nIndex, 2,LVIF_TEXT,  temp->getSection(),0,0,0,NULL);
 		m_ListCtrlMain.SetItem(nIndex, 3,LVIF_TEXT,  temp->getItem() ,0,0,0,NULL);
 
@@ -1666,7 +1693,8 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 					HTREEITEM hItem = m_treeMainTest.GetNextItem(m_treeMainTest.GetRootItem(), TVGN_NEXT);
 					
 					CString strTest = m_treeMainTest.GetItemText(hItem);
-
+					CString strTempTest;
+					strTempTest.Format(_T(""));
 					while(hItem != NULL)
 					{
 						m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
@@ -1676,11 +1704,20 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 
 						HTREEITEM hChild = m_treeMainTest.GetNextItem(hItem, TVGN_CHILD);
 						HTREEITEM hGrandChild = m_treeMainTest.GetNextItem(hChild, TVGN_CHILD);
-						if (hGrandChild != NULL)
+						while(hGrandChild != NULL && hChild != NULL)
 						{
+							strTempTest = strTest;
 							CString strChild = m_treeMainTest.GetItemText(hChild);
 							CString strTemp = strTest + ":" + strChild;
 							strTest = strTemp;
+
+							hChild = m_treeMainTest.GetNextItem(hChild, TVGN_NEXT);
+							hGrandChild = m_treeMainTest.GetNextItem(hChild, TVGN_CHILD);
+							if(hGrandChild != NULL)
+							{
+								m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
+								strTest = strTempTest;
+							}
 						}
 					}
 				}
@@ -1766,6 +1803,7 @@ void CData_ManagerDlg::OnNMDblclkList1(NMHDR *pNMHDR, LRESULT *pResult)
 bool CData_ManagerDlg::CheckBaseInfoInAllData()
 {
 	std::vector<CString> vDifferentTest;
+	vDifferentTest.clear();
 
 	bool bResult = m_cValueData.CheckBaseInfoInAllData(vDifferentTest);
 
@@ -1837,7 +1875,7 @@ void CData_ManagerDlg::OnEnKillfocusEdit1()
 	if(strDir != "")
 	{
 		if (m_bNewData)
-			strTest = strDir + "\\"+strTest;	
+			strTest = strDir + "\\"+strTest;
 		else
 			strTest = strDir + ":"+strTest;
 

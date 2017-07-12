@@ -12,7 +12,7 @@ public:
 	void ModifyConfigData(CString inTargetTest, CString inTargetFileName, BasicData* inTarget);
 	void ModifySettingData(CString inTargetTestName,CString inTargetFileName, BasicData* inTarget);
 	void ModifyBaseInfoData(CString inTargetTestName, CString inTargetFileName, BasicData* inTarget);
-	bool SaveRefToFile(CString inFilePath);
+	bool SaveRefToFile();
 	void LoadXMLFileListInValue();
 	void LoadXMLFileListInSetting();
 	void LoadXMLValueFileList(CString inData);

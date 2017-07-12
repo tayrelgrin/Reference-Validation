@@ -94,6 +94,9 @@
     <None Include="..\..\..\Data_Manager\Data_Manager\res\Delete_push.bmp">
       <Filter>리소스 파일</Filter>
     </None>
+    <None Include="res\DM_Icon.ico">
+      <Filter>리소스 파일</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
