@@ -841,7 +841,7 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 
 		while(pTarget)
 		{
-			FileType* pTargetFile = lTargetList.GetNext(pTarget);			
+			FileType* pTargetFile = lTargetList.GetNext(pTarget);
 			pSetting = lSettingList.GetHeadPosition();
 			pBase = lBaseList.GetHeadPosition();
 
@@ -940,7 +940,8 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 			}
 			else if (bTestFlag && strTestTemp != _T("") && strTestTemp != strTest)
 			{
-				break;
+				bTestFlag = false;
+//				break;
 			}
 			else if (bTestFlag)
 			{

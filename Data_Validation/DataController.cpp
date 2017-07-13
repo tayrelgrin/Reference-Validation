@@ -483,6 +483,8 @@ bool DataController::Validation(CString inData, bool inBasicCheck)
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Check Check Naming Rule End   ======================"));
 
+		int nTempCount = nListViewIndex;
+
 		// Compare
 		m_ListLog->WriteLogFile(_T("======================Compare Reference Start======================"));
 		bTemp = CompareReference( m_pListLogData,m_pListDifferentResult, nListViewIndex, i, inBasicCheck);
@@ -492,7 +494,7 @@ bool DataController::Validation(CString inData, bool inBasicCheck)
 
 		// CRC °è»ê
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
-		CheckCRC(vTemp);
+		bTemp = CheckCRC(vTemp,nTempCount);
 		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
@@ -960,17 +962,23 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 }
 
 
-bool DataController::CheckCRC(std::vector<CString>& outData)
+bool DataController::CheckCRC(std::vector<CString>& outData, int nIndex)
 {
-	bool bResult = false;
+	bool bResult = true;
 	CString strIniFIle;
 	CString strTestDir;
 	CString strTestName;
+	CString strConfigNum;
+	CString strAddTest;
 	strTestName.Format(_T(""));
+	strConfigNum.Format(_T(""));
+	strAddTest.Format(_T(""));
+
 	int nCRCResult = 0;
 	int nCRCValue = 0;
 	int nDirStartIndex = 0;
 	int nDirEndIndex = 0;
+
 	for (int i=0; i<m_vFileVector.size(); i++)
 	{
 		strIniFIle.Format("%s",m_vFileVector[i]);
@@ -981,12 +989,27 @@ bool DataController::CheckCRC(std::vector<CString>& outData)
 		strTestDir = strTestDir.Mid(nDirStartIndex+1);
 
 		AfxExtractSubString(strTestName, strTestDir, 5,'_');
+		AfxExtractSubString(strConfigNum, strTestDir, 4,'_');
+		AfxExtractSubString(strAddTest, strTestDir, 8,'_');
+
+		if(strAddTest != "")
+		{
+			if(strAddTest.Find("REL") != -1)
+			{
+				strTestName = "REL\\" + strTestName;
+			}
+			else
+			{
+				strTestName = strAddTest + "\\" + strTestName;
+			}
+		}
 
 		if (strIniFIle.Find("ItemVersion.ini") != -1)
 		{
 			TCHAR sDir[MAX_PATH];		
 			nCRCValue = GetPrivateProfileInt(_T("SPEC"), _T("CRC"),  0, strIniFIle);
-
+			CString strItemVersionPath;
+			strItemVersionPath.Format(_T("%s"),strIniFIle);
 			strIniFIle.Replace("ItemVersion.ini","Spec.ini");
 			m_cCRC.GetFileCRC32(strIniFIle,nCRCResult);
 			
@@ -998,25 +1021,23 @@ bool DataController::CheckCRC(std::vector<CString>& outData)
 				CString strCRCValue, strCRCResult;
 				strCRCValue.Format(_T("%d"),nCRCValue);
 				strCRCResult.Format(_T("%d"),nCRCResult);
-				cFailItem->SetTestName(strTestName);
-				m_pListLogData.AddTail(cFailItem);
-				m_pListDifferentResult.AddTail(cFailItem);
 
-				CompareResult* cFailItem1 = new CompareResult;
-				cFailItem1->SetFileName(_T("ItemVersion.ini"));
-				m_pListLogData.AddTail(cFailItem1);
-				m_pListDifferentResult.AddTail(cFailItem1);
-
-				CompareResult* cFailItem2 = new CompareResult;
-				cFailItem2->SetBaseInfoValue(strCRCValue);
-				cFailItem2->SetCurrentInfoValue(strCRCResult);
-				cFailItem2->SetCompareResult(FALSE);
-				m_pListLogData.AddTail(cFailItem2);
-				m_pListDifferentResult.AddTail(cFailItem2);
+				AddFailResult(strConfigNum, strTestName,_T("ItemVersion"),strCRCValue,strCRCResult,strItemVersionPath,_T("CRC Fail"));
 
 				strFailListLog.Format("%s%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle, _T(" : CRC Mismatched"), nCRCValue, nCRCResult);
 				outData.push_back(strFailListLog);
 				
+				m_pFailItems->AddFailItem(strConfigNum, strTestName, "ItemVersion.ini", "CRC Fail", strItemVersionPath);
+
+				CString strTempResult;
+				strTempResult.Format(_T(""));
+				strTempResult = m_ListCtrl->GetItemText(nIndex,2);
+
+				if(strTempResult == "..ing")
+				{
+					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+				}
+
 				bResult = FALSE;
 			}
 			else
@@ -1024,15 +1045,53 @@ bool DataController::CheckCRC(std::vector<CString>& outData)
 				strFailListLog.Format("%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle,nCRCValue, nCRCResult);
 				outData.push_back(strFailListLog);
 				
-				bResult = TRUE;
+				CString strTempResult;
+				strTempResult.Format(_T(""));
+				strTempResult = m_ListCtrl->GetItemText(nIndex,2);
+				bool bTemp = m_pFailItems->SearchFailItem(strConfigNum,strTestName);
+
+				if(strTempResult != "FAIL" && !bTemp)
+				{
+					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+				}
+				else
+				{
+					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+				}
 			}
+
+			m_ListCtrl->SetItem(nIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+			m_ListCtrl->EnsureVisible(nIndex,TRUE);
+			m_ListCtrl->Update(nIndex++);
 			m_ListLog->WriteLogFile(strFailListLog);
+			Sleep(100);
 		}
 	}
 
 	return bResult;
 }
 
+
+void DataController::AddFailResult(CString inConfig,CString inTestName, CString inFileName, CString inBaseValue, CString inTargetValue, CString inFilePath, CString inFailType)
+{
+	CompareResult* cFailItem = new CompareResult;
+	cFailItem->SetTestName(inTestName);
+	m_pListLogData.AddTail(cFailItem);
+	m_pListDifferentResult.AddTail(cFailItem);
+
+	CompareResult* cFailItem1 = new CompareResult;
+	cFailItem1->SetFileName(inFileName);
+	m_pListLogData.AddTail(cFailItem1);
+	m_pListDifferentResult.AddTail(cFailItem1);
+
+	CompareResult* cFailItem2 = new CompareResult;
+	cFailItem2->SetItemName(inFailType);
+	cFailItem2->SetBaseInfoValue(inBaseValue);
+	cFailItem2->SetCurrentInfoValue(inTargetValue);
+	cFailItem2->SetCompareResult(FALSE);
+	m_pListLogData.AddTail(cFailItem2);
+	m_pListDifferentResult.AddTail(cFailItem2);
+}
 
 bool DataController::CheckCommonInformation(int inIndex, int& inListViewIndex)
 {
@@ -1661,11 +1720,26 @@ bool DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 		CString strDir = inFilePath.Left(nFileName).Mid(nDirName+1);
 		CString strTestName;
 		CString strConfig;
+		CString strAddTest;
 		strTestName.Format(_T(""));
 		strConfig.Format(_T(""));
+		strAddTest.Format(_T(""));
 
 		AfxExtractSubString(strTestName, strDir, 5, '_');
 		AfxExtractSubString(strConfig, strDir, 4, '_');
+		AfxExtractSubString(strAddTest, strDir, 8, '_');
+
+		if(strAddTest != "")
+		{
+			if(strAddTest.Find("REL") != -1)
+			{
+				strTestName = "REL\\" + strTestName;
+			}
+			else
+			{
+				strTestName = strAddTest + "\\" + strTestName;
+			}
+		}
 
 		CompareResult* cFailItem1 = new CompareResult;
 		cFailItem1->SetTestName(strTestName);

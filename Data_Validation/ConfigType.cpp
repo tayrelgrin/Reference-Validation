@@ -235,14 +235,14 @@ bool ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 
 				if(bCompareResult)
 				{
-					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("..ing"),0,0,0,NULL);
 				}
 				else
 				{
 					m_ListCtrl->SetItem(inCount,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
 					bResult = FALSE;
 				}
-				m_ListCtrl->SetItem(inCount,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+				m_ListCtrl->SetItem(inCount,3,LVIF_TEXT,  _T("90%"),0,0,0,NULL);
 				m_ListCtrl->EnsureVisible(inCount,TRUE);
 				m_ListCtrl->Update(inCount++);
 				m_ProgressBar->StepIt();

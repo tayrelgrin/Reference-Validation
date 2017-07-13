@@ -45,10 +45,13 @@ void ListLog::WriteLogFile(CString strContents)
 		file.SeekToEnd();
 		strTemp.Format(_T("[%04d/%02d/%02d %02d:%02d:%02d] %s\r"), currentTime.GetYear(), currentTime.GetMonth(), currentTime.GetDay(), currentTime.GetHour(), currentTime.GetMinute(), currentTime.GetSecond(), strContents);
 		m_ListLogTab->AddListLog(strTemp);
+
 		file.Write(strTemp, strTemp.GetLength());
 		file.Close();
 	}
 }
+
+
 
 
 void ListLog::MakeLogDirectory()

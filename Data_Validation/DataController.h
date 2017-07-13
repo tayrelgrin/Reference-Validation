@@ -41,7 +41,7 @@ public:
 	bool CompareReference(CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, int inConfigCount, bool inBasicCheck);
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
-	bool CheckCRC(std::vector<CString>& outData);
+	bool CheckCRC(std::vector<CString>& outData, int nIndex);
 	bool CheckCommonInformation(int inIndex, int& inListViewIndex);
 	bool CheckNamingRule(int inIndex, int& inListViewIndex);
 	bool ComparePreAndNew(CString inFilePath, CString inPre, CString inNew, CString inType);
@@ -52,6 +52,7 @@ public:
 	bool SearchTestInSetting(CString inTargetConfig, CString inTest,TestType*& outTarget);
 	void GetDefferentResult(CList<CompareResult*>& outDifferent);
 	void InitDifferentResultList();
+	void AddFailResult(CString inConfig,CString inTestName, CString inFileName, CString inBaseValue, CString inTargetValue, CString inFilePath, CString inFailType);
 private:
 	std::vector<CString> m_vValueFileList;
 	CList<ConfigType*> m_pListConfig;

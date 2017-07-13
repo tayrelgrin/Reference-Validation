@@ -52,6 +52,39 @@ void ListLogTab::AddListLog(CString inData)
 // 	strListLog.Format("%02d.%02d, %02d:%02d:%02d, %s", cTimer.GetMonth(),cTimer.GetDay(), cTimer.GetHour(), cTimer.GetMinute(), cTimer.GetSecond(), inData);
 	m_listLogBox.AddString(inData);
 
+
+	int iExt = GetTextLen(inData);
+	if (iExt > m_listLogBox.GetHorizontalExtent())
+		m_listLogBox.SetHorizontalExtent(iExt);
+
+
 	int nCount = m_listLogBox.GetCount();
 	m_listLogBox.SetCurSel(nCount-1);
+}
+
+int ListLogTab::GetTextLen(LPCTSTR lpszText)
+{
+	ASSERT(AfxIsValidString(lpszText));
+
+	CDC *pDC = GetDC();
+	ASSERT(pDC);
+
+	CSize size;
+	CFont* pOldFont = pDC->SelectObject(GetFont());
+	if ((GetStyle() & LBS_USETABSTOPS) == 0)
+	{
+		size = pDC->GetTextExtent(lpszText, (int) _tcslen(lpszText));
+		size.cx += 3;
+	}
+	else
+	{
+		// Expand tabs as well
+		size = pDC->GetTabbedTextExtent(lpszText, (int)
+			_tcslen(lpszText), 0, NULL);
+		size.cx += 2;
+	}
+	pDC->SelectObject(pOldFont);
+	ReleaseDC(pDC);
+
+	return size.cx;
 }

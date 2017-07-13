@@ -10,6 +10,7 @@ public:
 	void CreateLogFile();
 	void WriteLogFile(CString strContents);
 	void MakeLogDirectory();
+	
 private:
 	CString m_sModulePath;
 	CString m_strLogPath;

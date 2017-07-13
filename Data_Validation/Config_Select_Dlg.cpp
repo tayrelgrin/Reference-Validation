@@ -71,6 +71,7 @@ void Config_Select_Dlg::AddPrjToCombo()
 	bool bResult = true;
 	for (int i = 0; i < m_vValueFiles.size(); i++)
 	{
+		bResult = true;
 		AfxExtractSubString(strTemp,m_vValueFiles[i],0,'_');
 		for (int j= 0; j< m_cCombo_Prj.GetCount(); j++)
 		{

@@ -23,4 +23,5 @@ public:
 	CListBox m_listLogBox;
 	virtual BOOL OnInitDialog();
 	void AddListLog(CString inData);
+	int GetTextLen(LPCTSTR lpszText);
 };

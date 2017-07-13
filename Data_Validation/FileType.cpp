@@ -428,11 +428,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 				}
 				bFlagSection = true;
 			}
-// 			else if(bFlagSection)
-// 			{
-// 				bFlagItem = false;
-// 				break;
-// 			}
+
 		}
 		if (bFlagSection && !bFlagItem)
 		{
