@@ -52,6 +52,7 @@ BEGIN_MESSAGE_MAP(AddNewRef, CDialogEx)
 	ON_CBN_SETFOCUS(IDC_COMBO3, &AddNewRef::OnCbnSetfocusCombo3)
 	ON_CBN_SETFOCUS(IDC_COMBO4, &AddNewRef::OnCbnSetfocusCombo4)
 	ON_CBN_SETFOCUS(IDC_COMBO2, &AddNewRef::OnCbnSetfocusCombo2)
+	ON_WM_DROPFILES()
 END_MESSAGE_MAP()
 
 
@@ -638,4 +639,28 @@ bool AddNewRef::CheckRefEffective(CString instrPath, std::vector<CString> invDat
 	}
 
 	return bResult;
+}
+
+void AddNewRef::OnDropFiles(HDROP hDropInfo)
+{
+	// TODO: 여기에 메시지 처리기 코드를 추가 및/또는 기본값을 호출합니다.
+
+	int nFiles;
+	char szPathName[MAX_PATH];
+	std::vector<CString> vDummy;
+
+	nFiles = ::DragQueryFileA(hDropInfo,0xFFFFFFFF,szPathName,MAX_PATH);
+
+	if (nFiles > 1)
+	{
+		AfxMessageBox("Input 1 Config!", MB_OK);
+	}
+	else
+	{
+		::DragQueryFileA(hDropInfo,0,szPathName,MAX_PATH);
+
+		m_editCtrl.SetWindowTextA(szPathName);
+	}
+	
+	CDialogEx::OnDropFiles(hDropInfo);
 }

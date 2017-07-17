@@ -93,7 +93,7 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 		CString strOriFilePath = m_vConfigFileList[i];
 		CString strDir, strTest, strFile;
 
-		if(strOriFilePath.Find('\\') == -1 && strOriFilePath=="")
+		if(strOriFilePath.Find('\\') == -1 && strOriFilePath == "")
 		{
 			AfxExtractSubString(strTest, strOriFilePath, 0, ':');
 			AfxExtractSubString(strFile, strOriFilePath, 1, ':');
@@ -125,7 +125,7 @@ void CheckingFileList::AddFileNameToTreeView(CTreeCtrl& incTarget)
 		bool bResult = false;
 
 		if(incTarget.GetCount() > 0 && i != 0)	
-			strCompare = incTarget.GetItemText(h_Child);	// Serach in h_Child level in tree
+			strCompare = incTarget.GetItemText(h_Child);	// Search in h_Child level in tree
 
 		if(strTest != strCompare.c_str())
 			h_Child = incTarget.InsertItem(strTest, TVI_ROOT, TVI_LAST);

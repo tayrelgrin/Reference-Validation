@@ -81,4 +81,5 @@ public:
 	CComboBox m_cComboBuild;
 	CComboBox m_cComboConfig;
 	CComboBox m_cComboDOE;
+	afx_msg void OnDropFiles(HDROP hDropInfo);
 };

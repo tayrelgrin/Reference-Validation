@@ -401,6 +401,9 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 	{
 		m_cSettingDlg.m_strSettingText = m_strPrj + "-" + m_strBuildNum + "-" + m_strConfigNum + "-" + m_strDOE;
 
+		m_ListCtrlMain.DeleteAllItems();
+		UpdateWindow();
+
 		std::vector<CString> vConfigFileNames;				// ref 디렉토리에 있는 파일 정보를 가져오기 위한 벡터
 		m_cNewConfigData->GetFileNames(vConfigFileNames);	// ref 디렉토리에 있는 파일 정보 m_cNewConfigData에서 전부 가져오기
 
@@ -412,6 +415,8 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 
 		m_vAllFileList = m_cSettingDlg.m_vSettingFileList;
 		bool bModify = m_cSettingDlg.m_bModifyFlag;
+
+		BeginWaitCursor();
 
 		if (bModify)
 		{
@@ -433,6 +438,9 @@ void CData_ManagerDlg::OnBnClickedButtonSetting()
 		}
 		AddToTree(m_cNewSettingData);
 		CheckBaseInfoInAllData();
+		HTREEITEM hItem = NULL;
+		m_treeMainTest.Select(hItem,NULL);
+		EndWaitCursor();
 	}
 	else
 	{
@@ -1310,7 +1318,7 @@ void CData_ManagerDlg::AddToListControl(CString inStrFileName, FileType& inData,
 		AfxExtractSubString(strValue,	strOri, 0, '/');
 		AfxExtractSubString(strDescrip, strOri, 1, '/');
 
-		if (strValue==m_strBasicLoadTxt)
+		if (strValue == m_strBasicLoadTxt)
 		{
 			strValue.Format("");
 		}
@@ -1414,7 +1422,7 @@ void CData_ManagerDlg::AddBaseInfoToListControl( CString inData)
 			CString strTemp = strTarget.c_str();
 			if (strTemp.Find(".ini") == -1)
 			{
-				strTemp = strTemp+".ini";
+				strTemp = strTemp + ".ini";
 			}
 
 			m_cNewConfigData->SearchFileDataInList(inData,strTemp,*pFile) ;
@@ -1634,6 +1642,13 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 	int nSelIndex = pNMLV->iItem; // 클릭한 아이템의 인덱스 얻어옴
 	bool bFlag = false;
 	CString strFile, strSection, strItem, strValue, strDescrip;
+	CString strSplit1, strSplit2;
+	strSplit1.Format(_T(""));
+	strSplit2.Format(_T(""));
+
+	bool bRefFileFlage = false;
+	std::vector<CString> vReferenceFileList;
+	int nFileIndex = 0;
 
 	if(pNMLV->uChanged)
 	{
@@ -1665,6 +1680,29 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 				bFlag = true;
 			}
 
+			if(strFile==_T("Reference"))
+			{
+				bRefFileFlage = true;
+				for(int i = 0; i <m_vAllFileList.size(); i++)
+				{
+					CString strTempName = m_vAllFileList[i];
+					if (strTempName.Find(_T("_Register.ini")) != -1)
+					{
+						strTempName.Replace(_T("_Register.ini"),"");
+						CString strDummy;
+						strDummy.Format(_T(""));
+						AfxExtractSubString(strDummy, strTempName, 2,':');
+
+						if(strDummy == "")
+						{
+							AfxExtractSubString(strDummy, strTempName, 1,':');
+						}
+
+						vReferenceFileList.push_back(strDummy);
+					}
+				}
+			}
+
 			if (bFlag && (hit_info.flags & TVHT_ONITEMSTATEICON) != 0)
 			{
 				// 변경된 세팅 값을 해당 객체에 저장
@@ -1684,7 +1722,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 				if (strTestName.Find(".ini") >-1)
 				{
 					selectedItem = m_treeMainTest.GetNextItem(selectedItem, TVGN_PARENT);		// 현재 선택된 아이템의 핸들을 가져온다.
-					strTestName = m_treeMainTest.GetItemText(selectedItem);		// 그 아이템의 이름을 얻어온다.
+					strTestName = m_treeMainTest.GetItemText(selectedItem);						// 그 아이템의 이름을 얻어온다.
 				}
 
 				if(strTestName == "Base Info")
@@ -1697,6 +1735,36 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 					strTempTest.Format(_T(""));
 					while(hItem != NULL)
 					{
+						if (bRefFileFlage)
+						{
+							CString strSplitTest1,strSplitTest2;
+							strSplitTest1.Format(_T(""));
+							strSplitTest2.Format(_T(""));
+
+							AfxExtractSubString(strSplitTest1,strTest,0,':');
+							AfxExtractSubString(strSplitTest2,strTest,1,':');
+
+							for (int i= 0; i < vReferenceFileList.size(); i++)
+							{
+								strSplit1.Format(_T(""));
+								strSplit2.Format(_T(""));
+
+								AfxExtractSubString(strSplit1,vReferenceFileList[i],5,'_');
+								AfxExtractSubString(strSplit2,vReferenceFileList[i],8,'_');
+
+								if(strSplit2.Find(strSplitTest1) != -1 && strSplitTest2 == strSplit1)
+								{
+									strFile = vReferenceFileList[i];
+									break;
+								}
+								else if(strSplit1 == strSplitTest1)
+								{
+									strFile = vReferenceFileList[i];
+									break;
+								}
+							}
+						}
+
 						m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
 
 						hItem = m_treeMainTest.GetNextItem(hItem, TVGN_NEXT);
@@ -1706,6 +1774,7 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 						HTREEITEM hGrandChild = m_treeMainTest.GetNextItem(hChild, TVGN_CHILD);
 						while(hGrandChild != NULL && hChild != NULL)
 						{
+							
 							strTempTest = strTest;
 							CString strChild = m_treeMainTest.GetItemText(hChild);
 							CString strTemp = strTest + ":" + strChild;
@@ -1715,6 +1784,28 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 							hGrandChild = m_treeMainTest.GetNextItem(hChild, TVGN_CHILD);
 							if(hGrandChild != NULL)
 							{
+								if (bRefFileFlage)
+								{
+									CString strSplitTest1,strSplitTest2;
+									strSplitTest1.Format(_T(""));
+									strSplitTest2.Format(_T(""));
+
+									AfxExtractSubString(strSplitTest1,strTest,0,':');
+									AfxExtractSubString(strSplitTest2,strTest,1,':');
+
+									for (int i= 0; i < vReferenceFileList.size(); i++)
+									{
+										AfxExtractSubString(strSplit1,vReferenceFileList[i],5,'_');
+										AfxExtractSubString(strSplit2,vReferenceFileList[i],8,'_');
+
+										if( strSplit2.Find(strSplitTest1) != -1 && strSplitTest2 == strSplit1)
+										{
+											strFile = vReferenceFileList[i];
+											break;
+										}
+									}
+								}
+
 								m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
 								strTest = strTempTest;
 							}
