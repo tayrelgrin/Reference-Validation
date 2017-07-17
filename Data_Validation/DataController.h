@@ -41,7 +41,7 @@ public:
 	bool CompareReference(CList<CompareResult*>& outLogData, CList<CompareResult*>& outDifferent, int& inCount, int inConfigCount, bool inBasicCheck);
 	void GetResultList(CList<CompareResult*>& outData);
 	void WriteResultLog(std::vector<CString> inData);
-	bool CheckCRC(std::vector<CString>& outData, int nIndex);
+	bool CheckCRC(std::vector<CString>& outData, int nIndex, int nConfigIndex);
 	bool CheckCommonInformation(int inIndex, int& inListViewIndex);
 	bool CheckNamingRule(int inIndex, int& inListViewIndex);
 	bool ComparePreAndNew(CString inFilePath, CString inPre, CString inNew, CString inType);

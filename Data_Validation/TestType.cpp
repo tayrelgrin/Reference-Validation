@@ -314,7 +314,7 @@ void TestType::SetListLog(ListLog* inData)
 	m_ListLog = inData;
 }
 
-bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck)
+bool TestType::CompareTest(CString inConfigNum, TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck)
 {
 	bool bResult = false;
 	bool bFileCount = false;
@@ -489,6 +489,7 @@ bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			for (int i = 0; i < vTempData1.size() ; i++)
 			{
 				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetConfigInfo(inConfigNum);
 				cNewConfig->SetFileName(vTempData1[i]);
 				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
@@ -533,6 +534,7 @@ bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			for (int i = 0; i < vTempData1.size() ; i++)
 			{
 				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetConfigInfo(inConfigNum);
 				cNewConfig->SetFileName(vTempData1[i]);
 				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
@@ -581,11 +583,12 @@ bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			if(strTargetRef.Find(pTarget->GetFileName()) != -1 &&  strBaseRef.Find(pThis->GetFileName()) != -1 && inBasicCheck == false)
 			{
 				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetConfigInfo(inConfigNum);
 				cNewConfig->SetFileName(pTarget->GetFileName());
 				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
 				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail,outLogData, outResult);
+				bCompareRusult = pThis->CompareFile(inConfigNum,pTarget, outFail,outLogData, outResult);
 				if (!bCompareRusult)
 				{
 					bFailFlag = true;
@@ -595,11 +598,12 @@ bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 			else if (strTargetRegister.Find(pTarget->GetFileName()) != -1 &&  strBaseRegister.Find(pThis->GetFileName()) != -1 )
 			{
 				CompareResult* cNewConfig = new CompareResult;
+				cNewConfig->SetConfigInfo(inConfigNum);
 				cNewConfig->SetFileName(pTarget->GetFileName());
 				outLogData.AddTail(cNewConfig);
 				outResult.AddTail(cNewConfig);
 				outFail.push_back(pThis->GetFileName());
-				bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
+				bCompareRusult = pThis->CompareFile(inConfigNum,pTarget, outFail, outLogData, outResult);
 				if (!bCompareRusult)
 				{
 					bFailFlag = true;
@@ -616,11 +620,12 @@ bool TestType::CompareTest(TestType* inTarget, std::vector<CString>& outFail, CL
 				else
 				{
 					CompareResult* cNewConfig = new CompareResult;
+					cNewConfig->SetConfigInfo(inConfigNum);
 					cNewConfig->SetFileName(pTarget->GetFileName());
 					outLogData.AddTail(cNewConfig);
 					outResult.AddTail(cNewConfig);
 					outFail.push_back(pThis->GetFileName());
-					bCompareRusult = pThis->CompareFile(pTarget, outFail, outLogData, outResult);
+					bCompareRusult = pThis->CompareFile(inConfigNum,pTarget, outFail, outLogData, outResult);
 					if (!bCompareRusult)
 					{
 						bFailFlag = true;

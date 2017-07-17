@@ -494,7 +494,7 @@ bool DataController::Validation(CString inData, bool inBasicCheck)
 
 		// CRC °è»ê
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC Start ======================"));
-		bTemp = CheckCRC(vTemp,nTempCount);
+		bTemp = CheckCRC(vTemp,nTempCount,i);
 		vResults.push_back(bTemp);
 		m_ProgressBar->StepIt();
 		m_ListLog->WriteLogFile(_T("====================== Calculate CRC End ======================"));
@@ -774,7 +774,7 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 			pTemp = pPos;
 			CompareResult* temp = m_pListLogData.GetNext(pPos);
 
-			if (temp->GetConfigInfo() != _T(""))
+			if (temp->GetConfigInfo() != _T("") && temp->GetFileName() != _T("") && temp->GetItemName() != _T(""))
 			{
 				vHeader.push_back(strReturn);
 				vBase.push_back(strReturn);
@@ -897,6 +897,7 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 					fprintf_s(file,strReturn);
 				}
 			}
+			
 
 			for (int i = nBaseCount; i < vBase.size(); i++)
 			{
@@ -912,6 +913,7 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 					fprintf_s(file,strReturn);
 				}
 			}
+			
 
 			for (int i = nCurrentCount; i < vCurrent.size(); i++)
 			{
@@ -927,6 +929,7 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 					fprintf_s(file,strReturn);
 				}
 			}
+			
 
 			for (int i = nResultCount; i < vResult.size(); i++)
 			{
@@ -962,7 +965,7 @@ void DataController::WriteResultLog(std::vector<CString> inData)
 }
 
 
-bool DataController::CheckCRC(std::vector<CString>& outData, int nIndex)
+bool DataController::CheckCRC(std::vector<CString>& outData, int nIndex, int nConfigIndex)
 {
 	bool bResult = true;
 	CString strIniFIle;
@@ -979,92 +982,96 @@ bool DataController::CheckCRC(std::vector<CString>& outData, int nIndex)
 	int nDirStartIndex = 0;
 	int nDirEndIndex = 0;
 
-	for (int i=0; i<m_vFileVector.size(); i++)
+
+	for (int i=nIndex-3; i<m_vFileVector.size(); i++)
 	{
-		strIniFIle.Format("%s",m_vFileVector[i]);
-		nDirEndIndex = strIniFIle.ReverseFind('\\');
-		nDirStartIndex = strIniFIle.Left(nDirEndIndex).ReverseFind('\\');
-
-		strTestDir = strIniFIle.Left(nDirEndIndex);
-		strTestDir = strTestDir.Mid(nDirStartIndex+1);
-
-		AfxExtractSubString(strTestName, strTestDir, 5,'_');
-		AfxExtractSubString(strConfigNum, strTestDir, 4,'_');
-		AfxExtractSubString(strAddTest, strTestDir, 8,'_');
-
-		if(strAddTest != "")
+		if (m_vFileVector[i].Find(m_vRootDIr[nConfigIndex]) != -1 )
 		{
-			if(strAddTest.Find("REL") != -1)
+			strIniFIle.Format("%s",m_vFileVector[i]);
+			nDirEndIndex = strIniFIle.ReverseFind('\\');
+			nDirStartIndex = strIniFIle.Left(nDirEndIndex).ReverseFind('\\');
+
+			strTestDir = strIniFIle.Left(nDirEndIndex);
+			strTestDir = strTestDir.Mid(nDirStartIndex+1);
+
+			AfxExtractSubString(strTestName, strTestDir, 5,'_');
+			AfxExtractSubString(strConfigNum, strTestDir, 4,'_');
+			AfxExtractSubString(strAddTest, strTestDir, 8,'_');
+
+			if(strAddTest != "")
 			{
-				strTestName = "REL\\" + strTestName;
-			}
-			else
-			{
-				strTestName = strAddTest + "\\" + strTestName;
-			}
-		}
-
-		if (strIniFIle.Find("ItemVersion.ini") != -1)
-		{
-			TCHAR sDir[MAX_PATH];		
-			nCRCValue = GetPrivateProfileInt(_T("SPEC"), _T("CRC"),  0, strIniFIle);
-			CString strItemVersionPath;
-			strItemVersionPath.Format(_T("%s"),strIniFIle);
-			strIniFIle.Replace("ItemVersion.ini","Spec.ini");
-			m_cCRC.GetFileCRC32(strIniFIle,nCRCResult);
-			
-			CString strFailListLog;
-			
-			if (nCRCResult != nCRCValue)
-			{
-				CompareResult* cFailItem = new CompareResult;
-				CString strCRCValue, strCRCResult;
-				strCRCValue.Format(_T("%d"),nCRCValue);
-				strCRCResult.Format(_T("%d"),nCRCResult);
-
-				AddFailResult(strConfigNum, strTestName,_T("ItemVersion"),strCRCValue,strCRCResult,strItemVersionPath,_T("CRC Fail"));
-
-				strFailListLog.Format("%s%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle, _T(" : CRC Mismatched"), nCRCValue, nCRCResult);
-				outData.push_back(strFailListLog);
-				
-				m_pFailItems->AddFailItem(strConfigNum, strTestName, "ItemVersion.ini", "CRC Fail", strItemVersionPath);
-
-				CString strTempResult;
-				strTempResult.Format(_T(""));
-				strTempResult = m_ListCtrl->GetItemText(nIndex,2);
-
-				if(strTempResult == "..ing")
+				if(strAddTest.Find("REL") != -1)
 				{
-					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
-				}
-
-				bResult = FALSE;
-			}
-			else
-			{
-				strFailListLog.Format("%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle,nCRCValue, nCRCResult);
-				outData.push_back(strFailListLog);
-				
-				CString strTempResult;
-				strTempResult.Format(_T(""));
-				strTempResult = m_ListCtrl->GetItemText(nIndex,2);
-				bool bTemp = m_pFailItems->SearchFailItem(strConfigNum,strTestName);
-
-				if(strTempResult != "FAIL" && !bTemp)
-				{
-					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+					strTestName = "REL\\" + strTestName;
 				}
 				else
 				{
-					m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+					strTestName = strAddTest + "\\" + strTestName;
 				}
 			}
 
-			m_ListCtrl->SetItem(nIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
-			m_ListCtrl->EnsureVisible(nIndex,TRUE);
-			m_ListCtrl->Update(nIndex++);
-			m_ListLog->WriteLogFile(strFailListLog);
-			Sleep(100);
+			if (strIniFIle.Find("ItemVersion.ini") != -1)
+			{
+				TCHAR sDir[MAX_PATH];		
+				nCRCValue = GetPrivateProfileInt(_T("SPEC"), _T("CRC"),  0, strIniFIle);
+				CString strItemVersionPath;
+				strItemVersionPath.Format(_T("%s"),strIniFIle);
+				strIniFIle.Replace("ItemVersion.ini","Spec.ini");
+				m_cCRC.GetFileCRC32(strIniFIle,nCRCResult);
+
+				CString strFailListLog;
+
+				if (nCRCResult != nCRCValue)
+				{
+					CompareResult* cFailItem = new CompareResult;
+					CString strCRCValue, strCRCResult;
+					strCRCValue.Format(_T("%d"),nCRCValue);
+					strCRCResult.Format(_T("%d"),nCRCResult);
+
+					AddFailResult(strConfigNum, strTestName,_T("ItemVersion"),strCRCValue,strCRCResult,strItemVersionPath,_T("CRC Fail"));
+
+					strFailListLog.Format("%s%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle, _T(" : CRC Mismatched"), nCRCValue, nCRCResult);
+					outData.push_back(strFailListLog);
+
+					m_pFailItems->AddFailItem(strConfigNum, strTestName, "ItemVersion.ini", "CRC Fail", strItemVersionPath);
+
+					CString strTempResult;
+					strTempResult.Format(_T(""));
+					strTempResult = m_ListCtrl->GetItemText(nIndex,2);
+
+					if(strTempResult == "..ing")
+					{
+						m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+					}
+
+					bResult = FALSE;
+				}
+				else
+				{
+					strFailListLog.Format("%s\n Itemversion, %d\n Calculated,  %d\n", strIniFIle,nCRCValue, nCRCResult);
+					outData.push_back(strFailListLog);
+
+					CString strTempResult;
+					strTempResult.Format(_T(""));
+					strTempResult = m_ListCtrl->GetItemText(nIndex,2);
+					bool bTemp = m_pFailItems->SearchFailItem(strConfigNum,strTestName);
+
+					if(strTempResult != "FAIL" && !bTemp)
+					{
+						m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("PASS"),0,0,0,NULL);
+					}
+					else
+					{
+						m_ListCtrl->SetItem(nIndex,2,LVIF_TEXT,  _T("FAIL"),0,0,0,NULL);
+					}
+				}
+
+				m_ListCtrl->SetItem(nIndex,3,LVIF_TEXT,  _T("100%"),0,0,0,NULL);
+				m_ListCtrl->EnsureVisible(nIndex,TRUE);
+				m_ListCtrl->Update(nIndex++);
+				m_ListLog->WriteLogFile(strFailListLog);
+				Sleep(100);
+			}
 		}
 	}
 
@@ -1742,6 +1749,7 @@ bool DataController::ComparePreAndNew(CString inFilePath, CString inPre, CString
 		}
 
 		CompareResult* cFailItem1 = new CompareResult;
+		cFailItem1->SetConfigInfo(strConfig);
 		cFailItem1->SetTestName(strTestName);
 		m_pListDifferentResult.AddTail(cFailItem1);
 		m_pListLogData.AddTail(cFailItem1);

@@ -339,7 +339,7 @@ void FileType::ModifyData(BasicData* inTarget)
 }
 
 
-BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDefferent)
+BOOL FileType::CompareFile(CString inConfigNum ,FileType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData, CList<CompareResult*>& outDefferent)
 {
 	CList<BasicData*> pListTargetData;
 
@@ -388,7 +388,7 @@ BOOL FileType::CompareFile(FileType* inTarget, std::vector<CString>& outFail, CL
 						strItemName = strTemp;
 
 					cNewResult->SetItemName(strItemName);
-
+					cNewResult->SetConfigInfo(inConfigNum);
 					strTemp = pThis->getValue();
 
 					if (strTemp.Find('/') != -1)

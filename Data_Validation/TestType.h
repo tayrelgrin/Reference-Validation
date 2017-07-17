@@ -26,7 +26,7 @@ public:
 	bool SearchFileInList(CString inStrTargetFile, FileType& outData);
 	void ModifyData(CString inTargetFileName, BasicData* inTarget);
 	void ChangeFileName(CString inTargetFileName, CString inNewFileName);
-	bool CompareTest(TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck);
+	bool CompareTest(CString inConfigNum,TestType* inTarget, std::vector<CString>& outFail, CList<CompareResult*>& outLogData,CList<CompareResult*>& outResult, bool inBasicCheck);
 	void GetDataList(CList<FileType*>& outData);
 	void SetFailItemPointer(FailItem* inData);
 	void SetListLog(ListLog* inData);

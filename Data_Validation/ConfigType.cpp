@@ -204,13 +204,14 @@ bool ConfigType::ConfigCompare(ConfigType* inTarget, std::vector<CString>& outFa
 				m_ListLog->WriteLogFile(strTestLog);
 				CompareResult* cNewConfig = new CompareResult;
 				cNewConfig->SetTestName(strTargetName);
+				cNewConfig->SetConfigInfo(m_strConfigNum);
 				outLogData.AddTail(cNewConfig);
 				outDifferent.AddTail(cNewConfig);
 				pThis->SetFailItemPointer(m_pFailItems);
 				
 				std::vector<CString> vTempFail;
 				CString strTestDir = m_vTestDirPath[nTestCount++];
-				bCompareResult = pTarget->CompareTest(pThis, vTempFail, outLogData, outDifferent, inBasicCheck);
+				bCompareResult = pTarget->CompareTest(m_strConfigNum ,pThis, vTempFail, outLogData, outDifferent, inBasicCheck);
 
 				for (int i = 0; i < vTempFail.size(); i++)
 				{

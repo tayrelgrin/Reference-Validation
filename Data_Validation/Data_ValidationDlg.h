@@ -64,6 +64,7 @@ private:
 	CWnd* m_pwndShow;
 	Config_Select_Dlg m_ConfigSelectDlg;
 	CList<CompareResult*> m_ListDefferent;
+	std::vector<CString> m_vTargetConfig;
 public:
 	CTabCtrl m_TabCtrl_Main;	
 	CListCtrl m_ListCtrl_Main;

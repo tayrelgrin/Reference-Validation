@@ -337,6 +337,18 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 				m_FinalResult.SetWindowTextA("FAIL");
 			}
 
+			HTREEITEM hItem;
+			m_TreeMain.Expand(hItem,TVE_COLLAPSE);
+			int nItemCount = m_TreeMain.GetCount();
+
+			hItem = m_TreeMain.GetRootItem();
+
+			for (int i = 0; i < nItemCount; i++)
+			{
+				m_TreeMain.Expand(hItem,TVE_COLLAPSE);
+				hItem = m_TreeMain.GetNextItem(hItem,TVGN_NEXT);
+			}
+
 			// ¸¶¿ì½º wait end
 			EndWaitCursor();
 			UpdateWindow();
@@ -371,13 +383,10 @@ void CData_ValidationDlg::OnBnClickedButtonRefSelect()
 	char   Pathname[MAX_PATH];
 	BROWSEINFO     BrInfo;
 
-
-
 	m_ListLog->WriteLogFile(_T("Pushed Select Ref Button"));
 
 	BrInfo.hwndOwner = GetSafeHwnd();
 	BrInfo.pidlRoot = NULL;
-
 
 	memset( &BrInfo, 0, sizeof(BrInfo) );
 	BrInfo.pszDisplayName =(LPTSTR)Pathname;
@@ -415,6 +424,29 @@ void CData_ValidationDlg::AddReference(char* Pathname)
 	m_ListLog->WriteLogFile(_T("Check Base File In All Data"));
 
 	bool bCheckResult = m_TotalData.CheckBaseInfoInAllData((LPTSTR)Pathname, vTestDir);
+
+	CString strTestDirName;
+	strTestDirName.Format("");
+	CString strConfigNum;
+	strConfigNum.Format("");
+
+	int nIndex = vTestDir[0].ReverseFind('\\');
+
+	strTestDirName.Format("%s", vTestDir[0].Mid(nIndex+1));
+
+	AfxExtractSubString(strConfigNum, strTestDirName,4,'_');
+
+	bool bSearch = false;
+
+	for (int i=0; i < m_vTargetConfig.size(); i++)
+	{
+		if (m_vTargetConfig[i] == strConfigNum)
+		{
+			bSearch = true;
+			break;
+		}
+	}
+
 	if(bCheckResult == false)
 	{
 		m_ListLog->WriteLogFile(_T("Reference Checking Fail!"));
@@ -422,8 +454,15 @@ void CData_ValidationDlg::AddReference(char* Pathname)
 		vTestDir.clear();
 		vFileNames.clear();
 	}
+	else if (bSearch)
+	{
+		m_ListLog->WriteLogFile(_T("Reference Checking Fail!"));
+		AfxMessageBox(_T("Already Same Config in Data "), MB_OK);
+	}
 	else
 	{
+		m_vTargetConfig.push_back(strConfigNum);
+
 		m_ListLog->WriteLogFile(_T("Check Base File In All Data : PASS"));
 		CString strRefName, strTemp;
 		strRefName.Format(_T(""));
@@ -576,6 +615,16 @@ void CData_ValidationDlg::OnBnClickedButtonDelete()
 					nDelCount++;
 			}
 			
+			for(int i=0; i < m_vTargetConfig.size(); i++)
+			{
+				if (m_vTargetConfig[i] == strConfigNum)
+				{
+					m_vTargetConfig.erase(m_vTargetConfig.begin()+i);
+					break;
+				}
+			}
+			
+
 			m_TotalData.DeleteFilePath(strSelectedConfigName);	
 
 			nDelCount = 0;
@@ -814,6 +863,32 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		TestType* pTestBaseValue = NULL;
 		TestType* pTestTargetValue = NULL;
 
+		std::vector<CString> vTestDir;
+		CString strConfigNum;
+
+		m_TotalData.GetTestDirectoryPath(vTestDir);
+
+		for (int i = 0; i< vTestDir.size(); i++)
+		{
+			if (vTestDir[i].Find(strConfig) != -1)
+			{
+				CString temp;
+				CString temp1;
+
+				temp.Format(_T(""));
+				temp1.Format(_T("%s"), vTestDir[i]);
+
+				int nIndex = temp1.ReverseFind('\\');
+
+				temp1 = temp1.Mid(nIndex+1);
+
+				AfxExtractSubString(temp, temp1, 4, '_');
+
+				strConfigNum = temp;
+				break;
+			}
+		}
+
 		m_TotalData.SearchTestInTarget(strConfig,	strTestForTarget, pTestTargetValue);
 		m_TotalData.SearchTestInSetting(strConfig,	strTest, pTestSetting);
 		m_TotalData.SearchTestInBase(strConfig,		strTest, pTestBaseValue);
@@ -930,15 +1005,16 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 		{
 			CompareResult* cTemp = m_ListDefferent.GetNext(pPos);
 			CString strTestTemp;
-			
+			CString strFailConfig;
+			strFailConfig.Format(_T("%s"), cTemp->GetConfigInfo());
 			strTestTemp.Format(_T("%s"), cTemp->GetTestName());
 			strTestTemp.Replace('\\',':');
 
-			if (strTestTemp == strTest)
+			if (strTestTemp == strTest && strFailConfig == strConfigNum)
 			{
 				bTestFlag = true;
 			}
-			else if (bTestFlag && strTestTemp != _T("") && strTestTemp != strTest)
+			else if (bTestFlag && strTestTemp != _T("") && strTestTemp != strTest /*&& strFailConfig != strConfigNum*/)
 			{
 				bTestFlag = false;
 //				break;
