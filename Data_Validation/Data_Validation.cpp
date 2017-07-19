@@ -83,6 +83,7 @@ BOOL CData_ValidationApp::InitInstance()
 
 			pWndChild->SetForegroundWindow();
 		}
+		AfxMessageBox("Already Executed same SW", MB_OK);
 		return FALSE;
 	}
 
