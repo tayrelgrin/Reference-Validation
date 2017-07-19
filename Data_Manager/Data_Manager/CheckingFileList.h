@@ -24,7 +24,6 @@ public:
 	virtual BOOL OnInitDialog();
 	CBitmapButton m_cButton_LoadSetting;
 	CBitmapButton m_cButton_Reload;
-	afx_msg void OnBnClickedButtonLsfl();
 	afx_msg void OnBnClickedButtonAdditem();
 	CBitmapButton m_cButton_Add;
 	CBitmapButton m_cButton_Remove;

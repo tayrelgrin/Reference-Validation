@@ -117,13 +117,18 @@ void ConfigDMData::GetConfigInfoFromVector(std::vector<CString> invData, CString
 		{
 			AfxExtractSubString(outPrj,		invData[i], 0, '_');
 			AfxExtractSubString(outConfig,	invData[i], 4, '_');
-			AfxExtractSubString(outBuild,	invData[i], 4, '_');
+			/*AfxExtractSubString(outBuild,	invData[i], 4, '_');*/
 			AfxExtractSubString(outDOE,		invData[i], 6, '_');
 			AfxExtractSubString(temp,		invData[i], 7, '_');
 
-			if(temp=="")
-				outDOE = "Main Build";
+			outBuild = outConfig;
 
+			if(temp=="")
+			{
+				temp = outDOE;
+				outDOE = "Main Build";
+			}
+			outDOE = outDOE+"-"+temp;
 			outBuild = outBuild.Left(3);
 			outBuild.Insert(2,'.');
 
@@ -140,22 +145,22 @@ void ConfigDMData::GetConfigInfoFromVector(std::vector<CString> invData, CString
 
 void ConfigDMData::SetBuildNum(CString inData)
 {
-	m_strBuildNum = inData;
+	m_strBuildNum.Format("%s",inData);
 }
 
 void ConfigDMData::SetConfigNum(CString inData)
 {
-	m_strConfigNum = inData;
+	m_strConfigNum.Format("%s", inData);
 }
 
 void ConfigDMData::SetProject(CString inData)
 {
-	m_strPrj = inData;
+	m_strPrj.Format("%s", inData);
 }
 
 void ConfigDMData::SetDOE(CString inData)
 {
-	m_strDOE = inData;
+	m_strDOE.Format("%s",inData);
 }
 
 bool ConfigDMData::operator ==(const ConfigDMData& inData)
@@ -181,7 +186,6 @@ void ConfigDMData::RemoveRootPathInVector(const std::vector<CString> invData, st
 		CString temp = invData[i];
 		
 		temp.Replace(inRootPath,_T(""));
-
 		outvData.push_back(temp);
 	}
 }
@@ -377,7 +381,7 @@ void ConfigDMData::SaveDataToFile(std::vector<CString> invBasicFile)
 {
     CString strEXEPath;
 
-	strEXEPath = GetEXEDirectoryPath();
+	strEXEPath.Format("%s", GetEXEDirectoryPath());
 
  	CString strFilePath;
 	CString strCTemp;
@@ -423,9 +427,10 @@ void ConfigDMData::SaveSettingToFile(std::vector<CString> invBasicFile, CList<Ba
 {
 	CString strEXEPath;
 
-	strEXEPath = GetEXEDirectoryPath();
+	strEXEPath.Format("%s", GetEXEDirectoryPath());
 
-	CString strTempFilePath = strEXEPath + "\\Data\\Setting";
+	CString strTempFilePath;
+	strTempFilePath.Format("%s%s", strEXEPath , "\\Data\\Setting");
 	CString strFilePath;
 	CreateDirectory(strTempFilePath,NULL);
 
@@ -529,7 +534,7 @@ void ConfigDMData::AddCommonBaseFile(std::vector<CString> invFileName)
 				bResult = true;
 			}
 		}
-		if(bResult==false)
+		if(bResult == false)
 			m_vBaseFiles.push_back(invFileName[i]); 
 	}
 }
@@ -571,7 +576,7 @@ CString ConfigDMData::GetEXEDirectoryPath()
 
 	GetModuleFileName(NULL, path, sizeof path);
 
-	strDirecPath = path;
+	strDirecPath.Format("%s",path);
 
 	int i = strDirecPath.ReverseFind('\\');//실행 파일 이름을 지우기 위해서 왼쪽에 있는 '/'를 찾는다.
 
@@ -663,7 +668,7 @@ void ConfigDMData::SearchXMLData(tinyxml2::XMLNode* pParent, int inIndex)
 							AfxExtractSubString(strFile, vTemp[i], 1,':');
 						}
 						else
-							strFile = strDir;
+							strFile.Format("%s", strDir);
 
 						m_vBaseFiles.push_back(strFile);
 					}
@@ -696,7 +701,7 @@ void ConfigDMData::GetFileNames(std::vector<CString>& outvData)
 	while(pPos)
 	{
 		TestType* temp = m_pListTestType.GetNext(pPos);
-		strTemp = temp->GetTestName();
+		strTemp.Format("%s", temp->GetTestName());
 		if (strTemp[0]=='\\')
 		{
 			//CString strTemp1 = strTemp.Replace('\\',"");
@@ -843,5 +848,5 @@ void ConfigDMData::ChangeFileName(CString inTestName, CString inNewFileName, CSt
 
 void ConfigDMData::SetRootPath(CString inPath)
 {
-	m_strInputDirPath = inPath;
+	m_strInputDirPath.Format("%s", inPath);
 }

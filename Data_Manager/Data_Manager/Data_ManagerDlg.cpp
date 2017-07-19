@@ -287,7 +287,8 @@ void CData_ManagerDlg::OnBnClickedButtonNew()
 
 			m_vTestList.clear();
 			m_vDirList.clear();
-			m_cBasicData->InitList();
+			if(m_bNewData)
+				m_cBasicData->InitList();
 			m_cFileData->InitList();
 
 			std::vector<CString> temp;
@@ -697,9 +698,7 @@ void CData_ManagerDlg::OnBnClickedButtonReload()
 	pSetting->LoadDataFiles(strSettingPath);
 
 	CList<BasicData*> cTemp;
-
 	pSetting->GetBaseInfoList(cTemp);
-
 	m_cValueData.SetBaseInfoFromConfig(cTemp);
 
 	AddToTree(pSetting);
@@ -1616,15 +1615,12 @@ void CData_ManagerDlg::OnLvnColumnclickList1(NMHDR *pNMHDR, LRESULT *pResult)
 			for( int i=0 ; i<nCnt ; i++ )
 				m_ListCtrlMain.SetCheck( i, FALSE );
 			m_bIsAllCheck = FALSE;
-			//SetHeaderCheck( FALSE );
 		}
 		else
 		{
 			for( int i=0 ; i<nCnt ; i++ )
 				m_ListCtrlMain.SetCheck( i );
 			m_bIsAllCheck = TRUE;
-			
-			//SetHeaderCheck( TRUE );
 		}
 		m_bModify = true;
 	}
@@ -1806,6 +1802,8 @@ void CData_ManagerDlg::OnLvnItemchangedList1(NMHDR *pNMHDR, LRESULT *pResult)
 									}
 								}
 
+								m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
+								strTest.Replace(':','\\');
 								m_cValueData.ModifySettingData(strTest, strFile, cModifyTarget);
 								strTest = strTempTest;
 							}

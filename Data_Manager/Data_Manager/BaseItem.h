@@ -29,7 +29,6 @@ public:
 	CBitmapButton m_cButton_BI_Reload;
 	virtual BOOL OnInitDialog();
 	CComboBox m_cComboFiles;
-	afx_msg void OnBnClickedButtonBirl();
 	afx_msg void OnCbnSelchangeCombo1();
 	InformationManager* m_pData;
 	CListCtrl m_ListCtrl_BaseItem;
@@ -38,8 +37,8 @@ public:
 	CTreeCtrl m_TreeCtrl_BaseFile;
 	afx_msg void OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedButtonAdditembi();
-	afx_msg void OnBnClickedButtonBils();
 	bool m_bModifyFlag;
 	void AddBaseInfoItemToList();
+	bool CheckExistSameData(HTREEITEM inData);
 	afx_msg void OnBnClickedButtonDeleteitembi();
 };

@@ -35,12 +35,9 @@ void BaseItem::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(BaseItem, CDialogEx)
-	ON_BN_CLICKED(IDC_BUTTON_BIRL, &BaseItem::OnBnClickedButtonBirl)
 	ON_CBN_SELCHANGE(IDC_COMBO1, &BaseItem::OnCbnSelchangeCombo1)
-
 	ON_NOTIFY(NM_CLICK, IDC_TREE_BI, &BaseItem::OnNMClickTreeBi)
 	ON_BN_CLICKED(IDC_BUTTON_ADDITEMBI, &BaseItem::OnBnClickedButtonAdditembi)
-	ON_BN_CLICKED(IDC_BUTTON_BILS, &BaseItem::OnBnClickedButtonBils)
 	ON_BN_CLICKED(IDC_BUTTON_DELETEITEMBI, &BaseItem::OnBnClickedButtonDeleteitembi)
 END_MESSAGE_MAP()
 
@@ -113,12 +110,6 @@ BOOL BaseItem::OnInitDialog()
 }
 
 
-void BaseItem::OnBnClickedButtonBirl()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-}
-
-
 void BaseItem::OnCbnSelchangeCombo1()
 {
 	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
@@ -158,7 +149,7 @@ void BaseItem::OnCbnSelchangeCombo1()
 		strFileName = cFile.GetFileName();
 		strFileName.Replace("_Register","");
 
-		m_strRefFileName = strFileName;
+		m_strRefFileName.Format("%s",strFileName);
 
 		cFile.InitList();
 		cTarget->SearchFileInList(strFileName,cFile);
@@ -222,7 +213,7 @@ void BaseItem::OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult)
 	CString strCombe = "";
 
 	hNode = m_TreeCtrl_BaseFile.GetNextItem(NULL, TVGN_CARET);		// 현재 선택된 아이템의 핸들을 가져온다.
-	strFileName = m_TreeCtrl_BaseFile.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+	strFileName.Format("%s", m_TreeCtrl_BaseFile.GetItemText(hNode));			// 그 아이템의 이름을 얻어온다.
 
 	
 	if(strFileName.Find('[') != -1 && (hit_info.flags & TVHT_ONITEMSTATEICON) != 0)
@@ -245,7 +236,7 @@ void BaseItem::OnNMClickTreeBi(NMHDR *pNMHDR, LRESULT *pResult)
 	}
 
 	hNode = m_TreeCtrl_BaseFile.GetNextItem(hNode, TVGN_PARENT);	// 현재 선택되어진 아이템의 상위 아이템을 가져온다.
-	strTestName = m_TreeCtrl_BaseFile.GetItemText(hNode);			// 그 아이템의 이름을 얻어온다.
+	strTestName.Format("%s", m_TreeCtrl_BaseFile.GetItemText(hNode));			// 그 아이템의 이름을 얻어온다.
 
 	*pResult = 0;
 }
@@ -267,7 +258,7 @@ void BaseItem::OnBnClickedButtonAdditembi()
 
 	if (strFileName == "Reference")
 	{
-		strFileName = m_strRefFileName;
+		strFileName.Format("%s", m_strRefFileName);
 	}
 
 	hParent = m_TreeCtrl_BaseFile.GetNextItem(m_TreeCtrl_BaseFile.GetRootItem(),TVGN_NEXT);		// 현재 선택된 아이템의 핸들을 가져온다.
@@ -281,7 +272,7 @@ void BaseItem::OnBnClickedButtonAdditembi()
 		{
 			if (m_TreeCtrl_BaseFile.GetCheck(hChildItem))
 			{
-				strTestName = m_TreeCtrl_BaseFile.GetItemText(hChildItem);
+				strTestName.Format("%s", m_TreeCtrl_BaseFile.GetItemText(hChildItem));
 
 				int nCount = m_ListCtrl_BaseItem.GetItemCount();
 
@@ -291,9 +282,9 @@ void BaseItem::OnBnClickedButtonAdditembi()
 				// check same item in list control
 				for (int i = 0; i< nCount ; i++)
 				{
-					strCompareFileName	= m_ListCtrl_BaseItem.GetItemText(i,0);
-					strCompareSection	= m_ListCtrl_BaseItem.GetItemText(i,1);
-					strCompareItem		= m_ListCtrl_BaseItem.GetItemText(i,2);
+					strCompareFileName.Format("%s",m_ListCtrl_BaseItem.GetItemText(i,0));
+					strCompareSection.Format("%s", m_ListCtrl_BaseItem.GetItemText(i,1));
+					strCompareItem.Format("%s", m_ListCtrl_BaseItem.GetItemText(i,2));
 
 					if(strCompareFileName == strFileName && 
 						strCompareSection == strSectionName &&
@@ -318,15 +309,17 @@ void BaseItem::OnBnClickedButtonAdditembi()
 			hChildItem = m_TreeCtrl_BaseFile.GetNextItem(hChildItem, TVGN_NEXT);
 		}
 
-		hParent = m_TreeCtrl_BaseFile.GetNextItem(hParent,TVGN_NEXT);		
-		strSectionName = m_TreeCtrl_BaseFile.GetItemText(hParent);			
+		hParent = m_TreeCtrl_BaseFile.GetNextItem(hParent,TVGN_NEXT);
+		strSectionName.Format("%s", m_TreeCtrl_BaseFile.GetItemText(hParent));
 	}
 }
 
 
-void BaseItem::OnBnClickedButtonBils()
+bool BaseItem::CheckExistSameData(HTREEITEM inData)
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
+	bool bResult = false;
+
+	return bResult;
 }
 
 
@@ -340,9 +333,9 @@ void BaseItem::AddBaseInfoItemToList()
 	{
 		BasicData* cNewData = new BasicData;
 
-		strFile		= m_ListCtrl_BaseItem.GetItemText(i,0);
-		strSection	= m_ListCtrl_BaseItem.GetItemText(i,1);
-		strItem		= m_ListCtrl_BaseItem.GetItemText(i,2);
+		strFile.Format("%s", m_ListCtrl_BaseItem.GetItemText(i,0));
+		strSection.Format("%s",m_ListCtrl_BaseItem.GetItemText(i,1));
+		strItem.Format("%s", m_ListCtrl_BaseItem.GetItemText(i,2));
 
 		cNewData->setSection(strSection);
 		cNewData->setItem(strItem);

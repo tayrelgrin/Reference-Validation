@@ -34,7 +34,6 @@ void CheckingFileList::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CheckingFileList, CDialogEx)
-	ON_BN_CLICKED(IDC_BUTTON_LSFL, &CheckingFileList::OnBnClickedButtonLsfl)
 	ON_BN_CLICKED(IDC_BUTTON_ADDITEM, &CheckingFileList::OnBnClickedButtonAdditem)
 	ON_BN_CLICKED(IDC_BUTTON_DELETEITEM, &CheckingFileList::OnBnClickedButtonDeleteitem)
 	ON_NOTIFY(NM_CLICK, IDC_TREE2, &CheckingFileList::OnNMClickTree2)
@@ -197,11 +196,6 @@ void CheckingFileList::AddFileNameToListview()
 	}
 }
 
-void CheckingFileList::OnBnClickedButtonLsfl()
-{
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
-	// 세팅 파일 읽어오기
-}
 
 
 void CheckingFileList::OnBnClickedButtonAdditem()
