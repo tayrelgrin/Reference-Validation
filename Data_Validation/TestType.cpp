@@ -504,7 +504,7 @@ bool TestType::CompareTest(CString inConfigNum, TestType* inTarget, std::vector<
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem("","","",strFailLog,_T(""));
+				m_pFailItems->AddFailItem(inConfigNum,"File Missing",vTempData1[i],strFailLog,_T(""));
 			}
 		}
 		else if(vTargetFileName.size() < vBaseFileName.size())
@@ -526,7 +526,7 @@ bool TestType::CompareTest(CString inConfigNum, TestType* inTarget, std::vector<
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem("","",strFailLog,vTempData1[i],_T(""));
+				m_pFailItems->AddFailItem(inConfigNum,"File Adding",strFailLog,vTempData1[i],_T(""));
 			}
 		}
 		else
@@ -549,7 +549,7 @@ bool TestType::CompareTest(CString inConfigNum, TestType* inTarget, std::vector<
 				outLogData.AddTail(cNewConfig1);
 				outResult.AddTail(cNewConfig1);
 				outFail.push_back(strFailLog);
-				m_pFailItems->AddFailItem("","",strFailLog,vTempData1[i],_T(""));
+				m_pFailItems->AddFailItem(inConfigNum,"",strFailLog,vTempData1[i],_T(""));
 			}
 		}
 		bFileCount = false;

@@ -432,12 +432,25 @@ BOOL FileType::CompareFile(CString inConfigNum ,FileType* inTarget, std::vector<
 		}
 		if (bFlagSection && !bFlagItem)
 		{
+			CompareResult* cNewResult = new CompareResult;
+
+			cNewResult->SetBaseInfoValue(pThis->getValue());
+			cNewResult->SetCurrentInfoValue(pTarget->getValue());
+			cNewResult->SetItemName(pThis->getItem());
+			cNewResult->SetCompareResult(FALSE);
+			outLogData.AddTail(cNewResult);
+			outDefferent.AddTail(cNewResult);
+
 			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Item "), inTarget->GetFileName(), pThis->getSection());
 			outFail.push_back(strFail);
 			strFail.Format(_T("Fail Item : (%s %s) : Not Exist Value"), inTarget->GetFileName(), pThis->getItem());
 			outFail.push_back(strFail);
+
 			bCompareResult = FALSE;
-			break;
+
+			if(m_strFileName.Find("_Register") != -1)
+				break;
+			
 		}
 	}
 

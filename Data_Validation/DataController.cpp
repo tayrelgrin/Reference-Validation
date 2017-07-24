@@ -1083,11 +1083,13 @@ void DataController::AddFailResult(CString inConfig,CString inTestName, CString 
 {
 	CompareResult* cFailItem = new CompareResult;
 	cFailItem->SetTestName(inTestName);
+	cFailItem->SetConfigInfo(inConfig);
 	m_pListLogData.AddTail(cFailItem);
 	m_pListDifferentResult.AddTail(cFailItem);
 
 	CompareResult* cFailItem1 = new CompareResult;
 	cFailItem1->SetFileName(inFileName);
+	cFailItem1->SetConfigInfo(inConfig);
 	m_pListLogData.AddTail(cFailItem1);
 	m_pListDifferentResult.AddTail(cFailItem1);
 
@@ -2000,11 +2002,18 @@ bool DataController::CheckNamingRule(int inIndex, int& inListViewIndex)
 			{
 				strListLog.Format(_T("Naming Rule Check FAIL %s : %s"), strRefDirName, strReferenceName);
 				m_ListLog->WriteLogFile(strListLog);
-				CString strTempConfig, strTempTest;
+				CString strTempConfig, strTempTest,strTempSubDir;
 				strTempConfig.Format(_T(""));
 				strTempTest.Format(_T(""));
+				strTempSubDir.Format(_T(""));
 				AfxExtractSubString(strTempConfig, strRefDirName,4,'_');
 				AfxExtractSubString(strTempTest, strRefDirName,5,'_');
+				AfxExtractSubString(strTempSubDir, strRefDirName,8,'_');
+
+				if (strTempSubDir != "")
+				{
+					strTempTest = strTempSubDir + ":" + strTempTest;
+				}
 				m_pFailItems->AddFailItem(strTempConfig,strTempTest,strRefDirName,"Ref Name Fail","");
 				bFailFlag = true;
 			}			

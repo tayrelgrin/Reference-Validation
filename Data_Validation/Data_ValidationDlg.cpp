@@ -337,7 +337,7 @@ void CData_ValidationDlg::OnBnClickedButtonStart()
 				m_FinalResult.SetWindowTextA("FAIL");
 			}
 
-			HTREEITEM hItem;
+			HTREEITEM hItem = NULL;
 			m_TreeMain.Expand(hItem,TVE_COLLAPSE);
 			int nItemCount = m_TreeMain.GetCount();
 
@@ -709,35 +709,7 @@ void CData_ValidationDlg::AddConfigAndTestToListControl(CString inConfig, std::v
 	}
 }
 
-void CData_ValidationDlg::CreateProgressBar(int nIndex, int nSubIndex)
-{
-	CProgressCtrl* ProgEntry = new CProgressCtrl;
-	CRect ItemRect;
 
-	RECT rtListCtrl, rtDlg;
-	HWND hwndBox = ::GetDlgItem(this->m_hWnd, IDC_LIST_MAIN);
-
-	//Get the Rectangle of the listControl
-	::GetWindowRect(hwndBox,&rtListCtrl);
-
-	//Get the Rectangle of the Dialog
-	::GetWindowRect(m_hWnd,&rtDlg);
-
-	// Dialog에 위치한 ListCtrl의 left & top 위치를 구한다.
-	int nThisLeft = rtListCtrl.left - rtDlg.left;
-	int nThisTop  = rtListCtrl.top  - rtDlg.top;
-
-	m_ListCtrl_Main.GetSubItemRect(nIndex, nSubIndex, LVIR_BOUNDS, ItemRect);
-
-	int left	= nThisLeft + ItemRect.left;
-	int right	= nThisLeft + ItemRect.right;
-	int top		= nThisTop  + ItemRect.top;
-	int bottom	= nThisTop  + ItemRect.bottom;
-
-	ProgEntry->Create(PBS_SMOOTH | WS_CHILD | WS_VISIBLE, CRect(left, top, right, bottom), this, 1);
-	ProgEntry->SetRange(0, 100);
-	ProgEntry->SetPos(0);
-}
 
 void CData_ValidationDlg::PostNcDestroy()
 {
@@ -1017,14 +989,12 @@ void CData_ValidationDlg::OnTvnSelchangedTreeMain(NMHDR *pNMHDR, LRESULT *pResul
 			else if (bTestFlag && strTestTemp != _T("") && strTestTemp != strTest /*&& strFailConfig != strConfigNum*/)
 			{
 				bTestFlag = false;
-//				break;
 			}
 			else if (bTestFlag)
 			{
 				if (cTemp->GetFileName() != _T(""))
 				{
-					//strFileNameTemp.Format(_T("%s"), cTemp->GetFileName());
-					strFileNameTemp = cTemp->GetFileName();
+					strFileNameTemp.Format(_T("%s"), cTemp->GetFileName());
 					continue;
 				}
 				m_ListCtrl_Test.InsertItem(nSettingCount, _T(""));
