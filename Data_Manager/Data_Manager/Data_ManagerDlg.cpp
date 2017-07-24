@@ -468,14 +468,12 @@ void CData_ManagerDlg::OnBnClickedButtonExit()
 		m_vTestList.clear();
 		m_vDirList.clear();
 
-		//m_cValueData.InitBaseInfo();
 		m_cValueData.InitAllData();
 			
 		m_cNewConfigData->InitListAndVectors();
 		m_cNewSettingData->InitListAndVectors();
 
 		delete m_cFileData;
-		//delete m_cBasicData;
 		::SendMessage(this->m_hWnd, WM_CLOSE,NULL,NULL);
 	}
 }

@@ -81,11 +81,12 @@ BOOL BaseItem::OnInitDialog()
 	
 	m_strRefFileName.Format(_T(""));
 
-	CString strSection, strItem, strValue;
+	CString strSection, strItem, strValue,strTemp;
 
 	strSection.Format(_T(""));
 	strItem.Format(_T(""));
 	strValue.Format(_T(""));
+	strTemp.Format(_T(""));
 
 	int nIndex = 0;
 
@@ -96,6 +97,9 @@ BOOL BaseItem::OnInitDialog()
 		strSection	= temp->getSection();
 		strItem		= temp->getItem();
 		strValue	= temp->getValue();
+
+		AfxExtractSubString(strTemp, strValue , 0, '/');
+		strValue = strTemp;
 
 		m_ListCtrl_BaseItem.InsertItem(nIndex, strValue);
 		m_ListCtrl_BaseItem.SetItem(nIndex, 0,LVIF_TEXT,  strValue,0,0,0,NULL );
